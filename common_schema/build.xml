@@ -1,0 +1,125 @@
+<project name="util schema" default="all" basedir=".">
+	<property name="mysql.user" value="root" />
+	<property name="mysql.password" value="" />
+	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
+
+	<property name="build.dir" value="build" />
+	<property name="mysql_51.output.file" value="common_schema_mysql_51.sql" />
+	<property name="mysql_innodb_plugin.output.file" value="common_schema_mysql_innodb_plugin.sql" />
+	<property name="percona_server.output.file" value="common_schema_percona_server.sql" />
+
+	<target name="all" depends="build">
+	</target>
+
+	<target name="build" depends="mysql_51, mysql_innodb_plugin, percona_server">
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="dist" />
+		<antcall target="exec_mysql_command">
+			<param name="mysql_command" value="DROP DATABASE IF EXISTS common_schema" />
+		</antcall>
+	</target>
+
+	<target name="revnumber" description="Get the SVN greatest revision number">
+		<mkdir dir="ant-tmp" />
+		<exec dir="." executable="svn" output="ant-tmp/svn_output" failifexecutionfails="false" description="Get SVN info for all files recursively">
+			<arg value="info" />
+			<arg value="--recursive" />
+		</exec>
+		<exec dir="." executable="awk" input="ant-tmp/svn_output" outputproperty="svn.revision" failifexecutionfails="false" description="Extract highest revision number">
+			<arg value="BEGIN {max=0} /Revision:/ {if ($2 > max) max=$2} END {print max}" />
+		</exec>
+		<condition property="svn.revision" value="0">
+			<not>
+				<isset property="svn.revision" />
+			</not>
+		</condition>
+		<delete dir="ant-tmp" />
+		<tstamp description="To be used as build number" />
+		<echo>revision: ${svn.revision}</echo>
+	</target>
+
+
+	<target name="mysql_51">
+		<mkdir dir="${build.dir}" />
+		<concat destfile="${build.dir}/${mysql_51.output.file}">
+			<fileset file="main.sql" />
+
+			<fileset dir="tables/" includes="*.sql" />
+
+			<fileset dir="routines/general/" includes="*.sql" />
+			<fileset dir="routines/text/" includes="*.sql" />
+			<fileset dir="routines/time/" includes="*.sql" />
+
+			<fileset dir="views/charsets/" includes="*.sql" />
+			<fileset dir="views/data_size/" includes="*.sql" />
+			<fileset dir="views/engines/" includes="*.sql" />
+			<fileset dir="views/foreign_keys/" includes="*.sql" />
+			<fileset dir="views/innodb/" includes="*.sql" />
+			<fileset dir="views/keys/" includes="*.sql" />
+			<fileset dir="views/privileges/" includes="*.sql" />
+			<fileset dir="views/process/" includes="*.sql" />
+			<fileset dir="views/status/" includes="*.sql" />
+		</concat>
+	</target>
+
+	<target name="mysql_innodb_plugin" depends="mysql_51">
+		<concat destfile="${build.dir}/${mysql_innodb_plugin.output.file}">
+			<fileset file="${build.dir}/${mysql_51.output.file}" />
+			<fileset dir="views/innodb_plugin/" includes="*.sql" />
+		</concat>
+	</target>
+
+	<target name="percona_server" depends="mysql_innodb_plugin">
+		<concat destfile="${build.dir}/${percona_server.output.file}">
+			<fileset file="${build.dir}/${mysql_innodb_plugin.output.file}" />
+			<fileset dir="views/percona_server/" includes="*.sql" />
+		</concat>
+	</target>
+
+	<target name="deploy_mysql_51" depends="mysql_51">
+		<antcall target="deploy_file">
+			<param name="common_schema_sql_file" value="${build.dir}/${mysql_51.output.file}" />
+		</antcall>
+	</target>
+
+	<target name="deploy_mysql_innodb_plugin" depends="mysql_innodb_plugin">
+		<antcall target="deploy_file">
+			<param name="common_schema_sql_file" value="${build.dir}/${mysql_innodb_plugin.output.file}" />
+		</antcall>
+	</target>
+
+	<target name="deploy_file">
+		<echo>
+			Deploying file: ${common_schema_sql_file}
+		</echo>
+		<antcall target="exec_mysql_file">
+			<param name="sql_file" value="${common_schema_sql_file}" />
+		</antcall>
+	</target>
+
+	<target name="exec_mysql_file">
+		<echo>
+			Executing SQL file: ${sql_file}
+		</echo>
+		<exec executable="mysql" input="${sql_file}">
+			<arg value="--user=${mysql.user}" />
+			<arg value="--password=${mysql.password}" />
+			<arg value="--socket=${mysql.socket}" />
+		</exec>
+	</target>
+
+	<target name="exec_mysql_command">
+		<echo>
+			Executing SQL command: ${mysql_command}
+		</echo>
+		<exec executable="mysql">
+			<arg value="--user=${mysql.user}" />
+			<arg value="--password=${mysql.password}" />
+			<arg value="--socket=${mysql.socket}" />
+			<arg value="--execute=${mysql_command}" />
+		</exec>
+	</target>
+</project>
