@@ -78,12 +78,12 @@ GRANT ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CRE
 <blockquote><pre><strong>mysql&gt;</strong> SELECT sql_grants FROM common_schema.sql_show_grants INTO OUTFILE '/tmp/grants.sql';
 
 <strong>bash$</strong> cat /tmp/grants.sql
-GRANT USAGE ON *.* TO 'apps'@'%' IDENTIFIED BY PASSWORD '';\
-GRANT DELETE, INSERT, SELECT, UPDATE ON `test`.* TO 'apps'@'%';\
+GRANT USAGE ON *.* TO 'apps'@'%' IDENTIFIED BY PASSWORD '';
+GRANT DELETE, INSERT, SELECT, UPDATE ON `test`.* TO 'apps'@'%';
 GRANT SELECT (description, film_id, title), UPDATE (description) ON `sakila`.`film` TO 'apps'@'%' WITH GRANT OPTION;
-GRANT USAGE ON *.* TO 'gromit'@'localhost' IDENTIFIED BY PASSWORD '';\
+GRANT USAGE ON *.* TO 'gromit'@'localhost' IDENTIFIED BY PASSWORD '';
 GRANT DELETE, INSERT, SELECT, UPDATE ON `world`.`City` TO 'gromit'@'localhost' WITH GRANT OPTION;
-GRANT USAGE ON *.* TO 'monitoring_user'@'localhost' IDENTIFIED BY PASSWORD '*6BB4837EB74329105EE4568DDA7DC67ED2CA2AD9';\
+GRANT USAGE ON *.* TO 'monitoring_user'@'localhost' IDENTIFIED BY PASSWORD '*6BB4837EB74329105EE4568DDA7DC67ED2CA2AD9';
 GRANT PROCESS ON *.* TO 'monitoring_user'@'localhost';
 </pre></blockquote>
 
