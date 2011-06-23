@@ -1,0 +1,17 @@
+common_schema
+Common views & routines for MySQL
+=================================
+
+Documentation can be found on the common_schema home page, see
+http://code.openark.org/forge/common-schema
+
+The project is hosted on Google Code, see
+http://code.google.com/p/common-schema/
+
+Bugs can be reported on http://code.google.com/p/common-schema/issues/list
+
+On how to install this package, please consult the INSTALL file.
+
+This toolkit is released under the BSD license.
+You should have received a copy of this license, see the LICENSE file.
+If you cannot find it, see http://www.opensource.org/licenses/bsd-license.php

@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>install: common_schema documentation</title>
+	<meta name="description" content="install: common_schema" />
+	<meta name="keywords" content="install: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="install.html">install</a></h2>	
+<p><i>common_schema</i> distribution file is a SQL source file.  To install it, you should execute it on your MySQL server.</p>
+
+<p>There are many ways to import a SQL file into MySQL, listed below. 
+Make sure to execute them as a privileged user, e.g. 'root', as installation involves creation of schema, tables, views &amp; routines. </p>
+
+<p>There are several <i>common_schema</i> distribution options, depending on your MySQL server version. Consult the <a href="download">download page</a></p>
+<ul>
+	<li>Within MySQL, issue:
+		<br/>
+		<blockquote><pre>mysql&gt; SOURCE '/path/to/file.sql';</pre></blockquote>
+	</li>
+	<li>From shell, execute:
+		<br/>
+		<blockquote><pre>bash$ mysql < /path/to/file.sql</pre></blockquote>
+	</li>
+	<li>Use your favorite MySQL GUI editor, copy+paste file content, execute.</li>
+</ul>
+
+<p>To verify installation, check that the <strong>common_schema</strong> database exists. e.g.:</p>
+<blockquote><pre>root@mysql&gt; SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| common_schema      |
+| mysql              |
+| sakila             |
+| world              |
++--------------------+
+</pre></blockquote>				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<h3>common_schema components</h3>
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><strong>Views</strong></li>
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						<li><strong>Routines</strong></li>
+						<li><a title="oak-block-account" href="oak-block-account.html">oak-block-account</a></li>
+						<li><a title="oak-chunk-update" href="oak-chunk-update.html">oak-chunk-update</a></li>
+						<li><a title="oak-get-slave-lag" href="oak-get-slave-lag.html">oak-get-slave-lag</a></li>
+						<li><a title="oak-hook-general-log" href="oak-hook-general-log.html">oak-hook-general-log</a></li>
+						<li><a title="oak-kill-slow-queries" href="oak-kill-slow-queries.html">oak-kill-slow-queries</a></li>
+						<li><a title="oak-modify-charset" href="oak-modify-charset.html">oak-modify-charset</a></li>
+						<li><a title="oak-online-alter-table" href="oak-online-alter-table.html">oak-online-alter-table</a></li>
+						<li><a title="oak-prepare-shutdown" href="oak-prepare-shutdown.html">oak-prepare-shutdown</a></li>
+						<li><a title="oak-purge-master-logs" href="oak-purge-master-logs.html">oak-purge-master-logs</a></li>
+						<li><a title="oak-repeat-query" href="oak-repeat-query.html">oak-repeat-query</a></li>
+						<li><a title="oak-security-audit" href="oak-security-audit.html">oak-security-audit</a></li>
+						<li><a title="oak-show-limits" href="oak-show-limits.html">oak-show-limits</a></li>
+						<li><a title="oak-show-replication-status" href="oak-show-replication-status.html">oak-show-replication-status</a></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+
+<p><i>common_schema</i> is a utility schema for MySQL. 
+It provides with useful views and routines which assist in schema diagnostics, meta data simplification & SQL code generation.
+</p>
+
+<p>The available tools are:</p>
+<ul>
+    <li><a href="oak-apply-ri.html">oak-apply-ri</a>: apply referential integrity on two columns with parent-child relationship.</li>
+    <li><a href="oak-block-account.html">oak-block-account</a>: block or release MySQL users accounts, disabling them or enabling them to login.</li>
+    <li><a href="oak-chunk-update.html">oak-chunk-update</a>: perform long, non-blocking UPDATE/DELETE operation in auto managed small chunks.</li>
+    <li><a href="oak-get-slave-lag.html">oak-get-slave-lag</a>: print slave replication lag and terminate with respective exit code.</li>
+    <li><a href="oak-hook-general-log.html">oak-hook-general-log</a>: hook up and filter general log entries based on entry type or execution plan criteria.</li>
+    <li><a href="oak-kill-slow-queries.html">oak-kill-slow-queries</a>: terminate long running queries.</li>
+    <li><a href="oak-modify-charset.html">oak-modify-charset</a>: change the character set (and collation) of a textual column.</li>
+    <li><a href="oak-online-alter-table.html">oak-online-alter-table</a>: perform a non-blocking ALTER TABLE operation.</li>
+    <li><a href="oak-prepare-shutdown.html">oak-prepare-shutdown</a>: make for a fast and safe MySQL shutdown.</li>
+    <li><a href="oak-purge-master-logs.html">oak-purge-master-logs</a>: purge master logs, depending on the state of replicating slaves.</li>
+    <li><a href="oak-repeat-query.html">oak-repeat-query</a>: repeat query execution until some condition holds.</li>
+    <li><a href="oak-security-audit.html">oak-security-audit</a>: audit accounts, passwords, privileges and other security settings.</li>
+    <li><a href="oak-show-limits.html">oak-show-limits</a>: show AUTO_INCREMENT “free space”.</li>
+    <li><a href="oak-show-replication-status.html">oak-show-replication-status</a>: show how far behind are replicating slaves on a given master.</li>
+</ul>
+
+<p>
+All tools are coded in Python, and require Python 2.3 or newer, and the python-mysqldb driver. 
+Some tools require MySQL 5.0 or higher; see the docs for each tool.
+</p>
+
+<h3>LICENSE</h3>
+common_schema is released under the <a href="http://www.opensource.org/licenses/bsd-license.php">BSD license</a>.
+<blockquote><pre>Copyright (c) 2011, Shlomi Noach
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+* Neither the name of the organization nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
+</blockquote>
+<h3>AUTHOR</h3>
+Shlomi Noach
