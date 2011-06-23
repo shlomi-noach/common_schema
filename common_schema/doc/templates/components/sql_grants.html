@@ -1,0 +1,134 @@
+<h3>NAME</h3>
+sql_grants: generate SQL GRANT/REVOKE statements for existing accounts; provide with GRANT metadata
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>sql_grants</i> presents metadata for existing accounts, and generates SQL queries for granting/revoking their privileges set.
+</p>
+
+<p>
+It is a one-stop-shop for getting the set of privileges per account, per privilege level (db, schema, table, column). 
+The view lists the set of privileges per account in several formats:
+<ul>
+	<li>In comma delimited format (e.g. <strong>SELECT, INSERT, UPDATE, EXECUTE</strong>)</li>
+	<li>In <strong>GRANT</strong> syntax</li>
+	<li>In <strong>REVOKE</strong> syntax</li>
+</ul>
+</p>
+<p>
+The original <strong>mysql</strong> privileges tables, or the INFORMATION_SCHEMA <strong>*_PRIVILEGES</strong> views 
+make for a per-domain distinction of privileges: a table for per-schema privileges; a table for per-table privileges, etc.
+</p>
+<p>
+The only existing alternative to that is the <strong>SHOW GRANTS FOR</strong> command. 
+Alas, it is not a proper SQL query, and does not provide with structured result.</p>
+
+<p>The <i>sql_grants</i> view provides with structured results, easily filtered or searched.</p>
+
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC sql_grants;
++--------------------+--------------+------+-----+---------+-------+
+| Field              | Type         | Null | Key | Default | Extra |
++--------------------+--------------+------+-----+---------+-------+
+| GRANTEE            | varchar(81)  | NO   |     |         |       |
+| user               | char(16)     | NO   |     |         |       |
+| host               | char(60)     | NO   |     |         |       |
+| priv_level         | varchar(133) | YES  |     | NULL    |       |
+| priv_level_name    | varchar(6)   | NO   |     |         |       |
+| current_privileges | mediumtext   | YES  |     | NULL    |       |
+| IS_GRANTABLE       | varchar(3)   | YES  |     | NULL    |       |
+| sql_grant          | longtext     | YES  |     | NULL    |       |
+| sql_revoke         | longtext     | YES  |     | NULL    |       |
+| sql_drop_user      | varchar(91)  | YES  |     | NULL    |       |
++--------------------+--------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>GRANTEE</strong>: grantee's account</li>
+	<li><strong>user</strong>: account user part</li>
+	<li><strong>host</strong>: account host part</li>
+	<li><strong>priv_level</strong>: the domain on which the privileges are set (e.g. <strong>*.*</strong>, <strong>sakila.*</strong>)</li>
+	<li><strong>priv_level_name</strong>: description of priv_level: <strong>'user'</strong>, <strong>'schema'</strong>, <strong>'table'</strong>, <strong>'column'</strong></li>
+	<li><strong>current_privileges</strong>: comma delimited list of privileges assigned to account on current privilege level</li>
+	<li><strong>IS_GRANTABLE</strong>: does current account have the GRANT privileges on this domain? <strong>'Yes'</strong> or <strong>'NO'</strong></li>
+	<li><strong>sql_grant</strong>: A <strong>GRANT</strong> query to generate current set of privileges</li>
+	<li><strong>sql_revoke</strong>: A <strong>REVOKE</strong> query to revoke current set of privileges</li>
+	<li><strong>sql_drop_user</strong>: A <strong>DROP USER</strong> query to drop account</li>
+</ul>
+
+<p>The view is in 2nd normal form. The <strong>sql_drop_user</strong> column applies to a grantee in general, unrelated to the current domain.</p>
+
+<h3>EXAMPLES</h3>
+<p>Generate all content for the 'apps' user:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.sql_grants WHERE user = 'apps'\G
+*************************** 1. row ***************************
+           GRANTEE: 'apps'@'%'
+              user: apps
+              host: %
+        priv_level: *.*
+   priv_level_name: user
+current_privileges: USAGE
+      IS_GRANTABLE: NO
+         sql_grant: GRANT USAGE ON *.* TO 'apps'@'%' IDENTIFIED BY PASSWORD ''
+        sql_revoke:
+     sql_drop_user: DROP USER 'apps'@'%'
+*************************** 2. row ***************************
+           GRANTEE: 'apps'@'%'
+              user: apps
+              host: %
+        priv_level: `test`.*
+   priv_level_name: schema
+current_privileges: DELETE, INSERT, SELECT, UPDATE
+      IS_GRANTABLE: NO
+         sql_grant: GRANT DELETE, INSERT, SELECT, UPDATE ON `test`.* TO 'apps'@'%'
+        sql_revoke: REVOKE DELETE, INSERT, SELECT, UPDATE ON `test`.* FROM 'apps'@'%'
+     sql_drop_user: DROP USER 'apps'@'%'
+*************************** 3. row ***************************
+           GRANTEE: 'apps'@'%'
+              user: apps
+              host: %
+        priv_level: `sakila`.`film`
+   priv_level_name: column
+current_privileges: SELECT (description, film_id, title), UPDATE (description)
+      IS_GRANTABLE: YES
+         sql_grant: GRANT SELECT (description, film_id, title), UPDATE (description) ON `sakila`.`film` TO 'apps'@'%' WITH GRANT OPTION
+        sql_revoke: REVOKE SELECT (description, film_id, title), UPDATE (description), GRANT OPTION ON `sakila`.`film` FROM 'apps'@'%'
+     sql_drop_user: DROP USER 'apps'@'%'
+</pre></blockquote>
+
+<p>Show privileges per domain for 'other_user'@'localhost'</p>
+<blockquote><pre>mysql&gt; SELECT priv_level, current_privileges FROM common_schema.sql_grants WHERE GRANTEE = '\'other_user\'@\'localhost\'';
++------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| priv_level | current_privileges                                                                                                                                                                           |
++------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| *.*        | USAGE                                                                                                                                                                                        |
+| `world`.*  | ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE |
++------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</pre></blockquote>
+<p>Generate <strong>REVOKE</strong> statements for all users:</p>
+<blockquote><pre>mysql&gt; SELECT sql_revoke FROM common_schema.sql_grants WHERE sql_revoke != '';
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| sql_revoke                                                                                                                                                                                                                                                                                                                                                   |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| REVOKE DELETE, INSERT, SELECT, UPDATE ON `test`.* FROM 'apps'@'%'                                                                                                                                                                                                                                                                                            |
+| REVOKE SELECT (description, film_id, title), UPDATE (description), GRANT OPTION ON `sakila`.`film` FROM 'apps'@'%'                                                                                                                                                                                                                                           |
+| REVOKE PROCESS ON *.* FROM 'monitoring_user'@'localhost'                                                                                                                                                                                                                                                                                                     |
+| REVOKE ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE ON `world`.* FROM 'other_user'@'localhost'                                                                                                               |
+| REVOKE REPLICATION SLAVE ON *.* FROM 'replication'@'10.0.0.%'                                                                                                                                                                                                                                                                                                |
+| REVOKE ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE USER, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, FILE, INDEX, INSERT, LOCK TABLES, PROCESS, REFERENCES, RELOAD, REPLICATION CLIENT, REPLICATION SLAVE, SELECT, SHOW DATABASES, SHOW VIEW, SHUTDOWN, SUPER, TRIGGER, UPDATE, GRANT OPTION ON *.* FROM 'root'@'127.0.0.1' |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</pre></blockquote>
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="sql_show_grants.html">sql_show_grants</a>
+<h3>AUTHOR</h3>
+Shlomi Noach

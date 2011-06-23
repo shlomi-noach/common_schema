@@ -1,0 +1,77 @@
+<h3>NAME</h3>
+sql_show_grants: generate <strong>SHOW GRANTS FOR</strong> -like statements for all existing accounts
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>sql_show_grants</i> generates an output similar to <strong>SHOW GRANTS FOR...</strong>, for all existing accounts. 
+It also includes account information, hence it is easy to filter results by account properties.
+</p>
+
+<p>
+MySQL does not provide with a similar feature. It only provides <strong>SHOW GRANTS FOR</strong> for a given account, and does not provide with the
+complete grants table. Also, it is not an SQL query, and so cannot be subjected to filtering, grouping, ordering, etc.
+</p>
+<p>
+In fact, 3rd party tools, such as <a href="http://www.maatkit.org/doc/mk-show-grants.html">mk-show-grants</a> are often used to interrogate MySQL
+as for the set of accounts, then listing the grants for those accounts. This view generates similar output.
+</p>
+
+<p>This view builds upon the <a href="sql_grants.html">sql_grants</a> results.</p>
+
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC common_schema.sql_show_grants;
++------------+-------------+------+-----+---------+-------+
+| Field      | Type        | Null | Key | Default | Extra |
++------------+-------------+------+-----+---------+-------+
+| GRANTEE    | varchar(81) | NO   |     |         |       |
+| user       | char(16)    | NO   |     |         |       |
+| host       | char(60)    | NO   |     |         |       |
+| sql_grants | longtext    | YES  |     | NULL    |       |
++------------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>GRANTEE</strong>: grantee's account</li>
+	<li><strong>user</strong>: account user part</li>
+	<li><strong>host</strong>: account host part</li>
+	<li><strong>sql_grants</strong>: The entire <string>GRANT</string> set of privileges for building the account; similar to the output of <strong>SHOW GRANTS FOR</strong></li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Show grants for users called 'world_user':</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.sql_show_grants WHERE user='world_user';
++--------------------------+------------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| GRANTEE                  | user       | host      | sql_grants                                                                                                                                                                                                                                                                                                             |
++--------------------------+------------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| 'world_user'@'localhost' | world_user | localhost | GRANT USAGE ON *.* TO 'world_user'@'localhost' IDENTIFIED BY PASSWORD '';
+GRANT ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE ON `world`.* TO 'world_user'@'localhost'; |
++--------------------------+------------+-----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</pre></blockquote>
+
+<p>Dump grants into external file:</p>
+<blockquote><pre><strong>mysql&gt;</strong> SELECT sql_grants FROM common_schema.sql_show_grants INTO OUTFILE '/tmp/grants.sql';
+
+<strong>bash$</strong> cat /tmp/grants.sql
+GRANT USAGE ON *.* TO 'apps'@'%' IDENTIFIED BY PASSWORD '';\
+GRANT DELETE, INSERT, SELECT, UPDATE ON `test`.* TO 'apps'@'%';\
+GRANT SELECT (description, film_id, title), UPDATE (description) ON `sakila`.`film` TO 'apps'@'%' WITH GRANT OPTION;
+GRANT USAGE ON *.* TO 'gromit'@'localhost' IDENTIFIED BY PASSWORD '';\
+GRANT DELETE, INSERT, SELECT, UPDATE ON `world`.`City` TO 'gromit'@'localhost' WITH GRANT OPTION;
+GRANT USAGE ON *.* TO 'monitoring_user'@'localhost' IDENTIFIED BY PASSWORD '*6BB4837EB74329105EE4568DDA7DC67ED2CA2AD9';\
+GRANT PROCESS ON *.* TO 'monitoring_user'@'localhost';
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="sql_grants.html">sql_grants</a>
+<h3>AUTHOR</h3>
+Shlomi Noach

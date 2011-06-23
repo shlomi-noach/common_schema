@@ -1,122 +1,85 @@
 <h3>NAME</h3>
-routine_privileges: apply referential integrity on two columns with parent-child  relationship.
+routine_privileges: INFORMATION_SCHEMA-like view on routines privileges
 <h3>TYPE</h3>
 View
-<h3>SYNOPSIS</h3>
-Delete rows from world.City where CountryCode does not have a matching Code in world.Country:
-<blockquote>oak-apply-ri --parent=world.Country.Code --child=world.City.CountryCode --action=delete</blockquote>
-Set CountryCode to NULL where no matching Code is found in world.Country:
-<blockquote>oak-apply-ri --parent=world.Country.Code --child=world.City.CountryCode --action=setnull</blockquote>
-Set CountryCode to NULL in chunks of 100, sleep 500 milliseconds between chunks:
-<blockquote>oak-apply-ri --parent=world.Country.Code --child=world.City.CountryCode --action=setnull --chunk-size=100 --sleep=500</blockquote>
-Same as above. Do not perform, just print the statements:
-<blockquote>oak-apply-ri --parent=world.Country.Code --child=world.City.CountryCode -a setnull -c 100 --sleep=500 --print-only</blockquote>
-Apply a normal safety level, which demands data types are identical:
-<blockquote>oak-apply-ri --parent=world.Country.Code --child=world.City.CountryCode --action=setnull --safety-level=normal</blockquote>
-Apply a high safety level, which demands column names and data types are identical:
-<blockquote>oak-apply-ri --parent=world.Country.Code --child=world.City.CountryCode --action=setnull --safety-level=high</blockquote>
-Provide connection parameters. Prompt for password:
-<blockquote>oak-apply-ri --user=root --ask-pass --socket=/tmp/mysql.sock --parent=world.Country.Code --child=world.City.CountryCode --action=delete</blockquote>
-Use a defaults file for parameters. Do not perform any safety checks:
-<blockquote>oak-apply-ri --defaults-file=/home/myuser/.my-oak.cnf --parent=world.Country.Code --child=world.City.CountryCode --safety-level=none</blockquote>
+
 <h3>DESCRIPTION</h3>
-This tool can be used when you are not using Foreign Keys (either not using a storage engine with supports foreign keys, aush as InnoDB, or not using referencial integrity in your schema), but would like to ensure that Foreign Key contraints apply on your database. With this tool you may perform the following:
-<ul>
-	<li>Delete "orphaned" rows (as in ON DELETE CASCADE)</li>
-	<li>Set "orphaned" rows reference to NULL (as in ON DELETE SET NULL)</li>
-	<li>Print our whatever need to done without executing</li>
-	<li>Evaluate if adding a Foreign Key contraint is possible</li>
-</ul>
-oak-apply-ri works with varying safety levels. Each safety level adds sanity checks to the previous one:
-<ul>
-	<li>None: does not perform checks</li>
-	<li>Normal: validates that both columns are of the same data type</li>
-	<li>High: validates that both columns have the same name.</li>
-</ul>
-Actual delete or update can be a lengthy operation, and may lock the child table. oak-apply-ri can work in specified chunk size, and with a configurable delay between chunk operations.
-
-Integrity can be applied for columns of different schemas.
-<h3>OPTIONS</h3>
--a ACTION, --action=ACTION
-<p class="indent">Action to take on invalid (orphaned) rows. Can be either <span style="text-decoration: underline;">delete</span> or <span style="text-decoration: underline;">setnull.</span></p>
-<p class="indent"><span style="text-decoration: underline;">delete</span> issues a DELETE on orphaned rows. <span style="text-decoration: underline;">setnull</span> issues an UPDATE on those rows, setting orphaned key to NULL.</p>
-<p class="indent"><span style="text-decoration: underline;">setnull</span> is the default value. It is impossible to use 'setnull' for a NOT NULL child column.</p>
-
---ask-pass
-<p class="indent">Prompt for password.</p>
-
---child=CHILD_COLUMN
-<p class="indent">Fully qualified child (referencing) column. Must be in the following format: schema_name.table_name.column_name</p>
-
--c CHUNK_SIZE, --chunk-size=CHUNK_SIZE
-<p class="indent">Number of values to act on in chunks. This does not map directly to number of rows, but rather to number of distinct orphaned values.</p>
-<p class="indent">Default chunk size is 0, which means all rows are deleted/updated in one operation</p>
-
---defaults-file=DEFAULTS_FILE
-<p class="indent">Read from MySQL configuration file. Overrides --user, --password, --socket, --port.</p>
-<p class="indent">Configuration needs to be in the following format:</p>
-
-<p class="indent"><strong>[client]<br/>
-user=my_user<br/>
-password=my_pass<br/>
-socket=/tmp/mysql.sock<br/>
-port=3306</strong>
+<p>INFORMATION_SCHEMA maps the <strong>mysql</strong> privileges tables into <strong>*_PRIVILEGES</strong> views.
+However, it only maps <strong>users</strong>, <strong>db</strong>, <strong>tables_priv</strong>, <strong>columns_priv</strong>, 
+and it fails mapping the <strong>procs_priv</strong> table. This is an inconsistency within INFORMATION_SCHEMA (see <a href="http://bugs.mysql.com/bug.php?id=61596">bug #61596</a>).
 </p>
 
--H HOST, --host=HOST
-<p class="indent">MySQL host (default: localhost)</p>
+<p><i>routine_privileges</i> implements what the author believes to be the definition of ROUTINE_PRIVILEGES within INFORMATION_SCHEMA should be. 
+It follows up on the <strong>*_PRIVILEGES</strong> tables conventions.</p>
 
--l SAFETY_LEVEL, --safety-level=SAFETY_LEVEL
-<p class="indent">Level of tests to make in order for action to take place. Valid values are:</p>
-<p class="indent"><span style="text-decoration: underline;">none</span>: no tests are performed</p>
-<p class="indent"><span style="text-decoration: underline;">normal</span> (default): columns are tested to be of identical date type</p>
-<p class="indent"><span style="text-decoration: underline;">high</span>: smae as 'normal' + columns are tested to be of identical names</p>
+<p>The view presents with grantees, and their set of privileges on specific routines (functions & procedures).</p>
 
---parent=PARENT_COLUMN
-<p class="indent">Fully qualified parent (referenced) column. Must be in the following format: schema_name.table_name.column_name</p>
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC routine_privileges;
++-----------------+------------------------------+------+-----+---------+-------+
+| Field           | Type                         | Null | Key | Default | Extra |
++-----------------+------------------------------+------+-----+---------+-------+
+| GRANTEE         | varchar(81)                  | YES  |     | NULL    |       |
+| ROUTINE_CATALOG | binary(0)                    | YES  |     | NULL    |       |
+| ROUTINE_SCHEMA  | char(64)                     | NO   |     |         |       |
+| ROUTINE_NAME    | char(64)                     | NO   |     |         |       |
+| ROUTINE_TYPE    | enum('FUNCTION','PROCEDURE') | NO   |     | NULL    |       |
+| PRIVILEGE_TYPE  | varchar(27)                  | YES  |     | NULL    |       |
+| IS_GRANTABLE    | varchar(3)                   | NO   |     |         |       |
++-----------------+------------------------------+------+-----+---------+-------+
+</pre></blockquote>
 
--p PASSWORD, --password=PASSWORD
-<p class="indent">MySQL password</p>
+<h3>SYNOPSIS</h3>
 
--P PORT, --port=PORT
-<p class="indent">TCP/IP port (default: 3306)</p>
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>GRANTEE</strong>: grantee's account</li>
+	<li><strong>ROUTINE_CATALOG</strong>: unused; NULL</li>
+	<li><strong>ROUTINE_SCHEMA</strong>: schema in which routines is located</li>
+	<li><strong>ROUTINE_NAME</strong>: name of routine</li>
+	<li><strong>ROUTINE_TYPE</strong>: 'FUNCTION' or 'PROECEDURE'</li>
+	<li><strong>PRIVILEGE_TYPE</strong>: single privilege (e.g. 'EXECUTE' or 'ALTER ROUTINE')</li>
+	<li><strong>IS_GRANTABLE</strong>: whether the grantee is grantable on this routine. 
+	This is a de-normalized column, following the convention of the <strong>*_PRIVILEGES</strong> tables in INFORMATION_SCHEMA</li>
+</ul>
 
---print-only
-<p class="indent">Do not execute. Only print statement</p>
+<p>The view is denormalized. While the <strong>mysql.procs_privs</strong> table lists the set of privileges per account in one row, 
+this view breaks the privileges to distinct rows. Also, the 'Grant' privilege is not listed on its own, but rather as an extra column.</p>
 
---sleep=SLEEP_MILLIS
-<p class="indent">Number of milliseconds to sleep between chunks. Default: 0</p>
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.routine_privileges ORDER BY GRANTEE, ROUTINE_SCHEMA, ROUTINE_NAME;
++--------------------------+-----------------+----------------+----------------------------+--------------+----------------+--------------+
+| GRANTEE                  | ROUTINE_CATALOG | ROUTINE_SCHEMA | ROUTINE_NAME               | ROUTINE_TYPE | PRIVILEGE_TYPE | IS_GRANTABLE |
++--------------------------+-----------------+----------------+----------------------------+--------------+----------------+--------------+
+| 'apps'@'%'               | NULL            | sakila         | get_customer_balance       | FUNCTION     | EXECUTE        | YES          |
+| 'other_user'@'localhost' | NULL            | sakila         | film_in_stock              | PROCEDURE    | ALTER ROUTINE  | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | film_in_stock              | PROCEDURE    | EXECUTE        | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | get_customer_balance       | FUNCTION     | ALTER ROUTINE  | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | get_customer_balance       | FUNCTION     | EXECUTE        | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | inventory_held_by_customer | FUNCTION     | ALTER ROUTINE  | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | inventory_held_by_customer | FUNCTION     | EXECUTE        | NO           |
+| 'world_user'@'localhost' | NULL            | sakila         | get_customer_balance       | FUNCTION     | EXECUTE        | YES          |
+| 'world_user'@'localhost' | NULL            | sakila         | get_customer_balance       | FUNCTION     | ALTER ROUTINE  | YES          |
++--------------------------+-----------------+----------------+----------------------------+--------------+----------------+--------------+
+</pre></blockquote>
 
--S SOCKET, --socket=SOCKET
-<p class="indent">MySQL socket file. Only applies when host is localhost</p>
-
--u USER, --user=USER
-<p class="indent">MySQL user</p>
-
--v, --verbose
-<p class="indent">Print user friendly messages</p>
-
+<p>Compare with:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM mysql.procs_priv;
++-----------+--------+------------+----------------------------+--------------+----------------+-----------------------------+---------------------+
+| Host      | Db     | User       | Routine_name               | Routine_type | Grantor        | Proc_priv                   | Timestamp           |
++-----------+--------+------------+----------------------------+--------------+----------------+-----------------------------+---------------------+
+| %         | sakila | apps       | get_customer_balance       | FUNCTION     | root@localhost | Execute,Grant               | 2011-06-22 14:29:01 |
+| localhost | sakila | world_user | get_customer_balance       | FUNCTION     | root@localhost | Execute,Alter Routine,Grant | 2011-06-22 14:29:18 |
+| localhost | sakila | other_user | get_customer_balance       | FUNCTION     | root@localhost | Execute,Alter Routine       | 2011-06-22 14:29:25 |
+| localhost | sakila | other_user | inventory_held_by_customer | FUNCTION     | root@localhost | Execute,Alter Routine       | 2011-06-22 14:30:12 |
+| localhost | sakila | other_user | film_in_stock              | PROCEDURE    | root@localhost | Execute,Alter Routine       | 2011-06-22 14:30:46 |
++-----------+--------+------------+----------------------------+--------------+----------------+-----------------------------+---------------------+
+</pre></blockquote>
 <h3>ENVIRONMENT</h3>
-Requires MySQL 5.0 or newer, python 2.3 or newer.
+MySQL 5.1 or newer
 
-python-mysqldb must be installed in order to use this tool. You can
-<blockquote>apt-get install python-mysqldb</blockquote>
-or
-<blockquote>yum install mysql-python</blockquote>
 <h3>SEE ALSO</h3>
-<h3>LICENSE</h3>
-This tool is released under the BSD license.
-<blockquote><pre>Copyright (c) 2008 - 2010, Shlomi Noach
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-* Neither the name of the organization nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
-</blockquote>
+<a href="sql_grants.html">sql_grants</a>
 <h3>AUTHOR</h3>
 Shlomi Noach
