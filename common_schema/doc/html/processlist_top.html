@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>processlist_top: common_schema documentation</title>
+	<meta name="description" content="processlist_top: common_schema" />
+	<meta name="keywords" content="processlist_top: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="processlist_top.html">processlist_top</a></h2>	
+<h3>NAME</h3>
+processlist_top: Listing of active processes sorted by current query runtime, desc (longest first)
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>processlist_top</i> displays only active processes (those not in Sleep mode, hence actually performing some query); it lists longest running queries first.
+</p>
+
+<p>
+When looking at running processes, we are many times interested in those queries making trouble. We may look at PROCESSLIST when server seems
+to react slowly. We may be looking for queries acquiring locks, blocking other queries, or for extremely long queries which are wasting system resources.
+A good heuristic would be to look for queries running the longest.
+</p>
+<p>
+However, PROCESSLIST also lists down many other connections, including those sleeping for long time. 
+<i>processlist_top</i> provides with the short story: only active, and longest first. 
+This is similar to query listing as implemented in <a href="http://jeremy.zawodny.com/mysql/mytop/">mytop</a> 
+or <a href="http://code.google.com/p/innotop/">innotop</a>. 
+</p>
+
+<p><i>processlist_top</i> does not list its own process (the process invoking the SELECT on processlist_top)
+</p>
+
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC common_schema.processlist_top;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| ID      | bigint(4)   | NO   |     | 0       |       |
+| USER    | varchar(16) | NO   |     |         |       |
+| HOST    | varchar(64) | NO   |     |         |       |
+| DB      | varchar(64) | YES  |     | NULL    |       |
+| COMMAND | varchar(16) | NO   |     |         |       |
+| TIME    | int(7)      | NO   |     | 0       |       |
+| STATE   | varchar(64) | YES  |     | NULL    |       |
+| INFO    | longtext    | YES  |     | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Structure of this view is identical to that of <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a> table</p>
+
+<p>On Percona Server, this additional info is included:
+	<ul>
+		<li><strong>TIME_MS</strong>: execution time in milliseconds</li>
+	</ul>
+</p>
+<h3>EXAMPLES</h3>
+<p>Show all active processes:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_top;
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+| ID       | USER        | HOST         | DB        | COMMAND     | TIME    | STATE                                                            | INFO                                                                                                                  | TIME_MS    |
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+|  3598334 | system user |              | NULL      | Connect     | 4281883 | Waiting for master to send event                                 | NULL                                                                                                                  | 4281883102 |
+|  3598469 | replica     | sql01:51157  | NULL      | Binlog Dump | 4281878 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 4281877707 |
+| 31066726 | replica     | sql02:48924  | NULL      | Binlog Dump | 1041758 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 1041758134 |
+|  3598335 | system user |              | NULL      | Connect     |  195747 | Has read all relay log; waiting for the slave I/O thread to upda | NULL                                                                                                                  |          0 |
+| 39946702 | store       | app03:46795  | datastore | Query       |       0 | Writing to net                                                   | SELECT * FROM store_location                                                                                          |         27 |
+| 39946693 | store       | app05:51090  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 5  |         54 |
+| 39946692 | store       | sql01:47849  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 34 |        350 |
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+</pre></blockquote>
+<p>In the above example the last three processes seem to be running for 0 seconds. However, with Percona Server's <strong>TIME_MS</strong> we see the sub-second
+runtime for each process. As it turns out, these three processes are not strictly order from oldest to newest. This is because we order them
+based on <strong>TIME</strong>, which has a 1 second resolution.</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer. Percona Server yields a different schema.
+
+<h3>SEE ALSO</h3>
+<a href="processlist_per_userhost.html">processlist_per_userhost</a>,
+<a href="processlist_repl.html">processlist_repl</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<h3>common_schema components</h3>
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						
+						<li><strong>Views</strong></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+						
+						<li><strong>Routines</strong></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

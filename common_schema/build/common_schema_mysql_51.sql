@@ -89,6 +89,30 @@ END $$
 
 DELIMITER ;
 -- 
+-- Return number of tokens in delimited text
+-- txt: input string
+-- delimiter: char or text by which to split txt
+--
+-- example:
+--
+-- SELECT get_num_tokens('the quick brown fox', ' ') AS num_token;
+-- Returns: 4
+-- 
+DELIMITER $$
+
+DROP FUNCTION IF EXISTS get_num_tokens $$
+CREATE FUNCTION get_num_tokens(txt TEXT CHARSET utf8, delimiter VARCHAR(255) CHARSET utf8) RETURNS INT UNSIGNED 
+DETERMINISTIC
+NO SQL
+SQL SECURITY INVOKER
+COMMENT 'Return number of tokens in delimited text'
+
+BEGIN
+  RETURN CHAR_LENGTH(txt) - CHAR_LENGTH(REPLACE(txt, delimiter, '')) + 1;
+END $$
+
+DELIMITER ;
+-- 
 -- Return a qualified MySQL name (e.g. database name, table name, column name, ...) from given text.
 -- 
 -- Can be used for dynamic query generation by INFORMATION_SCHEMA, where names are unqualified.
@@ -561,6 +585,28 @@ VIEW redundant_keys AS
     )
 ;
 -- 
+-- INFORMATION_SCHEMA-like privileges on routines    
+-- 
+CREATE OR REPLACE
+ALGORITHM = TEMPTABLE
+SQL SECURITY INVOKER
+VIEW routine_privileges AS
+  SELECT
+    CONCAT('\'', User, '\'@\'', Host, '\'') AS GRANTEE,
+    NULL AS ROUTINE_CATALOG,
+    Db AS ROUTINE_SCHEMA,
+    Routine_name AS ROUTINE_NAME,
+    Routine_type AS ROUTINE_TYPE,
+    UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(Proc_priv, ',', n+1), ',', -1)) AS PRIVILEGE_TYPE,
+    IF(find_in_set('Grant', Proc_priv) > 0, 'YES', 'NO') AS IS_GRANTABLE
+  FROM
+    mysql.procs_priv
+    CROSS JOIN numbers
+  WHERE
+    numbers.n BETWEEN 0 AND CHAR_LENGTH(Proc_priv) - CHAR_LENGTH(REPLACE(Proc_priv, ',', ''))
+    AND UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(Proc_priv, ',', n+1), ',', -1)) != 'GRANT'
+;
+-- 
 -- (Internal use): privileges set on columns   
 -- 
 CREATE OR REPLACE
@@ -729,24 +775,24 @@ VIEW sql_show_grants AS
     GRANTEE, user, host
 ;
 -- 
--- Active processes sorted by current query runtime, desc (longest first). Exclude current connection.
+-- State of processes per user/host: connected, executing, average execution time
 -- 
 CREATE OR REPLACE
 ALGORITHM = UNDEFINED
 SQL SECURITY INVOKER
-VIEW processlist_per_account AS
+VIEW processlist_per_userhost AS
   SELECT 
-    USER, 
-    HOST,
+    USER AS user,
+    SUBSTRING_INDEX(HOST, ':', 1) AS host,
     COUNT(*) AS count_processes,
     SUM(COMMAND != 'Sleep') AS active_processes,
     AVG(IF(COMMAND != 'Sleep', TIME, NULL)) AS average_active_time
   FROM 
     INFORMATION_SCHEMA.PROCESSLIST 
   WHERE 
-    COMMAND != 'Sleep'
+    id != CONNECTION_ID()
   GROUP BY
-    USER, HOST
+    USER, SUBSTRING_INDEX(HOST, ':', 1)
 ;
 -- 
 -- Replication processes only (both Master & Slave)

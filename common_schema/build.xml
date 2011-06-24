@@ -1,4 +1,10 @@
 <project name="util schema" default="all" basedir=".">
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="/usr/share/java/ant-contrib.jar"/>
+		</classpath>
+	</taskdef>
+
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="" />
 	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
@@ -7,6 +13,9 @@
 	<property name="mysql_51.output.file" value="common_schema_mysql_51.sql" />
 	<property name="mysql_innodb_plugin.output.file" value="common_schema_mysql_innodb_plugin.sql" />
 	<property name="percona_server.output.file" value="common_schema_percona_server.sql" />
+
+	<property name="doc.templates.dir" value="doc/templates"/>
+	<property name="doc.html.dir" value="doc/html"/>
 
 	<target name="all" depends="build">
 	</target>
@@ -121,5 +130,42 @@
 			<arg value="--socket=${mysql.socket}" />
 			<arg value="--execute=${mysql_command}" />
 		</exec>
+	</target>
+
+	<target name="doc">		
+		<foreach param="component_doc_filename" target="component_doc">
+			<path>
+				<fileset dir="${doc.templates.dir}/components">
+			    	<include name="*.html"/>
+				</fileset>
+			</path>
+		</foreach>		
+		<foreach param="generaldoc_filename" target="generaldoc">
+			<path>
+				<fileset dir="${doc.templates.dir}/general">
+			    	<include name="*.html"/>
+				</fileset>
+			</path>
+		</foreach>		
+	</target>
+	<target name="component_doc">		
+		<basename property="doc_basename" file="${component_doc_filename}"/>
+		<basename property="component_name" file="${component_doc_filename}" suffix=".html"/>
+		<echo message="Generating documentation for ${component_name} component" /> 
+		<concat destfile="${doc.html.dir}/${doc_basename}">
+			<filelist dir="${doc.templates.dir}" files="head.html.template, ${component_doc_filename}, tail.html.template"/>
+		</concat>
+		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${component_name}"/>
+		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${component_name}"/>
+	</target>
+	<target name="generaldoc">		
+		<basename property="doc_basename" file="${generaldoc_filename}"/>
+		<basename property="docname" file="${generaldoc_filename}" suffix=".html"/>
+		<echo message="Generating documentation for ${docname} file" /> 
+		<concat destfile="${doc.html.dir}/${doc_basename}">
+			<filelist dir="${doc.templates.dir}" files="head.html.template, ${generaldoc_filename}, tail.html.template"/>
+		</concat>
+		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${docname}"/>
+		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${docname}"/>
 	</target>
 </project>

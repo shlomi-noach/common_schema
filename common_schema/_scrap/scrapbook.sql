@@ -1,4 +1,64 @@
 
+
+SELECT
+  CONCAT('\'', User, '\'@\'', Host, '\'') AS GRANTEE,
+  NULL AS ROUTINE_CATALOG,
+  Db AS ROUTINE_SCHEMA,
+  Routine_name AS ROUTINE_NAME,
+  Routine_type AS ROUTINE_TYPE,
+  UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(Proc_priv, ',', n+1), ',', -1)) AS PRIVILEGE_TYPE,
+  IF(grantable_procs_priv.User IS NULL, 'NO', 'YES') AS IS_GRANTABLE
+FROM
+  mysql.procs_priv
+  CROSS JOIN numbers
+  LEFT JOIN (
+      SELECT 
+        DISTINCT User, Host, Db, Routine_name
+      FROM
+        mysql.procs_priv
+      WHERE 
+         find_in_set('Grant', Proc_priv) > 0
+    ) grantable_procs_priv USING (User, Host, Db, Routine_name)
+WHERE
+  numbers.n BETWEEN 0 AND CHAR_LENGTH(Proc_priv) - CHAR_LENGTH(REPLACE(Proc_priv, ',', ''))
+  AND UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(Proc_priv, ',', n+1), ',', -1)) != 'GRANT'
+;
+
+
+
+SELECT STRAIGHT_JOIN
+  CONCAT('\'', User, '\'@\'', Host, '\'') AS GRANTEE,
+  NULL AS ROUTINE_CATALOG,
+  Db AS ROUTINE_SCHEMA,
+  Routine_name AS ROUTINE_NAME,
+  Routine_type AS ROUTINE_TYPE,
+  UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(Proc_priv, ',', n+1), ',', -1)) AS PRIVILEGE_TYPE,
+  IF(grantable_procs_priv.User IS NULL, 'NO', 'YES') AS IS_GRANTABLE
+FROM
+  mysql.procs_priv
+  CROSS JOIN (SELECT @counter := -1) select_init
+  CROSS JOIN (
+    SELECT
+      @counter := @counter+1 AS n
+    FROM
+      INFORMATION_SCHEMA.COLLATIONS
+    LIMIT 3
+  ) numbers
+  LEFT JOIN (
+      SELECT 
+        DISTINCT User, Host, Db, Routine_name
+      FROM
+        mysql.procs_priv
+      WHERE 
+         find_in_set('Grant', Proc_priv) > 0
+    ) grantable_procs_priv USING (User, Host, Db, Routine_name)
+WHERE
+  numbers.n BETWEEN 0 AND CHAR_LENGTH(Proc_priv) - CHAR_LENGTH(REPLACE(Proc_priv, ',', ''))
+  AND UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(Proc_priv, ',', n+1), ',', -1)) != 'GRANT'
+ORDER BY
+  GRANTEE, ROUTINE_SCHEMA, ROUTINE_NAME, ROUTINE_TYPE, n
+;
+
 -- 
 -- Current grantee privileges and additional info breakdown, generated GRANT and REVOKE sql statements  
 -- 
