@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>global_status_diff: common_schema documentation</title>
+	<meta name="description" content="global_status_diff: common_schema" />
+	<meta name="keywords" content="global_status_diff: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="global_status_diff.html">global_status_diff</a></h2>	
+<h3>NAME</h3>
+global_status_diff: Status variables difference over time, with interpolation and extrapolation per time unit
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>global_status_diff</i> takes two samples of GLOBAL STATUS, 10 seconds apart (within the view's query) and prints out the 
+difference between the two samples, along with interpolated/extrapolated change per second/minute, respectively.
+</p>
+
+<p>Measuring changes in GLOBAL STATUS is essential to any MySQL monitoring scheme. For example, the change in <strong>com_select</strong>
+presents the number of issues SELECT queries. Knowing the rate of queries (e.g. number of SELECTs per second) is key information to understanding
+server behavior and analyzing its performance.
+</p>
+
+<p><i>global_status_diff</i> provides with possibly the simplest status sampling code, as it allows one to query such information from within MySQL.
+Other tools require external applications/scripts to execute.  
+
+<p>
+The view utilizes INFORMATION_SCHEMA.GLOBAL_STATUS and calculates the change for all variables. 
+For some variables this does not make sense (examples are: <strong>rpl_status</strong>, <strong>slave_running</strong>, <strong>open_tables</strong> etc.).
+It is up to the user of this view to isolate desired variables.
+</p>
+
+<p>Querying this view takes 10 seconds to complete. 
+In between the first and second samples the view's query will be <a href="http://dev.mysql.com/doc/refman/5.1/en/miscellaneous-functions.html#function_sleep">sleeping</a>.
+</p>
+
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC common_schema.global_status_diff;
++------------------------+---------------+------+-----+---------+-------+
+| Field                  | Type          | Null | Key | Default | Extra |
++------------------------+---------------+------+-----+---------+-------+
+| variable_name          | varchar(64)   | YES  |     | NULL    |       |
+| variable_value_0       | longtext      | YES  |     | NULL    |       |
+| variable_value_1       | varchar(1024) | YES  |     | NULL    |       |
+| variable_value_diff    | double        | YES  |     | NULL    |       |
+| variable_value_psec    | double        | YES  |     | NULL    |       |
+| variable_value_pminute | double        | YES  |     | NULL    |       |
++------------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>variable_name</strong>: name of global status variable</li>
+	<li><strong>variable_value_0</strong>: first sample value</li>
+	<li><strong>variable_value_1</strong>: second sample value</li>
+	<li><strong>variable_value_diff</strong>: difference between the two samples</li>
+	<li><strong>variable_value_psec</strong>: average change in value per second of execution</li>
+	<li><strong>variable_value_pminute</strong>: estimated (via extrapolation) average change in value per minute of execution</li>
+</ul>
+
+<p>The view is in 2nd normal form. The <strong>sql_drop_user</strong> column applies to a grantee in general, unrelated to the current domain.</p>
+
+<h3>EXAMPLES</h3>
+<p>Get status difference for varios InnoDB write metrics:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.global_status_diff WHERE variable_name LIKE 'innodb_%write%';
++-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+| variable_name                     | variable_value_0 | variable_value_1 | variable_value_diff | variable_value_psec | variable_value_pminute |
++-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+| innodb_buffer_pool_write_requests | 1000528622       | 1000528683       |                  61 |                 6.1 |                    366 |
+| innodb_data_pending_writes        | 0                | 0                |                   0 |                   0 |                      0 |
+| innodb_data_writes                | 100335216        | 100335247        |                  31 |                 3.1 |                    186 |
+| innodb_dblwr_writes               | 603031           | 603032           |                   1 |                 0.1 |                      6 |
+| innodb_log_write_requests         | 338838621        | 338838633        |                  12 |                 1.2 |                     72 |
+| innodb_log_writes                 | 69311204         | 69311213         |                   9 |                 0.9 |                     54 |
+| innodb_os_log_pending_writes      | 0                | 0                |                   0 |                   0 |                      0 |
++-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+</pre></blockquote>
+
+<p>Show complete samples analysis:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.global_status_diff;
++---------------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+| variable_name                         | variable_value_0 | variable_value_1 | variable_value_diff | variable_value_psec | variable_value_pminute |
++---------------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+| aborted_clients                       | 2276049          | 2276059          |                  10 |                   1 |                     60 |
+| aborted_connects                      | 72               | 72               |                   0 |                   0 |                      0 |
+| binlog_cache_disk_use                 | 0                | 0                |                   0 |                   0 |                      0 |
+| binlog_cache_use                      | 0                | 0                |                   0 |                   0 |                      0 |
+| bytes_received                        | 48240316982      | 48240364869      |               47887 |              4788.7 |                 287322 |
+| bytes_sent                            | 400087906753     | 400090499674     |             2592921 |            259292.1 |               15557526 |
+| com_admin_commands                    | 0                | 0                |                   0 |                   0 |                      0 |
+| com_assign_to_keycache                | 0                | 0                |                   0 |                   0 |                      0 |
+| com_alter_db                          | 0                | 0                |                   0 |                   0 |                      0 |
+| com_alter_db_upgrade                  | 0                | 0                |                   0 |                   0 |                      0 |
+| com_alter_event                       | 0                | 0                |                   0 |                   0 |                      0 |
+| com_alter_function                    | 0                | 0                |                   0 |                   0 |                      0 |
+| com_alter_procedure                   | 0                | 0                |                   0 |                   0 |                      0 |
+| com_alter_server                      | 0                | 0                |                   0 |                   0 |                      0 |
+| com_alter_table                       | 2                | 2                |                   0 |                   0 |                      0 |
+| com_alter_tablespace                  | 0                | 0                |                   0 |                   0 |                      0 |
+| com_analyze                           | 102952           | 102952           |                   0 |                   0 |                      0 |
+| com_backup_table                      | 0                | 0                |                   0 |                   0 |                      0 |
+| com_begin                             | 0                | 0                |                   0 |                   0 |                      0 |
+| com_binlog                            | 0                | 0                |                   0 |                   0 |                      0 |
+| com_call_procedure                    | 0                | 0                |                   0 |                   0 |                      0 |
+| com_change_db                         | 3762413          | 3762422          |                   9 |                 0.9 |                     54 |
+...
+many more rows
+...
++------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</pre></blockquote>
+
+<p>Just look at the number of selects:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.global_status_diff WHERE variable_name = 'com_select';
++---------------+------------------+------------------+---------------------+---------------------+------------------------+
+| variable_name | variable_value_0 | variable_value_1 | variable_value_diff | variable_value_psec | variable_value_pminute |
++---------------+------------------+------------------+---------------------+---------------------+------------------------+
+| com_select    | 44977723         | 44977764         |                  41 |                 4.1 |                    246 |
++---------------+------------------+------------------+---------------------+---------------------+------------------------+
+</pre></blockquote>
+
+<a href="global_status_diff_clean.html">global_status_diff_clean</a> and
+<a href="global_status_diff_nonzero.html">global_status_diff_nonzero</a> build upon this view for further common usage.
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="global_status_diff_clean.html">global_status_diff_clean</a>,
+<a href="global_status_diff_nonzero.html">global_status_diff_nonzero</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<h3>common_schema components</h3>
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						
+						<li><strong>Views</strong></li>
+						
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+						
+						<li><strong>Routines</strong></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

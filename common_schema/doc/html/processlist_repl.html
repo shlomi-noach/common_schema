@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>processlist_repl: common_schema documentation</title>
+	<meta name="description" content="processlist_repl: common_schema" />
+	<meta name="keywords" content="processlist_repl: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="processlist_repl.html">processlist_repl</a></h2>	
+<h3>NAME</h3>
+processlist_repl: Listing of replication processes: the server's slave threads and any replicating slaves 
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>processlist_repl</i> displays only replication processes. These may include:
+<ul>
+	<li>Connected slaves: when this server acts as a master, each slave connects using a single process. 
+	A slave with running IO thread will appear in this server's processlist_repl</li>
+	<li>IO thread: if this server is itself a replicating slave</li>
+	<li>SQL thread: if this server is itself a replicating slave</li>
+</ul>
+</p>
+
+<p>
+This view provides with a quick look at replication status processlist-wise.
+</p>
+
+<p>
+The output of this view is a row subset of INFORMATION_SCHEMA.PROCESSLIST.
+</p>
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC common_schema.processlist_repl;
++---------+-------------+------+-----+---------+-------+
+| Field   | Type        | Null | Key | Default | Extra |
++---------+-------------+------+-----+---------+-------+
+| ID      | bigint(4)   | NO   |     | 0       |       |
+| USER    | varchar(16) | NO   |     |         |       |
+| HOST    | varchar(64) | NO   |     |         |       |
+| DB      | varchar(64) | YES  |     | NULL    |       |
+| COMMAND | varchar(16) | NO   |     |         |       |
+| TIME    | int(7)      | NO   |     | 0       |       |
+| STATE   | varchar(64) | YES  |     | NULL    |       |
+| INFO    | longtext    | YES  |     | NULL    |       |
++---------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Structure of this view is identical to that of <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a> table</p>
+
+<p>On Percona Server, this additional info is included:
+	<ul>
+		<li><strong>TIME_MS</strong>: execution time in milliseconds</li>
+	</ul>
+</p>
+<h3>EXAMPLES</h3>
+<p>Show all replication processes</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_repl;
++----------+-------------+-------------+------+-------------+---------+------------------------------------------------------------------+------+------------+
+| ID       | USER        | HOST        | DB   | COMMAND     | TIME    | STATE                                                            | INFO | TIME_MS    |
++----------+-------------+-------------+------+-------------+---------+------------------------------------------------------------------+------+------------+
+| 31066726 | repl_user   | sql02:48924 | NULL | Binlog Dump | 1205439 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL | 1205438922 |
+|  3598469 | repl_user   | sql01:51157 | NULL | Binlog Dump | 4445559 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL | 4445558495 |
+|  3598335 | system user |             | NULL | Connect     |  359428 | Has read all relay log; waiting for the slave I/O thread to upda | NULL |          3 |
+|  3598334 | system user |             | NULL | Connect     | 4445564 | Waiting for master to send event                                 | NULL | 4445563890 |
++----------+-------------+-------------+------+-------------+---------+------------------------------------------------------------------+------+------------+
+</pre></blockquote>
+<p>In the above example we see two slaves replicating from this server (sql02 & sql01), 
+and the two threads (IO thread, SQL thread) this server uses to replication from its master</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer. Percona Server yields a different schema.
+
+<h3>SEE ALSO</h3>
+<a href="processlist_top.html">processlist_top</a>,
+<a href="processlist_per_userhost.html">processlist_per_userhost</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<h3>common_schema components</h3>
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						
+						<li><strong>Views</strong></li>
+						
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+						
+						<li><strong>Routines</strong></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>
