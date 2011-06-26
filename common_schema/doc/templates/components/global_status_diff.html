@@ -17,6 +17,7 @@ server behavior and analyzing its performance.
 
 <p><i>global_status_diff</i> provides with possibly the simplest status sampling code, as it allows one to query such information from within MySQL.
 Other tools require external applications/scripts to execute.  
+</p>
 
 <p>
 The view utilizes INFORMATION_SCHEMA.GLOBAL_STATUS and calculates the change for all variables. 
@@ -54,8 +55,6 @@ mysql&gt; DESC common_schema.global_status_diff;
 	<li><strong>variable_value_psec</strong>: average change in value per second of execution</li>
 	<li><strong>variable_value_pminute</strong>: estimated (via extrapolation) average change in value per minute of execution</li>
 </ul>
-
-<p>The view is in 2nd normal form. The <strong>sql_drop_user</strong> column applies to a grantee in general, unrelated to the current domain.</p>
 
 <h3>EXAMPLES</h3>
 <p>Get status difference for varios InnoDB write metrics:</p>
