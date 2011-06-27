@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>sql_alter_table: common_schema documentation</title>
+	<meta name="description" content="sql_alter_table: common_schema" />
+	<meta name="keywords" content="sql_alter_table: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="sql_alter_table.html">sql_alter_table</a></h2>	
+<h3>NAME</h3>
+sql_alter_table: Generate ALTER TABLE SQL statements per table, with engine and create options
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>sql_alter_table</i> provides with SQL statements to alter a table to its current form in terms of engine and create options.
+</p>
+
+<p>
+This view is useful in generating a "resurrection" script to restore table to its current engine state.
+For example, it may provide with the rollback script for a database migration from MyISAM to InnoDB, or from InnoDB Antelope to Barracuda format.
+</p>
+
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC common_schema.sql_alter_table;
++-----------------+--------------+------+-----+---------+-------+
+| Field           | Type         | Null | Key | Default | Extra |
++-----------------+--------------+------+-----+---------+-------+
+| TABLE_SCHEMA    | varchar(64)  | NO   |     |         |       |
+| TABLE_NAME      | varchar(64)  | NO   |     |         |       |
+| ENGINE          | varchar(64)  | YES  |     | NULL    |       |
+| alter_statement | varchar(473) | YES  |     | NULL    |       |
++-----------------+--------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: schema of current table</li>
+	<li><strong>TABLE_NAME</strong>: current table name</li>
+	<li><strong>ENGINE</strong>: current engine name</li>
+	<li><strong>alter_statement</strong>: A SQL statement which ALTERs current table to its current engine with create-options</li>
+</ul>
+
+<p>The SQL statements are not terminated by ';'.</p>
+
+<h3>EXAMPLES</h3>
+<p>Generate ALTER TABLE statements for `sakila` tables:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.sql_alter_table WHERE TABLE_SCHEMA='sakila';
++--------------+---------------+--------+-----------------------------------------------------+
+| TABLE_SCHEMA | TABLE_NAME    | ENGINE | alter_statement                                     |
++--------------+---------------+--------+-----------------------------------------------------+
+| sakila       | actor         | InnoDB | ALTER TABLE `sakila`.`actor` ENGINE=InnoDB          |
+| sakila       | address       | InnoDB | ALTER TABLE `sakila`.`address` ENGINE=InnoDB        |
+| sakila       | category      | InnoDB | ALTER TABLE `sakila`.`category` ENGINE=InnoDB       |
+| sakila       | city          | InnoDB | ALTER TABLE `sakila`.`city` ENGINE=InnoDB           |
+| sakila       | country       | InnoDB | ALTER TABLE `sakila`.`country` ENGINE=InnoDB        |
+| sakila       | customer      | InnoDB | ALTER TABLE `sakila`.`customer` ENGINE=InnoDB       |
+| sakila       | film          | InnoDB | ALTER TABLE `sakila`.`film` ENGINE=InnoDB           |
+| sakila       | film_actor    | InnoDB | ALTER TABLE `sakila`.`film_actor` ENGINE=InnoDB     |
+| sakila       | film_category | InnoDB | ALTER TABLE `sakila`.`film_category` ENGINE=InnoDB  |
+| sakila       | film_text     | MyISAM | ALTER TABLE `sakila`.`film_text` ENGINE=MyISAM      |
+| sakila       | inventory     | InnoDB | ALTER TABLE `sakila`.`inventory` ENGINE=InnoDB      |
+| sakila       | language      | InnoDB | ALTER TABLE `sakila`.`language` ENGINE=InnoDB       |
+| sakila       | payment       | InnoDB | ALTER TABLE `sakila`.`payment` ENGINE=InnoDB        |
+| sakila       | rental        | InnoDB | ALTER TABLE `sakila`.`rental` ENGINE=InnoDB         |
+| sakila       | staff         | InnoDB | ALTER TABLE `sakila`.`staff` ENGINE=InnoDB          |
+| sakila       | store         | InnoDB | ALTER TABLE `sakila`.`store` ENGINE=InnoDB          |
++--------------+---------------+--------+-----------------------------------------------------+
+</pre></blockquote>
+
+<p>Modify tables; again generate ALTER TABLE statements for `sakila` tables:</p>
+<blockquote><pre>mysql&gt; ALTER TABLE sakila.film_text ENGINE=MyISAM ROW_FORMAT=FIXED;
+mysql&gt; ALTER TABLE sakila.film_category ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=8;
+
+mysql&gt; SELECT * FROM common_schema.sql_alter_table WHERE TABLE_SCHEMA='sakila';
++--------------+---------------+--------+-------------------------------------------------------------------------------------------+
+| TABLE_SCHEMA | TABLE_NAME    | ENGINE | alter_statement                                                                           |
++--------------+---------------+--------+-------------------------------------------------------------------------------------------+
+| sakila       | actor         | InnoDB | ALTER TABLE `sakila`.`actor` ENGINE=InnoDB                                                |
+| sakila       | address       | InnoDB | ALTER TABLE `sakila`.`address` ENGINE=InnoDB                                              |
+| sakila       | category      | InnoDB | ALTER TABLE `sakila`.`category` ENGINE=InnoDB                                             |
+| sakila       | city          | InnoDB | ALTER TABLE `sakila`.`city` ENGINE=InnoDB                                                 |
+| sakila       | country       | InnoDB | ALTER TABLE `sakila`.`country` ENGINE=InnoDB                                              |
+| sakila       | customer      | InnoDB | ALTER TABLE `sakila`.`customer` ENGINE=InnoDB                                             |
+| sakila       | film          | InnoDB | ALTER TABLE `sakila`.`film` ENGINE=InnoDB                                                 |
+| sakila       | film_actor    | InnoDB | ALTER TABLE `sakila`.`film_actor` ENGINE=InnoDB                                           |
+| sakila       | film_category | InnoDB | ALTER TABLE `sakila`.`film_category` ENGINE=InnoDB row_format=COMPRESSED KEY_BLOCK_SIZE=8 |
+| sakila       | film_text     | MyISAM | ALTER TABLE `sakila`.`film_text` ENGINE=MyISAM row_format=FIXED                           |
+| sakila       | inventory     | InnoDB | ALTER TABLE `sakila`.`inventory` ENGINE=InnoDB                                            |
+| sakila       | language      | InnoDB | ALTER TABLE `sakila`.`language` ENGINE=InnoDB                                             |
+| sakila       | payment       | InnoDB | ALTER TABLE `sakila`.`payment` ENGINE=InnoDB                                              |
+| sakila       | rental        | InnoDB | ALTER TABLE `sakila`.`rental` ENGINE=InnoDB                                               |
+| sakila       | staff         | InnoDB | ALTER TABLE `sakila`.`staff` ENGINE=InnoDB                                                |
+| sakila       | store         | InnoDB | ALTER TABLE `sakila`.`store` ENGINE=InnoDB                                                |
++--------------+---------------+--------+-------------------------------------------------------------------------------------------+
+</pre></blockquote>
+<p>Note again that the SQL statements are not terminated by ';'. 
+Either CONCAT() these beforehand, or use <i>sed</i>/<i>awk</i> afterwards.</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="sql_foreign_keys.html">sql_foreign_keys</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<h3>common_schema components</h3>
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						
+						<li><strong>Views</strong></li>
+						
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						
+						<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+						<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+						
+						<li><strong>Routines</strong></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>
