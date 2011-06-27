@@ -1,0 +1,113 @@
+<h3>NAME</h3>
+sql_foreign_keys: Generate create/drop foreign key constraints SQL statements
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>sql_foreign_keys</i> provides with SQL statements to create/drop existing foreign key constraints.
+</p>
+
+<p>
+Currently, foreign keys are not implemented at MySQL, but rather at the Storage Engine level. 
+That is, MySQL does not manage foreign key constraints. Instead, each storage engine manages integrity within the engine, if at all.
+</p>
+
+<p>
+InnoDB provides foreign key support. MyISAM/MEMORY/ARCHIVE/others do not. 3rd party engines may or may not implement foreign keys.
+</p>
+
+<p>
+Unfortunately, not only does MySQL not manage the foreign keys, it also does not manage their existence, nor their definitions. 
+Thus, should we ALTER and InnoDB table with foreign keys to MyISAM, all foreign key information is lost: the definition itself ceases to exist.
+When ALTERing the table back to InnoDB the foreign key remains lost.
+</p>
+
+<p>
+It is useful to be able to generate the SQL required to "resurrect" foreign key definitions, and <i>sql_foreign_keys</i> does just that. 
+It builds upon the INFORMATION_SCHEMA views which provides the foreign key metadata to generate 
+<strong>'ALTER TABLE ... ADD CONSTRAINT ... FOREIGN KEY ...'</strong> / <strong>'ALTER TABLE ... DROP FOREIGN KEY'</strong> statement pairs. 
+</p>
+
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC common_schema.sql_foreign_keys;
++------------------+--------------+------+-----+---------+-------+
+| Field            | Type         | Null | Key | Default | Extra |
++------------------+--------------+------+-----+---------+-------+
+| TABLE_SCHEMA     | varchar(64)  | NO   |     |         |       |
+| TABLE_NAME       | varchar(64)  | NO   |     |         |       |
+| CONSTRAINT_NAME  | varchar(64)  | NO   |     |         |       |
+| drop_statement   | varchar(229) | YES  |     | NULL    |       |
+| create_statement | longtext     | YES  |     | NULL    |       |
++------------------+--------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: schema of constraint's table</li>
+	<li><strong>TABLE_NAME</strong>: table on which constraint is defined (this is child/dependent side of relation)</li>
+	<li><strong>CONSTRAINT_NAME</strong>: name of foreign key constraint (unique within its schema)</li>
+	<li><strong>drop_statement</strong>: A SQL statement which drops the constraint from this table (via ALTER TABLE)</li>
+	<li><strong>create_statement</strong>: A SQL statement which creates this constraint (via ALTER TABLE)</li>
+</ul>
+
+<p>The SQL statements are not terminated by ';'.</p>
+
+<h3>EXAMPLES</h3>
+<p>Show foreign keys create/drop statements for `sakila`.`film_actor` (depends on `film` and `actor` tables)</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.sql_foreign_keys WHERE TABLE_SCHEMA='sakila' AND table_name='film_actor' \G
+*************************** 1. row ***************************
+    TABLE_SCHEMA: sakila
+      TABLE_NAME: film_actor
+ CONSTRAINT_NAME: fk_film_actor_actor
+  drop_statement: ALTER TABLE `sakila`.`film_actor` DROP FOREIGN KEY `fk_film_actor_actor`
+create_statement: ALTER TABLE `sakila`.`film_actor` ADD CONSTRAINT `fk_film_actor_actor` FOREIGN KEY (`actor_id`) REFERENCES `sakila`.`actor` (`actor_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+*************************** 2. row ***************************
+    TABLE_SCHEMA: sakila
+      TABLE_NAME: film_actor
+ CONSTRAINT_NAME: fk_film_actor_film
+  drop_statement: ALTER TABLE `sakila`.`film_actor` DROP FOREIGN KEY `fk_film_actor_film`
+create_statement: ALTER TABLE `sakila`.`film_actor` ADD CONSTRAINT `fk_film_actor_film` FOREIGN KEY (`film_id`) REFERENCES `sakila`.`film` (`film_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+</pre></blockquote>
+
+<p>Save all of sakila's foreign keys ADD CONSTRAINT statements to file:</p>
+<blockquote><pre><strong>mysql&gt;</strong> SELECT create_statement FROM common_schema.sql_foreign_keys WHERE TABLE_SCHEMA='sakila' INTO OUTFILE '/tmp/create_sakila_foreign_keys.sql'
+
+<strong>bash$</strong> cat /tmp/create_sakila_foreign_keys.sql 
+ALTER TABLE `sakila`.`address` ADD CONSTRAINT `fk_address_city` FOREIGN KEY (`city_id`) REFERENCES `sakila`.`city` (`city_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`city` ADD CONSTRAINT `fk_city_country` FOREIGN KEY (`country_id`) REFERENCES `sakila`.`country` (`country_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`customer` ADD CONSTRAINT `fk_customer_address` FOREIGN KEY (`address_id`) REFERENCES `sakila`.`address` (`address_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`customer` ADD CONSTRAINT `fk_customer_store` FOREIGN KEY (`store_id`) REFERENCES `sakila`.`store` (`store_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`film` ADD CONSTRAINT `fk_film_language` FOREIGN KEY (`language_id`) REFERENCES `sakila`.`language` (`language_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`film` ADD CONSTRAINT `fk_film_language_original` FOREIGN KEY (`original_language_id`) REFERENCES `sakila`.`language` (`language_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`film_actor` ADD CONSTRAINT `fk_film_actor_actor` FOREIGN KEY (`actor_id`) REFERENCES `sakila`.`actor` (`actor_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`film_actor` ADD CONSTRAINT `fk_film_actor_film` FOREIGN KEY (`film_id`) REFERENCES `sakila`.`film` (`film_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`film_category` ADD CONSTRAINT `fk_film_category_category` FOREIGN KEY (`category_id`) REFERENCES `sakila`.`category` (`category_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`film_category` ADD CONSTRAINT `fk_film_category_film` FOREIGN KEY (`film_id`) REFERENCES `sakila`.`film` (`film_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`inventory` ADD CONSTRAINT `fk_inventory_film` FOREIGN KEY (`film_id`) REFERENCES `sakila`.`film` (`film_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`inventory` ADD CONSTRAINT `fk_inventory_store` FOREIGN KEY (`store_id`) REFERENCES `sakila`.`store` (`store_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`payment` ADD CONSTRAINT `fk_payment_customer` FOREIGN KEY (`customer_id`) REFERENCES `sakila`.`customer` (`customer_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`payment` ADD CONSTRAINT `fk_payment_rental` FOREIGN KEY (`rental_id`) REFERENCES `sakila`.`rental` (`rental_id`) ON DELETE SET NULL ON UPDATE CASCADE
+ALTER TABLE `sakila`.`payment` ADD CONSTRAINT `fk_payment_staff` FOREIGN KEY (`staff_id`) REFERENCES `sakila`.`staff` (`staff_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`rental` ADD CONSTRAINT `fk_rental_customer` FOREIGN KEY (`customer_id`) REFERENCES `sakila`.`customer` (`customer_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`rental` ADD CONSTRAINT `fk_rental_inventory` FOREIGN KEY (`inventory_id`) REFERENCES `sakila`.`inventory` (`inventory_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`rental` ADD CONSTRAINT `fk_rental_staff` FOREIGN KEY (`staff_id`) REFERENCES `sakila`.`staff` (`staff_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`staff` ADD CONSTRAINT `fk_staff_address` FOREIGN KEY (`address_id`) REFERENCES `sakila`.`address` (`address_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`staff` ADD CONSTRAINT `fk_staff_store` FOREIGN KEY (`store_id`) REFERENCES `sakila`.`store` (`store_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`store` ADD CONSTRAINT `fk_store_address` FOREIGN KEY (`address_id`) REFERENCES `sakila`.`address` (`address_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+ALTER TABLE `sakila`.`store` ADD CONSTRAINT `fk_store_staff` FOREIGN KEY (`manager_staff_id`) REFERENCES `sakila`.`staff` (`staff_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+</pre></blockquote>
+<p>Note again that the SQL statements are not terminated by ';'. 
+Either CONCAT() these beforehand, or use <i>sed</i>/<i>awk</i> afterwards.</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="sql_alter_table.html">sql_alter_table</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
