@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>processlist_summary: common_schema documentation</title>
+	<meta name="description" content="processlist_summary: common_schema" />
+	<meta name="keywords" content="processlist_summary: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="processlist_summary.html">processlist_summary</a></h2>	
+<h3>NAME</h3>
+processlist_summary: Number of connected, sleeping, running connections and slow query count
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>processlist_summary</i> provides a one-line summary of PROCESSLIST status. 
+It presents with counters listing the number of connected, running, sleeping, long-running processes.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.processlist_summary;
++-------------------------+---------------+------+-----+---------+-------+
+| Field                   | Type          | Null | Key | Default | Extra |
++-------------------------+---------------+------+-----+---------+-------+
+| count_processes         | bigint(21)    | NO   |     | 0       |       |
+| active_processes        | decimal(23,0) | YES  |     | NULL    |       |
+| sleeping_processes      | decimal(23,0) | YES  |     | NULL    |       |
+| active_queries          | decimal(23,0) | YES  |     | NULL    |       |
+| num_queries_over_1_sec  | decimal(23,0) | NO   |     | 0       |       |
+| num_queries_over_10_sec | decimal(23,0) | NO   |     | 0       |       |
+| num_queries_over_60_sec | decimal(23,0) | NO   |     | 0       |       |
+| average_active_time     | decimal(14,4) | NO   |     | 0.0000  |       |
++-------------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>count_processes</strong>: total number of connected processes</li>
+	<li><strong>active_processes</strong>: number of processes not sleeping</li>
+	<li><strong>sleeping_processes</strong>: number of sleeping processes</li>
+	<li><strong>active_queries</strong>: number of non-replication, non-sleeping processes</li>
+	<li><strong>num_queries_over_1_sec</strong>: non-replication queries running at 1 second or more</li>
+	<li><strong>num_queries_over_10_sec</strong>: non-replication queries running at 10 second or more</li>
+	<li><strong>num_queries_over_60_sec</strong>: non-replication queries running at 60 second or more</li>
+	<li><strong>average_active_time</strong>: average query execution time for non-replication, non-sleeping queries queries</li>
+</ul>
+<p>All of the above counters exclude the connection from which the view is being queried.
+</p>
+<p>
+<strong>num_queries_over_10_sec</strong> include queries counted in <strong>num_queries_over_1_sec</strong>.
+<br/>
+<strong>num_queries_over_60_sec</strong> include queries counted in <strong>num_queries_over_10_sec</strong> and <strong>num_queries_over_1_sec</strong>.
+</p>
+
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_summary;
++-----------------+------------------+--------------------+----------------+------------------------+-------------------------+-------------------------+---------------------+
+| count_processes | active_processes | sleeping_processes | active_queries | num_queries_over_1_sec | num_queries_over_10_sec | num_queries_over_60_sec | average_active_time |
++-----------------+------------------+--------------------+----------------+------------------------+-------------------------+-------------------------+---------------------+
+|              84 |               13 |                 71 |             10 |                      2 |                       1 |                       0 |              7.5000 |
++-----------------+------------------+--------------------+----------------+------------------------+-------------------------+-------------------------+---------------------+
+</pre></blockquote>
+
+<p>
+In the above, the server participates in a Master-Master topology, which makes for <strong>3</strong> replication processes
+(<strong>1</strong> serving a slave, <strong>2</strong> being a slave).
+</p>
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="processlist_per_userhost.html">processlist_per_userhost</a>,
+<a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_top.html">processlist_top</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<h3>common_schema components</h3>
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						
+						<li><strong>Views</strong></li>
+						
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+						
+						<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_summary" href="processlist_summary.html">processlist_summary</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a></li>
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						
+						<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+						<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+						
+						<li><strong>Routines</strong></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

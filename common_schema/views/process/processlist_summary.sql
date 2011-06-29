@@ -1,5 +1,5 @@
 -- 
--- Summary of processlist: numebr of connected, sleeping, running connections and slow query count
+-- Summary of processlist: number of connected, sleeping, running connections and slow query count
 -- 
 CREATE OR REPLACE
 ALGORITHM = UNDEFINED

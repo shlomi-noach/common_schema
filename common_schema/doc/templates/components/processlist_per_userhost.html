@@ -15,6 +15,7 @@ or particular hosts from where heavy weight queries are executed.
 </p>
 
 <h3>STRUCTURE</h3>
+
 <blockquote><pre>
 mysql&gt; DESC common_schema.processlist_per_userhost;
 +---------------------+---------------+------+-----+---------+-------+
@@ -30,6 +31,7 @@ mysql&gt; DESC common_schema.processlist_per_userhost;
 
 <h3>SYNOPSIS</h3>
 
+<p>Columns of this view:</p>
 <ul>
 	<li><strong>user</strong>: login name of running process</li>
 	<li><strong>host</strong>: connection host of origin. This excludes the connection port</li>
@@ -66,6 +68,8 @@ MySQL 5.1 or newer.
 
 <h3>SEE ALSO</h3>
 <a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_summary.html">processlist_summary</a>,
 <a href="processlist_top.html">processlist_top</a>
+
 <h3>AUTHOR</h3>
 Shlomi Noach

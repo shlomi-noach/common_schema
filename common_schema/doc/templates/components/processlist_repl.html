@@ -23,6 +23,7 @@ This view provides with a quick look at replication status processlist-wise.
 The output of this view is a row subset of INFORMATION_SCHEMA.PROCESSLIST.
 </p>
 <h3>STRUCTURE</h3>
+
 <blockquote><pre>
 mysql&gt; DESC common_schema.processlist_repl;
 +---------+-------------+------+-----+---------+-------+
@@ -67,7 +68,8 @@ and the two threads (IO thread, SQL thread) this server uses to replication from
 MySQL 5.1 or newer. Percona Server yields a different schema.
 
 <h3>SEE ALSO</h3>
-<a href="processlist_top.html">processlist_top</a>,
-<a href="processlist_per_userhost.html">processlist_per_userhost</a>
+<a href="processlist_per_userhost.html">processlist_per_userhost</a>,
+<a href="processlist_summary.html">processlist_summary</a>,
+<a href="processlist_top.html">processlist_top</a>
 <h3>AUTHOR</h3>
 Shlomi Noach
