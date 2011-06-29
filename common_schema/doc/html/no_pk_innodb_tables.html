@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>no_pk_innodb_tables: common_schema documentation</title>
+	<meta name="description" content="no_pk_innodb_tables: common_schema" />
+	<meta name="keywords" content="no_pk_innodb_tables: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></h2>	
+<h3>NAME</h3>
+no_pk_innodb_tables: List InnoDB tables where no PRIMARY KEY is defined
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p>InnoDB uses a clustered B+ tree as underlying data structure. Data is clustered via clustering index, which is the PRIMARY KEY in InnoDB.
+It follows that any InnoDB table has a PRIMARY KEY, whether one was explicitly defined or not.
+</p>
+
+<p>
+When no PRIMARY KEY is defined, InnoDB chooses an existing UNIQUE KEY on the table (but does not let us know which). 
+When no such key is available, it creates an internal PRIMARY KEY, based on <i>row id</i>. 
+However, it does not provide access to this data.
+This leads to a table clustered by some value we cannot access, control, nor define.
+It is generally bad practice to create an InnoDB table with no explicit PRIMARY KEY.
+</p>
+
+<p><i>no_pk_innodb_tables</i> lists InnoDB tables where PRIMARY KEY is not explicitly created.
+It offers a list of candidate keys: UNIQUE keys already defined, which are eligible to take the part of PRIMARY KEY.
+</p>
+
+<h3>STRUCTURE</h3>
+<blockquote><pre>
+mysql&gt; DESC common_schema.no_pk_innodb_tables;
++----------------+-------------+------+-----+---------+-------+
+| Field          | Type        | Null | Key | Default | Extra |
++----------------+-------------+------+-----+---------+-------+
+| TABLE_SCHEMA   | varchar(64) | NO   |     |         |       |
+| TABLE_NAME     | varchar(64) | NO   |     |         |       |
+| ENGINE         | varchar(64) | YES  |     | NULL    |       |
+| candidate_keys | longtext    | YES  |     | NULL    |       |
++----------------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: schema of InnoDB table missing PRIMARY KEY</li>
+	<li><strong>TABLE_NAME</strong>: InnoDB table missing PRIMARY KEY</li>
+	<li><strong>ENGINE</strong>: currently the constant <strong>'InnoDB'</strong></li>
+	<li><strong>candidate_keys</strong>: Comma seperated list of candidate (UNIQUE) keys, or NULL if no such keys are available.</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Show foreign keys create/drop statements for `sakila`.`film_actor` (depends on `film` and `actor` tables)</p>
+<blockquote><pre>mysql&gt; ALTER TABLE `sakila`.`rental` MODIFY rental_id INT NOT NULL, DROP PRIMARY KEY, ADD UNIQUE KEY(rental_id);
+mysql&gt; CREATE TABLE `test`.`no_pk` (id INT) ENGINE=InnoDB;
+
+mysql&gt; SELECT * FROM common_schema.no_pk_innodb_tables;
++--------------+------------+--------+-----------------------+
+| TABLE_SCHEMA | TABLE_NAME | ENGINE | candidate_keys        |
++--------------+------------+--------+-----------------------+
+| sakila       | rental     | InnoDB | rental_date,rental_id |
+| test         | no_pk      | InnoDB | NULL                  |
++--------------+------------+--------+-----------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="redundant_keys.html">redundant_keys</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<h3>common_schema components</h3>
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						
+						<li><strong>Views</strong></li>
+						
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+						
+						<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a></li>
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						
+						<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+						<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+						
+						<li><strong>Routines</strong></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>
