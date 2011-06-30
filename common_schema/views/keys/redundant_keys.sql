@@ -38,7 +38,10 @@ VIEW redundant_keys AS
     dominant_keys.index_name AS dominant_index_name,
     dominant_keys.index_columns AS dominant_index_columns,
     dominant_keys.non_unique AS dominant_index_non_unique,
-    IF(redundant_keys.subpart_exists OR dominant_keys.subpart_exists, 1 ,0) AS subpart_exists
+    IF(redundant_keys.subpart_exists OR dominant_keys.subpart_exists, 1 ,0) AS subpart_exists,
+    CONCAT(
+      'ALTER TABLE `', redundant_keys.table_schema, '`.`', redundant_keys.table_name, '` DROP INDEX `', redundant_keys.index_name, '`'
+      ) AS sql_drop_index
   FROM
     _flattened_keys AS redundant_keys
     INNER JOIN _flattened_keys AS dominant_keys
@@ -51,7 +54,9 @@ VIEW redundant_keys AS
         (redundant_keys.index_columns = dominant_keys.index_columns)
         AND (
           (redundant_keys.non_unique > dominant_keys.non_unique)
-          OR (redundant_keys.non_unique = dominant_keys.non_unique AND redundant_keys.index_name > dominant_keys.index_name)
+          OR (redundant_keys.non_unique = dominant_keys.non_unique 
+          	AND IF(redundant_keys.index_name='PRIMARY', '', redundant_keys.index_name) > IF(dominant_keys.index_name='PRIMARY', '', dominant_keys.index_name)
+          )
         )
       )
       OR
