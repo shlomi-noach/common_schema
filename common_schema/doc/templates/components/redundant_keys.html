@@ -1,68 +1,188 @@
 <h3>NAME</h3>
-redundant_keys: List InnoDB tables where no PRIMARY KEY is defined
+redundant_keys: List indexes which are made redundant (or duplicate) by other (dominant) keys. 
 <h3>TYPE</h3>
 View
 
 <h3>DESCRIPTION</h3>
 
-<p>InnoDB uses a clustered B+ tree as underlying data structure. Data is clustered via clustering index, which is the PRIMARY KEY in InnoDB.
-It follows that any InnoDB table has a PRIMARY KEY, whether one was explicitly defined or not.
+<p><i>redundant_keys</i> finds and lists keys which are redundant; such that other existing keys can take their functionality, 
+or that provide no better selectivity/cardinality than other existing keys.</p>
+
+<p>It is in essence similar to Maatkit's <a href="http://www.maatkit.org/doc/mk-duplicate-key-checker.html">mk-duplicate-key-checker</a>,
+but provides information by utulizing a query instead of external scripts.</p>
+
+<p>
+Exactly what a redundant or duplicate key is sometimes a matter of perspective. Listed below are sample cases that make or do not make for redundant keys.
+The trivial example where a key is redundant is when two identical keys are created. For example: <strong>KEY idx_1 (a), KEY idx_2 (a)</strong>. 
+</p>
+<p>There is no argument that one of the keys above is redundant. However, the following case is somewhat different:
+<strong>KEY idx_1 (a), KEY idx_2 (a, b)</strong>.
+</p>
+
+<p>In the above, idx_1 is "covered" by idx_2. Anything idx_1 can do can also be done with idx_2, which indexes column 'a' <i>and then some</i>.</p>
+
+<p>
+However, this is not the complete picture. While mathematically being redundant, we may actually desire to explicitly have idx_1 for performance reasons.
+Since idx_2 covers more columns, it is more bloated. For queries only searching through 'a', idx_1 may yield with better performance, since scanning through
+the index required less I/O (less pages to be scanned). 
+</p>
+
+<p>Moreover, for queries where idx_1 makes for a covering index (e.g. <strong>SELECT a FROM t WHERE a BETWEEN 200 AND 500</strong>, 
+the difference may be even more significant, since we now only scan the index idx_1 and do not require access to the table.
+In the previous example, accessing the table added such overhead that made the difference between the two indexes smaller in comparison to total work.
+</p>
+
+<p>The recommendations provided by <i>redundant_keys</i> only refer to the mathematical definition, and leave performance to the discretion of the user.</p>
+
+<p>Terms:
+<ul>
+	<li><i>KEY</i> and <i>INDEX</i> are synonyms</li>
+	<li>A <i>redundant</i> or <i>duplicate</i> index is an index which is not mathematically required.</li>
+	<li>A <i>dominant</i> index is a key which makes another index redundant.</li>
+</ul>
 </p>
 
 <p>
-When no PRIMARY KEY is defined, InnoDB chooses an existing UNIQUE KEY on the table (but does not let us know which). 
-When no such key is available, it creates an internal PRIMARY KEY, based on <i>row id</i>. 
-However, it does not provide access to this data.
-This leads to a table clustered by some value we cannot access, control, nor define.
-It is generally bad practice to create an InnoDB table with no explicit PRIMARY KEY.
+Important notes:
+<ul>
+	<li>The view provides with a <strong>sql_drop_index</strong> column, making for SQL statement which drop the redundant keys. 
+		Do <strong>NOT</strong> take them for granted, or automate them back into MySQL. User is advised to double check all recommendations.</li>
+	<li>This view only considers B-Trees. This includes normal InnoDB & MyISAM indexes, and excludes FULLTEXT, HASH, GIS keys.</li>
+	<li>Subpart keys (indexing a prefix of a text column, e.g. <strong>KEY `name_idx` (`name` (10))</strong> is not supported by this view.
+		It provides with the <strong>subpart_exists</strong> column, to notify that subpart indexing is in use, but does not validate
+		if and how redundancy is affected. User is advised to double & triple check recommendations. See examples below.</li>
+	<li>Circular listing of redundant keys may be possible and has not been thoroughly tested. That is, there may be groups of >= 3 keys,
+		each making the other redundant, such that the view recommends to drop them all.</li>
+</ul>
 </p>
 
-<p><i>no_pk_innodb_tables</i> lists InnoDB tables where PRIMARY KEY is not explicitly created.
-It offers a list of candidate keys: UNIQUE keys already defined, which are eligible to take the part of PRIMARY KEY.
+
+<p>
+Sample cases where a key is redundant:
+<ul>
+	<li><strong>KEY idx_1 (a), KEY idx_2 (a)</strong>: the trivial case with two identical keys. Either one can be dropped.</li>
+	<li><strong>UNIQUE KEY idx_1 (a), KEY idx_2 (a)</strong>: both index same column, but idx_1 also provides uniqueness. idx_2 is redundant.</li>
+	<li><strong>UNIQUE KEY idx_1 (a, b), KEY idx_2 (a, b)</strong>: same as above.</li>
+	<li><strong>KEY idx_1 (a), KEY idx_2 (a, b)</strong>: any query utilizing idx_1 can also utilize idx_2. idx_2 can answer for all 'a' issues. 
+		This makes idx_1 redundant. See preliminary discussion on explicit redundant keys for more on this.</li>
+	<li><strong>KEY idx_1 (a), UNIQUE KEY idx_2 (a, b)</strong>: same as above.</li>
+	<li><strong>UNIQUE KEY idx_1 (a), KEY idx_2 (a, b)</strong>: interestingly, idx_2 is redundant. To see why, note that idx_1 is UNIQUE.
+	 	Since a UNIQUE key poses a constraint, which is not provided otherwise, idx_1 cannot be redundant.
+	 	However, since any 'a' is unique, so is any ('a', 'b') combination. For any 'a' there can only be one 'b', since there can only be one 'a' at most.
+	 	This means there is no point in further indexing column 'b' (unless for covering index purposes). There is no added value in terms of
+	 	cardinality or selectivity.</li>
+	<li><strong>UNIQUE KEY idx_1 (a), UNIQUE KEY idx_2 (a, b)</strong>: continuing the above case, there is no need to declare that ('a', 'b') is UNIQUE,
+		since 'a' is known to be unique. It follows that KEY suffices for idx_2. Thus it also follows that idx_2 is redundant.</li>
+	<li><strong>KEY idx_1 (a), KEY idx_2 (a(10))</strong>: idx_2 only indexes 1st 10 characters of 'a'. idx_1 indexes all characters.
+		idx_2 is redundant.</li>
+	<li><strong>KEY idx_1 (a), UNIQUE KEY idx_2 (a(10))</strong>: idx_2 forces 1st 10 characters of 'a' to be UNIQUE. 
+		There is no added value to idx_1 (see preliminary discussion). idx_1 is redundant.</li>
+</ul>
+Sample cases where no key is redundant:
+<ul>
+	<li><strong>KEY idx_1 (a), KEY idx_2 (b)</strong>: obviously, there's nothing in common between the two keys.</li>
+	<li><strong>KEY idx_1 (a), KEY idx_2 (b, a)</strong>: since order of column within an index is important, idx_2 cannot answer for 'a'-only queries
+		(except by perhaps providing full index scan, outside our interest, see preliminary discussion). 
+		idx_1 therefore answers for queries not solvable by idx_2.</li>
+	<li><strong>KEY idx_1 (a, b), KEY idx_2 (b, a)</strong>: both indexes answer for different cases. 
+		On some access types, there is some form of waste in definition: in a many-to-many connecting table, where all queries use equality filtering (i.e. 'WHERE a = ?' as opposed to 'WHERE a > ?'),
+		idx_1 may suffice with indexing 'a' only. However, with range condition this changes and both keys may be required.</li>
+	<li><strong>UNIQUE KEY idx_1 (a, b), KEY idx_2 (b, a)</strong>: same as above.</li>
+	<li><strong>UNIQUE KEY idx_1 (a, b), UNIQUE KEY idx_2 (b, a)</strong>: the UNIQUE constraint on either key is not strictly required. 
+		However this does not make the index itself redundant. As a side note, UNIQUE constraints are extremely helpful for MySQL query optimizer.</li>
+	<li><strong>KEY idx_1 (a), KEY idx_2 (a(10), b)</strong>: 'a' is text column, and idx_2 only indexes 1st 10 characters (subpart index). 
+		If any row contains more than 10 characters for 'a', idx_1 provides with indexing not supported by idx_2, and is therefore not redundant.</li>
+	<li><strong>UNIQUE KEY idx_1 (a), KEY idx_2 (a(10), b)</strong>: even stricter than the above.</li>
+	<li><strong>KEY idx_1 (a), UNIQUE KEY idx_2 (a(10), b)</strong>: idx_2 does NOT force any uniqueness on 'a' itself. 
+		It indexes less characters than idx_1. idx_1 is not redundant; nor is idx_2.</li>
+</ul>
 </p>
 
 <h3>STRUCTURE</h3>
 
 <blockquote><pre>
-mysql&gt; DESC common_schema.no_pk_innodb_tables;
-+----------------+-------------+------+-----+---------+-------+
-| Field          | Type        | Null | Key | Default | Extra |
-+----------------+-------------+------+-----+---------+-------+
-| TABLE_SCHEMA   | varchar(64) | NO   |     |         |       |
-| TABLE_NAME     | varchar(64) | NO   |     |         |       |
-| ENGINE         | varchar(64) | YES  |     | NULL    |       |
-| candidate_keys | longtext    | YES  |     | NULL    |       |
-+----------------+-------------+------+-----+---------+-------+
+mysql&gt; DESC common_schema.redundant_keys;
++----------------------------+--------------+------+-----+---------+-------+
+| Field                      | Type         | Null | Key | Default | Extra |
++----------------------------+--------------+------+-----+---------+-------+
+| table_schema               | varchar(64)  | NO   |     |         |       |
+| table_name                 | varchar(64)  | NO   |     |         |       |
+| redundant_index_name       | varchar(64)  | NO   |     |         |       |
+| redundant_index_columns    | longtext     | YES  |     | NULL    |       |
+| redundant_index_non_unique | bigint(1)    | YES  |     | NULL    |       |
+| dominant_index_name        | varchar(64)  | NO   |     |         |       |
+| dominant_index_columns     | longtext     | YES  |     | NULL    |       |
+| dominant_index_non_unique  | bigint(1)    | YES  |     | NULL    |       |
+| subpart_exists             | int(1)       | NO   |     | 0       |       |
+| sql_drop_index             | varchar(223) | YES  |     | NULL    |       |
++----------------------------+--------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
 
 <p>Columns of this view:</p>
 <ul>
-	<li><strong>TABLE_SCHEMA</strong>: schema of InnoDB table missing PRIMARY KEY</li>
-	<li><strong>TABLE_NAME</strong>: InnoDB table missing PRIMARY KEY</li>
-	<li><strong>ENGINE</strong>: currently the constant <strong>'InnoDB'</strong></li>
-	<li><strong>candidate_keys</strong>: Comma seperated list of candidate (UNIQUE) keys, or NULL if no such keys are available.</li>
+	<li><strong>table_schema</strong>: schema of table with redundant index</li>
+	<li><strong>table_name</strong>: table with redundant index</li>
+	<li><strong>redundant_index_name</strong>: name of index suspected as redundant</li>
+	<li><strong>redundant_index_columns</strong>: column covered by redundant index, comma separated, by order of definitions</li>
+	<li><strong>redundant_index_non_unique</strong>: <strong>0</strong> if redundant index is UNIQUE; <strong>1</strong> if non-unique</li>
+	<li><strong>dominant_index_name</strong>: name of index "covering for" the redundant index. This index is responsible for the redundant index to be redundant.</li>
+	<li><strong>dominant_index_columns</strong>: column covered by dominant index, comma separated, by order of definitions</li>
+	<li><strong>dominant_index_non_unique</strong>: <strong>0</strong> if dominant index is UNIQUE; <strong>1</strong> if non-unique</li>
+	<li><strong>subpart_exists</strong>: <strong>1</strong> if either redundant or dominant keys use string subpart (indexing a prefix of a textual column); this calls for triple-check on the nature of both keys.</li>
+	<li><strong>sql_drop_index</strong>: SQL statement to drop redundant index</li>
 </ul>
 
 <h3>EXAMPLES</h3>
 <p>Show foreign keys create/drop statements for `sakila`.`film_actor` (depends on `film` and `actor` tables)</p>
-<blockquote><pre>mysql&gt; ALTER TABLE `sakila`.`rental` MODIFY rental_id INT NOT NULL, DROP PRIMARY KEY, ADD UNIQUE KEY(rental_id);
-mysql&gt; CREATE TABLE `test`.`no_pk` (id INT) ENGINE=InnoDB;
+<blockquote><pre>mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX(`actor_id`);
 
-mysql&gt; SELECT * FROM common_schema.no_pk_innodb_tables;
-+--------------+------------+--------+-----------------------+
-| TABLE_SCHEMA | TABLE_NAME | ENGINE | candidate_keys        |
-+--------------+------------+--------+-----------------------+
-| sakila       | rental     | InnoDB | rental_date,rental_id |
-| test         | no_pk      | InnoDB | NULL                  |
-+--------------+------------+--------+-----------------------+
+mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX(`last_name`, `first_name`);
+
+mysql&gt; ALTER TABLE `sakila`.`film_actor` ADD UNIQUE KEY (`film_id`, `actor_id`);
+
+mysql&gt; SELECT * FROM common_schema.redundant_keys \G
+*************************** 1. row ***************************
+              table_schema: sakila
+                table_name: actor
+      redundant_index_name: idx_actor_last_name
+   redundant_index_columns: last_name
+redundant_index_non_unique: 1
+       dominant_index_name: last_name
+    dominant_index_columns: last_name,first_name
+ dominant_index_non_unique: 1
+            subpart_exists: 0
+            sql_drop_index: ALTER TABLE `sakila`.`actor` DROP INDEX `idx_actor_last_name`
+*************************** 2. row ***************************
+              table_schema: sakila
+                table_name: actor
+      redundant_index_name: actor_id
+   redundant_index_columns: actor_id
+redundant_index_non_unique: 1
+       dominant_index_name: PRIMARY
+    dominant_index_columns: actor_id
+ dominant_index_non_unique: 0
+            subpart_exists: 0
+            sql_drop_index: ALTER TABLE `sakila`.`actor` DROP INDEX `actor_id`
+*************************** 3. row ***************************
+              table_schema: sakila
+                table_name: film_actor
+      redundant_index_name: idx_fk_film_id
+   redundant_index_columns: film_id
+redundant_index_non_unique: 1
+       dominant_index_name: film_id
+    dominant_index_columns: film_id,actor_id
+ dominant_index_non_unique: 0
+            subpart_exists: 0
+            sql_drop_index: ALTER TABLE `sakila`.`film_actor` DROP INDEX `idx_fk_film_id`
 </pre></blockquote>
 
 <h3>ENVIRONMENT</h3>
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
-<a href="redundant_keys.html">redundant_keys</a>
+<a href="no_pk_innodb_tables.html">no_pk_innodb_tables</a>,
+<a href="sql_foreign_keys.html">sql_foreign_keys</a>
 <h3>AUTHOR</h3>
 Shlomi Noach
