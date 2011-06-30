@@ -18,4 +18,5 @@ VIEW text_columns AS
     TABLE_SCHEMA NOT IN ('mysql', 'INFORMATION_SCHEMA', 'performance_schema')
     AND CHARACTER_SET_NAME IS NOT NULL
     AND DATA_TYPE != 'enum'
+    AND DATA_TYPE != 'set'
 ;
