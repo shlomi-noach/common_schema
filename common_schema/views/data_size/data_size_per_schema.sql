@@ -18,7 +18,7 @@ VIEW data_size_per_schema AS
   FROM 
     INFORMATION_SCHEMA.TABLES
   WHERE 
-    TABLE_SCHEMA NOT IN ('mysql', 'INFORMATION_SCHEMA', 'performance_schema')
+    TABLE_SCHEMA NOT IN ('INFORMATION_SCHEMA', 'performance_schema')
   GROUP BY 
     TABLE_SCHEMA
 ;
