@@ -67,7 +67,7 @@ Important notes:
 	<li>The view provides with a <strong>sql_drop_index</strong> column, making for SQL statement which drop the redundant keys. 
 		Do <strong>NOT</strong> take them for granted, or automate them back into MySQL. User is advised to double check all recommendations.</li>
 	<li>This view only considers B-Trees. This includes normal InnoDB & MyISAM indexes, and excludes FULLTEXT, HASH, GIS keys.</li>
-	<li>Subpart keys (indexing a prefix of a text column, e.g. <strong>KEY `name_idx` (`name` (10))</strong> is not supported by this view.
+	<li>Subpart keys (indexing a prefix of a text column, e.g. <strong>KEY `name_idx` (`name` (10))</strong>) are not supported by this view.
 		It provides with the <strong>subpart_exists</strong> column, to notify that subpart indexing is in use, but does not validate
 		if and how redundancy is affected. User is advised to double & triple check recommendations. See examples below.</li>
 	<li>Circular listing of redundant keys may be possible and has not been thoroughly tested. That is, there may be groups of >= 3 keys,
@@ -155,11 +155,11 @@ mysql&gt; DESC common_schema.redundant_keys;
 
 <h3>EXAMPLES</h3>
 <p>Show foreign keys create/drop statements for `sakila`.`film_actor` (depends on `film` and `actor` tables)</p>
-<blockquote><pre>mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX(`actor_id`);
+<blockquote><pre>mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX `actor_id_idx` (`actor_id`);
 
-mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX(`last_name`, `first_name`);
+mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX `last_and_first_names_idx` (`last_name`, `first_name`);
 
-mysql&gt; ALTER TABLE `sakila`.`film_actor` ADD UNIQUE KEY (`film_id`, `actor_id`);
+mysql&gt; ALTER TABLE `sakila`.`film_actor` ADD UNIQUE KEY `film_and_actor_ids_idx` (`film_id`, `actor_id`);
 
 mysql&gt; SELECT * FROM common_schema.redundant_keys \G
 *************************** 1. row ***************************
@@ -168,7 +168,7 @@ mysql&gt; SELECT * FROM common_schema.redundant_keys \G
       redundant_index_name: idx_actor_last_name
    redundant_index_columns: last_name
 redundant_index_non_unique: 1
-       dominant_index_name: last_name
+       dominant_index_name: last_and_first_names_idx
     dominant_index_columns: last_name,first_name
  dominant_index_non_unique: 1
             subpart_exists: 0
@@ -176,21 +176,21 @@ redundant_index_non_unique: 1
 *************************** 2. row ***************************
               table_schema: sakila
                 table_name: actor
-      redundant_index_name: actor_id
+      redundant_index_name: actor_id_idx
    redundant_index_columns: actor_id
 redundant_index_non_unique: 1
        dominant_index_name: PRIMARY
     dominant_index_columns: actor_id
  dominant_index_non_unique: 0
             subpart_exists: 0
-            sql_drop_index: ALTER TABLE `sakila`.`actor` DROP INDEX `actor_id`
+            sql_drop_index: ALTER TABLE `sakila`.`actor` DROP INDEX `actor_id_idx`
 *************************** 3. row ***************************
               table_schema: sakila
                 table_name: film_actor
       redundant_index_name: idx_fk_film_id
    redundant_index_columns: film_id
 redundant_index_non_unique: 1
-       dominant_index_name: film_id
+       dominant_index_name: film_and_actor_ids_idx
     dominant_index_columns: film_id,actor_id
  dominant_index_non_unique: 0
             subpart_exists: 0
