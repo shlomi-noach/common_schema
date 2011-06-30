@@ -15,7 +15,7 @@ VIEW auto_increment_columns AS
       LOCATE('unsigned', COLUMN_TYPE) > 0,
       1,
       0
-    ) AS IS_UNSIGNED,
+    ) AS is_signed,
     (
       CASE DATA_TYPE
         WHEN 'tinyint' THEN 255
@@ -24,7 +24,7 @@ VIEW auto_increment_columns AS
         WHEN 'int' THEN 4294967295
         WHEN 'bigint' THEN 18446744073709551615
       END >> IF(LOCATE('unsigned', COLUMN_TYPE) > 0, 0, 1)
-    ) AS MAX_VALUE,
+    ) AS max_value,
     AUTO_INCREMENT,
     AUTO_INCREMENT / (
       CASE DATA_TYPE
@@ -34,7 +34,7 @@ VIEW auto_increment_columns AS
         WHEN 'int' THEN 4294967295
         WHEN 'bigint' THEN 18446744073709551615
       END >> IF(LOCATE('unsigned', COLUMN_TYPE) > 0, 0, 1)
-    ) AS AUTO_INCREMENT_RATIO
+    ) AS auto_increment_ratio
   FROM 
     INFORMATION_SCHEMA.COLUMNS
     INNER JOIN INFORMATION_SCHEMA.TABLES USING (TABLE_SCHEMA, TABLE_NAME)
