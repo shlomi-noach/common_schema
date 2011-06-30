@@ -1,0 +1,74 @@
+<h3>NAME</h3>
+table_charset: list tables, their character sets and collations
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p>A table is associated with a character set and a collation. 
+Surprisingly, INFORMATION_SCHEMA's TABLES table only lists a table's collation, and neglects to provide with the character set.</p>
+
+<p>A character set is easily deduced by given collation, since a collation relates to a single character set.</p>
+
+<p><i>table_charset</i> provides this convenient connection.</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.table_charset;
++--------------------+-------------+------+-----+---------+-------+
+| Field              | Type        | Null | Key | Default | Extra |
++--------------------+-------------+------+-----+---------+-------+
+| TABLE_SCHEMA       | varchar(64) | NO   |     |         |       |
+| TABLE_NAME         | varchar(64) | NO   |     |         |       |
+| CHARACTER_SET_NAME | varchar(32) | NO   |     |         |       |
+| TABLE_COLLATION    | varchar(32) | YES  |     | NULL    |       |
++--------------------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: name of schema (database)</li>
+	<li><strong>TABLE_NAME</strong>: name of table</li>
+	<li><strong>CHARACTER_SET_NAME</strong>: table's defined character set</li>
+	<li><strong>TABLE_COLLATION</strong>: table's collation</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.table_charset WHERE TABLE_SCHEMA IN ('sakila', 'world');
++--------------+-----------------+--------------------+-------------------+
+| TABLE_SCHEMA | TABLE_NAME      | CHARACTER_SET_NAME | TABLE_COLLATION   |
++--------------+-----------------+--------------------+-------------------+
+| world        | City            | latin1             | latin1_swedish_ci |
+| world        | Country         | latin1             | latin1_swedish_ci |
+| world        | CountryLanguage | latin1             | latin1_swedish_ci |
+| sakila       | actor           | utf8               | utf8_general_ci   |
+| sakila       | address         | utf8               | utf8_general_ci   |
+| sakila       | category        | utf8               | utf8_general_ci   |
+| sakila       | city            | utf8               | utf8_general_ci   |
+| sakila       | country         | utf8               | utf8_general_ci   |
+| sakila       | customer        | utf8               | utf8_general_ci   |
+| sakila       | film            | utf8               | utf8_general_ci   |
+| sakila       | film_actor      | utf8               | utf8_general_ci   |
+| sakila       | film_category   | utf8               | utf8_general_ci   |
+| sakila       | film_text       | utf8               | utf8_general_ci   |
+| sakila       | inventory       | utf8               | utf8_general_ci   |
+| sakila       | language        | utf8               | utf8_general_ci   |
+| sakila       | payment         | utf8               | utf8_general_ci   |
+| sakila       | rental          | utf8               | utf8_general_ci   |
+| sakila       | staff           | utf8               | utf8_general_ci   |
+| sakila       | store           | utf8               | utf8_general_ci   |
++--------------+-----------------+--------------------+-------------------+
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="text_columns.html">text_columns</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>auto_increment_columns: common_schema documentation</title>
+	<meta name="description" content="auto_increment_columns: common_schema" />
+	<meta name="keywords" content="auto_increment_columns: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="auto_increment_columns.html">auto_increment_columns</a></h2>	
+<h3>NAME</h3>
+auto_increment_columns: List AUTO_INCREMENT columns and their capacity 
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>auto_increment_columns</i> presents current capacity and limits for AUTO_INCREMENT columns.</p>
+
+<p>For each AUTO_INCREMENT column, it observes its column type and its signed/unsigned status,
+and calculates the maximum possible value expressed by this column. It cross references this
+with table's current AUTO_INCREMENT value, to present with current usage or capacity.</p>
+
+<p>This view answers the questions: <i>"Am I running out of AUTO_INCREMENT values?"</i>, 
+<i>"Should I modify to BIGINT?"</i></p>
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.auto_increment_columns;
++----------------------+------------------------+------+-----+---------+-------+
+| Field                | Type                   | Null | Key | Default | Extra |
++----------------------+------------------------+------+-----+---------+-------+
+| TABLE_SCHEMA         | varchar(64)            | NO   |     |         |       |
+| TABLE_NAME           | varchar(64)            | NO   |     |         |       |
+| COLUMN_NAME          | varchar(64)            | NO   |     |         |       |
+| DATA_TYPE            | varchar(64)            | NO   |     |         |       |
+| COLUMN_TYPE          | longtext               | NO   |     | NULL    |       |
+| is_signed            | int(1)                 | NO   |     | 0       |       |
+| max_value            | bigint(21) unsigned    | YES  |     | NULL    |       |
+| AUTO_INCREMENT       | bigint(21) unsigned    | YES  |     | NULL    |       |
+| auto_increment_ratio | decimal(24,4) unsigned | YES  |     | NULL    |       |
++----------------------+------------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: schema of table with AUTO_INCREMENT columns</li>
+	<li><strong>TABLE_NAME</strong>: name of table with AUTO_INCREMENT columns</li>
+	<li><strong>COLUMN_NAME</strong>: AUTO_INCREMENT column name</li>
+	<li><strong>DATA_TYPE</strong>: type of column: this is always an integer type: <strong>TINYINT</strong>, <strong>SMALLINT</strong>, <strong>MEDIUMINT</strong>, <strong>INT</strong>, <strong>BIGINT</strong>.</li>
+	<li><strong>COLUMN_TYPE</strong>: full description of column type</li>
+	<li><strong>is_signed</strong>: <strong>1</strong> if type is SIGNED, <strong>0</strong> if UNSIGNED</li>
+	<li><strong>max_value</strong>: maximum value which can be expressed by this column</li>
+	<li><strong>AUTO_INCREMENT</strong>: current AUTO_INCREMENT value for table</li>
+	<li><strong>auto_increment_ratio</strong>: ratio between max_value and table's AUTO_INCREMENT. Ranges [0..1]. Expresses capacity</li>
+</ul>
+<p>Upper case columns are directly derived from underlying INFORMATION_SCHEMA tables, whereas lower case columns are computed.</p>
+
+<h3>EXAMPLES</h3>
+<p>Show AUTO_INCREMENT capacity for 'sakila' database:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.auto_increment_columns WHERE TABLE_SCHEMA='sakila';
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+| TABLE_SCHEMA | TABLE_NAME | COLUMN_NAME  | DATA_TYPE | COLUMN_TYPE           | is_signed | max_value  | AUTO_INCREMENT | auto_increment_ratio |
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+| sakila       | actor      | actor_id     | smallint  | smallint(5) unsigned  |         1 |      65535 |            201 |               0.0031 |
+| sakila       | address    | address_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |            606 |               0.0092 |
+| sakila       | category   | category_id  | tinyint   | tinyint(3) unsigned   |         1 |        255 |             17 |               0.0667 |
+| sakila       | city       | city_id      | smallint  | smallint(5) unsigned  |         1 |      65535 |            601 |               0.0092 |
+| sakila       | country    | country_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |            110 |               0.0017 |
+| sakila       | customer   | customer_id  | smallint  | smallint(5) unsigned  |         1 |      65535 |            600 |               0.0092 |
+| sakila       | film       | film_id      | smallint  | smallint(5) unsigned  |         1 |      65535 |           1001 |               0.0153 |
+| sakila       | inventory  | inventory_id | mediumint | mediumint(8) unsigned |         1 |   16777215 |           4582 |               0.0003 |
+| sakila       | language   | language_id  | tinyint   | tinyint(3) unsigned   |         1 |        255 |              7 |               0.0275 |
+| sakila       | payment    | payment_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |          16050 |               0.2449 |
+| sakila       | rental     | rental_id    | int       | int(11)               |         0 | 2147483647 |          16050 |               0.0000 |
+| sakila       | staff      | staff_id     | tinyint   | tinyint(3) unsigned   |         1 |        255 |              3 |               0.0118 |
+| sakila       | store      | store_id     | tinyint   | tinyint(3) unsigned   |         1 |        255 |              3 |               0.0118 |
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="data_size_per_engine.html">data_size_per_engine</a>,
+<a href="data_size_per_schema.html">data_size_per_schema</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<h3>common_schema components</h3>
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						
+						<li><strong>Views</strong></li>
+						
+						<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
+						<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
+						<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
+
+
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+						
+						<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_summary" href="processlist_summary.html">processlist_summary</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a></li>
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						
+						<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+						<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+
+						<li><a title="table_charset" href="table_charset.html">table_charset</a></li>
+						<li><a title="text_columns" href="text_columns.html">text_columns</a></li>
+						
+						<li><strong>Routines</strong></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

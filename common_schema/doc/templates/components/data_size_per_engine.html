@@ -1,0 +1,67 @@
+<h3>NAME</h3>
+data_size_per_engine: Present with data size measurements per storage engine
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>data_size_per_engine</i> provides with an approximate data size in bytes per storage engine. 
+It is useful in diagnosing an unfamiliar server, checking up on the different defined engines and the volumes they hold. 
+</p>
+
+<p>This view includes dimensions of the <strong>`mysql`</strong> schema, since this schema may also include user data such as stored routines.
+It does not consider INFORMATION_SCHEMA nor PERFORMANCE_SCHEMA.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.data_size_per_engine;
++--------------------+---------------------+------+-----+---------+-------+
+| Field              | Type                | Null | Key | Default | Extra |
++--------------------+---------------------+------+-----+---------+-------+
+| ENGINE             | varchar(64)         | YES  |     | NULL    |       |
+| count_tables       | bigint(21)          | NO   |     | 0       |       |
+| data_size          | decimal(42,0)       | YES  |     | NULL    |       |
+| index_size         | decimal(42,0)       | YES  |     | NULL    |       |
+| total_size         | decimal(43,0)       | YES  |     | NULL    |       |
+| largest_table      | longtext            | YES  |     | NULL    |       |
+| largest_table_size | bigint(20) unsigned | YES  |     | NULL    |       |
++--------------------+---------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>ENGINE</strong>: name of storage engine</li>
+	<li><strong>count_tables</strong>: number of tables of this engine</li>
+	<li><strong>data_size</strong>: approximate data size in bytes for all tables of this engine</li>
+	<li><strong>index_size</strong>: approximate index size in bytes for all tables of this engine</li>
+	<li><strong>total_size</strong>: sum of data_size and index_size: approximate total size on disk</li>
+	<li><strong>largest_table</strong>: fully qualified name of largest table of this engine</li>
+	<li><strong>largest_table_size</strong>: total size in bytes of largest_table</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Show dimensions per storage engine on an InnoDB-dedicated server:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.auto_increment_columns WHERE TABLE_SCHEMA='sakila';
++--------+--------------+--------------+-------------+--------------+---------------------------+--------------------+
+| ENGINE | count_tables | data_size    | index_size  | total_size   | largest_table             | largest_table_size |
++--------+--------------+--------------+-------------+--------------+---------------------------+--------------------+
+| CSV    |            2 |            0 |           0 |            0 | `mysql`.`general_log`     |                  0 |
+| InnoDB |          172 | 252877864960 | 68769677312 | 321647542272 | `webdata`.`data_archive`  |       150358507520 |
+| MyISAM |           21 |       573493 |       95232 |       668725 | `mysql`.`help_topic`      |             442472 |
+| SPHINX |            1 |            0 |           0 |            0 | `webdata`.`sphinx_search` |                  0 |
++--------+--------------+--------------+-------------+--------------+---------------------------+--------------------+
+</pre></blockquote>
+<p>In the above example the only MyISAM tables are those of the <strong>`mysql`</strong> schema.</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="auto_increment_columns.html">auto_increment_columns</a>,
+<a href="data_size_per_schema.html">data_size_per_schema</a>
+<h3>AUTHOR</h3>
+Shlomi Noach

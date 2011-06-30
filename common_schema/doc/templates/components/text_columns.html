@@ -1,0 +1,115 @@
+<h3>NAME</h3>
+text_columns: list textual columns character sets & collations
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>text_columns</i> builds upon INFORMATION_SCHEMA's COLUMNS table to present with 
+textual columns, their character sets and collations.
+</p>
+
+<p>Textual columns are columns of types <strong>CHAR</strong>, <strong>VARCHAR</strong>, <strong>TINYTEXT</strong>, <strong>MEDIUMTEXT</strong>, <strong>TEXT</strong>, <strong>LONGTEXT</strong>.
+</p>
+
+<p><strong>ENUM</strong> and <strong>SET</strong> types are excluded, although they, too, are associated with character sets and collations.
+Internal representation of <strong>ENUM</strong> & <strong>SET</strong> is numeric.</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.text_columns;
++--------------------+-------------+------+-----+---------+-------+
+| Field              | Type        | Null | Key | Default | Extra |
++--------------------+-------------+------+-----+---------+-------+
+| TABLE_SCHEMA       | varchar(64) | NO   |     |         |       |
+| TABLE_NAME         | varchar(64) | NO   |     |         |       |
+| COLUMN_NAME        | varchar(64) | NO   |     |         |       |
+| COLUMN_TYPE        | longtext    | NO   |     | NULL    |       |
+| CHARACTER_SET_NAME | varchar(32) | YES  |     | NULL    |       |
+| COLLATION_NAME     | varchar(32) | YES  |     | NULL    |       |
++--------------------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view directly map to those of <a href="http://dev.mysql.com/doc/refman/5.1/en/columns-table.html">INFORMATION_SCHEMA.COLUMNS</a></p>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.text_columns WHERE TABLE_SCHEMA IN ('sakila', 'world');
++--------------+----------------------------+----------------+--------------+--------------------+-------------------+
+| TABLE_SCHEMA | TABLE_NAME                 | COLUMN_NAME    | COLUMN_TYPE  | CHARACTER_SET_NAME | COLLATION_NAME    |
++--------------+----------------------------+----------------+--------------+--------------------+-------------------+
+| sakila       | actor                      | first_name     | varchar(45)  | utf8               | utf8_general_ci   |
+| sakila       | actor                      | last_name      | varchar(45)  | utf8               | utf8_general_ci   |
+| sakila       | actor_info                 | first_name     | varchar(45)  | utf8               | utf8_general_ci   |
+| sakila       | actor_info                 | last_name      | varchar(45)  | utf8               | utf8_general_ci   |
+| sakila       | actor_info                 | film_info      | longtext     | utf8               | utf8_general_ci   |
+| sakila       | address                    | address        | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | address                    | address2       | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | address                    | district       | varchar(20)  | utf8               | utf8_general_ci   |
+| sakila       | address                    | postal_code    | varchar(10)  | utf8               | utf8_general_ci   |
+| sakila       | address                    | phone          | varchar(20)  | utf8               | utf8_general_ci   |
+| sakila       | category                   | name           | varchar(25)  | utf8               | utf8_general_ci   |
+| sakila       | city                       | city           | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | country                    | country        | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | customer                   | first_name     | varchar(45)  | utf8               | utf8_general_ci   |
+| sakila       | customer                   | last_name      | varchar(45)  | utf8               | utf8_general_ci   |
+| sakila       | customer                   | email          | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | customer_list              | name           | varchar(91)  | utf8               | utf8_general_ci   |
+| sakila       | customer_list              | address        | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | customer_list              | zip code       | varchar(10)  | utf8               | utf8_general_ci   |
+| sakila       | customer_list              | phone          | varchar(20)  | utf8               | utf8_general_ci   |
+| sakila       | customer_list              | city           | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | customer_list              | country        | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | customer_list              | notes          | varchar(6)   | utf8               | utf8_general_ci   |
+| sakila       | film                       | title          | varchar(255) | utf8               | utf8_general_ci   |
+| sakila       | film                       | description    | text         | utf8               | utf8_general_ci   |
+| sakila       | film_list                  | title          | varchar(255) | utf8               | utf8_general_ci   |
+| sakila       | film_list                  | description    | text         | utf8               | utf8_general_ci   |
+| sakila       | film_list                  | category       | varchar(25)  | utf8               | utf8_general_ci   |
+| sakila       | film_list                  | actors         | longtext     | utf8               | utf8_general_ci   |
+| sakila       | film_text                  | title          | varchar(255) | utf8               | utf8_general_ci   |
+| sakila       | film_text                  | description    | text         | utf8               | utf8_general_ci   |
+| sakila       | language                   | name           | char(20)     | utf8               | utf8_general_ci   |
+| sakila       | nicer_but_slower_film_list | title          | varchar(255) | utf8               | utf8_general_ci   |
+| sakila       | nicer_but_slower_film_list | description    | text         | utf8               | utf8_general_ci   |
+| sakila       | nicer_but_slower_film_list | category       | varchar(25)  | utf8               | utf8_general_ci   |
+| sakila       | nicer_but_slower_film_list | actors         | longtext     | utf8               | utf8_general_ci   |
+| sakila       | sales_by_film_category     | category       | varchar(25)  | utf8               | utf8_general_ci   |
+| sakila       | sales_by_store             | store          | varchar(101) | utf8               | utf8_general_ci   |
+| sakila       | sales_by_store             | manager        | varchar(91)  | utf8               | utf8_general_ci   |
+| sakila       | staff                      | first_name     | varchar(45)  | utf8               | utf8_general_ci   |
+| sakila       | staff                      | last_name      | varchar(45)  | utf8               | utf8_general_ci   |
+| sakila       | staff                      | email          | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | staff                      | username       | varchar(16)  | utf8               | utf8_general_ci   |
+| sakila       | staff                      | password       | varchar(40)  | utf8               | utf8_bin          |
+| sakila       | staff_list                 | name           | varchar(91)  | utf8               | utf8_general_ci   |
+| sakila       | staff_list                 | address        | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | staff_list                 | zip code       | varchar(10)  | utf8               | utf8_general_ci   |
+| sakila       | staff_list                 | phone          | varchar(20)  | utf8               | utf8_general_ci   |
+| sakila       | staff_list                 | city           | varchar(50)  | utf8               | utf8_general_ci   |
+| sakila       | staff_list                 | country        | varchar(50)  | utf8               | utf8_general_ci   |
+| world        | City                       | Name           | char(35)     | latin1             | latin1_swedish_ci |
+| world        | City                       | CountryCode    | char(3)      | latin1             | latin1_swedish_ci |
+| world        | City                       | District       | char(20)     | latin1             | latin1_swedish_ci |
+| world        | Country                    | Code           | char(3)      | latin1             | latin1_swedish_ci |
+| world        | Country                    | Name           | char(52)     | latin1             | latin1_swedish_ci |
+| world        | Country                    | Region         | char(26)     | latin1             | latin1_swedish_ci |
+| world        | Country                    | LocalName      | char(45)     | latin1             | latin1_swedish_ci |
+| world        | Country                    | GovernmentForm | char(45)     | latin1             | latin1_swedish_ci |
+| world        | Country                    | HeadOfState    | char(60)     | latin1             | latin1_swedish_ci |
+| world        | Country                    | Code2          | char(2)      | latin1             | latin1_swedish_ci |
+| world        | CountryLanguage            | CountryCode    | char(3)      | latin1             | latin1_swedish_ci |
+| world        | CountryLanguage            | Language       | char(30)     | latin1             | latin1_swedish_ci |
++--------------+----------------------------+----------------+--------------+--------------------+-------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="table_charset.html">table_charset</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

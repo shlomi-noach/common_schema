@@ -1,0 +1,73 @@
+<h3>NAME</h3>
+data_size_per_schema: Present with data size measurements per schema
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>data_size_per_schema</i> provides with an analysis of number and size of tables, views & engines per schema.
+It is useful in diagnosing an unfamiliar server, in checking up on the different engines, quickly recognizing largest tables. 
+</p>
+
+<p>This view includes dimensions of the <strong>`mysql`</strong> schema, since this schema may also include user data such as stored routines.
+It does not consider INFORMATION_SCHEMA nor PERFORMANCE_SCHEMA.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.data_size_per_schema;
++--------------------+---------------------+------+-----+---------+-------+
+| Field              | Type                | Null | Key | Default | Extra |
++--------------------+---------------------+------+-----+---------+-------+
+| TABLE_SCHEMA       | varchar(64)         | NO   |     |         |       |
+| count_tables       | decimal(23,0)       | YES  |     | NULL    |       |
+| count_views        | decimal(23,0)       | YES  |     | NULL    |       |
+| distinct_engines   | bigint(21)          | NO   |     | 0       |       |
+| data_size          | decimal(42,0)       | YES  |     | NULL    |       |
+| index_size         | decimal(42,0)       | YES  |     | NULL    |       |
+| total_size         | decimal(43,0)       | YES  |     | NULL    |       |
+| largest_table      | longtext            | YES  |     | NULL    |       |
+| largest_table_size | bigint(20) unsigned | YES  |     | NULL    |       |
++--------------------+---------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: name of schema</li>
+	<li><strong>count_tables</strong>: number of tables in this schema</li>
+	<li><strong>count_views</strong>: number of views in this schema</li>
+	<li><strong>distinct_engines</strong>: number of distinct storage engines of tables in this schema</li>
+	<li><strong>data_size</strong>: approximate data size of schema's tables</li>
+	<li><strong>index_size</strong>: approximate index size of schema's tables</li>
+	<li><strong>total_size</strong>: sum of data_size and index_size</li>
+	<li><strong>largest_table</strong>: name of largest table in this schema</li>
+	<li><strong>largest_table_size</strong>: total size in bytes of largest_table</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Show dimensions per schema:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.data_size_per_schema;
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+| TABLE_SCHEMA  | count_tables | count_views | distinct_engines | data_size | index_size | total_size | largest_table        | largest_table_size |
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+| common_schema |            1 |          27 |                1 |     28672 |      35840 |      64512 | numbers              |              64512 |
+| google_charts |            1 |           1 |                1 |     16384 |          0 |      16384 | chart_data           |              16384 |
+| mycheckpoint  |           13 |          50 |                2 |   3022602 |      88064 |    3110666 | status_variables     |            2654208 |
+| mysql         |           23 |           0 |                2 |   3259223 |    2551808 |    5811031 | time_zone_transition |            4297362 |
+| sakila        |           16 |           7 |                2 |   4297536 |    2761728 |    7059264 | rental               |            2850816 |
+| test          |            6 |           0 |                2 |     80232 |      45056 |     125288 | t                    |              49152 |
+| world         |            3 |           0 |                2 |    510355 |      28672 |     539027 | City                 |             409600 |
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="auto_increment_columns.html">auto_increment_columns</a>,
+<a href="data_size_per_engine.html">data_size_per_engine</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
