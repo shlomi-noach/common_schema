@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>table_charset: common_schema documentation</title>
-	<meta name="description" content="table_charset: common_schema" />
-	<meta name="keywords" content="table_charset: common_schema" />
+	<title>innodb_simple_locks: common_schema documentation</title>
+	<meta name="description" content="innodb_simple_locks: common_schema" />
+	<meta name="keywords" content="innodb_simple_locks: common_schema" />
 	<link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 
@@ -16,78 +16,58 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="table_charset.html">table_charset</a></h2>	
+				<h2><a href="innodb_simple_locks.html">innodb_simple_locks</a></h2>	
 <h3>NAME</h3>
-table_charset: list tables, their character sets and collations
+innodb_simple_locks: Listing of locks, simplifying INFORMATION_SCHEMA.INNODB_LOCKS
 <h3>TYPE</h3>
 View
 
 <h3>DESCRIPTION</h3>
+<p></p>
 
-<p>A table is associated with a character set and a collation. 
-Surprisingly, INFORMATION_SCHEMA's TABLES table only lists a table's collation, and neglects to provide with the character set.</p>
-
-<p>A character set is easily deduced by given collation, since a collation relates to a single character set.</p>
-
-<p><i>table_charset</i> provides this convenient connection.</p>
+<p><i>innodb_simple_locks</i> is a simplification of INFORMATION_SCHEMA.INNODB_LOCKS. 
+It merely provides with "the good parts" in the form of selected columns. No rows are filtered by this view.
+</p>
 
 <h3>STRUCTURE</h3>
 
 <blockquote><pre>
-mysql&gt; DESC common_schema.table_charset;
-+--------------------+-------------+------+-----+---------+-------+
-| Field              | Type        | Null | Key | Default | Extra |
-+--------------------+-------------+------+-----+---------+-------+
-| TABLE_SCHEMA       | varchar(64) | NO   |     |         |       |
-| TABLE_NAME         | varchar(64) | NO   |     |         |       |
-| CHARACTER_SET_NAME | varchar(32) | NO   |     |         |       |
-| TABLE_COLLATION    | varchar(32) | YES  |     | NULL    |       |
-+--------------------+-------------+------+-----+---------+-------+
+mysql&gt; DESC common_schema.innodb_simple_locks;
++-------------+---------------+------+-----+---------+-------+
+| Field       | Type          | Null | Key | Default | Extra |
++-------------+---------------+------+-----+---------+-------+
+| lock_id     | varchar(81)   | NO   |     |         |       |
+| lock_trx_id | varchar(18)   | NO   |     |         |       |
+| lock_type   | varchar(32)   | NO   |     |         |       |
+| lock_table  | varchar(1024) | NO   |     |         |       |
+| lock_index  | varchar(1024) | YES  |     | NULL    |       |
+| lock_data   | varchar(8192) | YES  |     | NULL    |       |
++-------------+---------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
 
-<p>Columns of this view:</p>
-<ul>
-	<li><strong>TABLE_SCHEMA</strong>: name of schema (database)</li>
-	<li><strong>TABLE_NAME</strong>: name of table</li>
-	<li><strong>CHARACTER_SET_NAME</strong>: table's defined character set</li>
-	<li><strong>TABLE_COLLATION</strong>: table's collation</li>
-</ul>
+<p>Columns of this view map directly to those of <a href="http://dev.mysql.com/doc/innodb-plugin/1.0/en/innodb-information-schema-innodb_locks.html">INFORMATION_SCHEMA.INNODB_LOCKS</a> table</p>
 
 <h3>EXAMPLES</h3>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.table_charset WHERE TABLE_SCHEMA IN ('sakila', 'world');
-+--------------+-----------------+--------------------+-------------------+
-| TABLE_SCHEMA | TABLE_NAME      | CHARACTER_SET_NAME | TABLE_COLLATION   |
-+--------------+-----------------+--------------------+-------------------+
-| world        | City            | latin1             | latin1_swedish_ci |
-| world        | Country         | latin1             | latin1_swedish_ci |
-| world        | CountryLanguage | latin1             | latin1_swedish_ci |
-| sakila       | actor           | utf8               | utf8_general_ci   |
-| sakila       | address         | utf8               | utf8_general_ci   |
-| sakila       | category        | utf8               | utf8_general_ci   |
-| sakila       | city            | utf8               | utf8_general_ci   |
-| sakila       | country         | utf8               | utf8_general_ci   |
-| sakila       | customer        | utf8               | utf8_general_ci   |
-| sakila       | film            | utf8               | utf8_general_ci   |
-| sakila       | film_actor      | utf8               | utf8_general_ci   |
-| sakila       | film_category   | utf8               | utf8_general_ci   |
-| sakila       | film_text       | utf8               | utf8_general_ci   |
-| sakila       | inventory       | utf8               | utf8_general_ci   |
-| sakila       | language        | utf8               | utf8_general_ci   |
-| sakila       | payment         | utf8               | utf8_general_ci   |
-| sakila       | rental          | utf8               | utf8_general_ci   |
-| sakila       | staff           | utf8               | utf8_general_ci   |
-| sakila       | store           | utf8               | utf8_general_ci   |
-+--------------+-----------------+--------------------+-------------------+
+
+<p>Show current locks:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_simple_locks;
++----------------+-------------+-----------+--------------------------+------------+-----------+
+| lock_id        | lock_trx_id | lock_type | lock_table               | lock_index | lock_data |
++----------------+-------------+-----------+--------------------------+------------+-----------+
+| 313C57443:1027 | 313C57443   | TABLE     | `deps_db`.`pending_deps` | NULL       | NULL      |
+| 313C57442:1027 | 313C57442   | TABLE     | `deps_db`.`pending_deps` | NULL       | NULL      |
++----------------+-------------+-----------+--------------------------+------------+-----------+
 </pre></blockquote>
 
-
 <h3>ENVIRONMENT</h3>
-MySQL 5.1 or newer.
+MySQL 5.1 with InnoDB Plugin installed (with InnoDB INFORMATION_SCHEMA plugins enabled), or MySQL >= 5.5
 
 <h3>SEE ALSO</h3>
-<a href="text_columns.html">text_columns</a>
+<a href="innodb_locked_transactions.html">innodb_locked_transactions</a>,
+<a href="innodb_transactions.html">innodb_transactions</a>,
+<a href="innodb_transactions_summary.html">innodb_transactions_summary</a>
 
 <h3>AUTHOR</h3>
 Shlomi Noach

@@ -1,0 +1,54 @@
+<h3>NAME</h3>
+innodb_simple_locks: Listing of locks, simplifying INFORMATION_SCHEMA.INNODB_LOCKS
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>innodb_simple_locks</i> is a simplification of INFORMATION_SCHEMA.INNODB_LOCKS. 
+It merely provides with "the good parts" in the form of selected columns. No rows are filtered by this view.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_simple_locks;
++-------------+---------------+------+-----+---------+-------+
+| Field       | Type          | Null | Key | Default | Extra |
++-------------+---------------+------+-----+---------+-------+
+| lock_id     | varchar(81)   | NO   |     |         |       |
+| lock_trx_id | varchar(18)   | NO   |     |         |       |
+| lock_type   | varchar(32)   | NO   |     |         |       |
+| lock_table  | varchar(1024) | NO   |     |         |       |
+| lock_index  | varchar(1024) | YES  |     | NULL    |       |
+| lock_data   | varchar(8192) | YES  |     | NULL    |       |
++-------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view map directly to those of <a href="http://dev.mysql.com/doc/innodb-plugin/1.0/en/innodb-information-schema-innodb_locks.html">INFORMATION_SCHEMA.INNODB_LOCKS</a> table</p>
+
+<h3>EXAMPLES</h3>
+
+<p>Show current locks:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_simple_locks;
++----------------+-------------+-----------+--------------------------+------------+-----------+
+| lock_id        | lock_trx_id | lock_type | lock_table               | lock_index | lock_data |
++----------------+-------------+-----------+--------------------------+------------+-----------+
+| 313C57443:1027 | 313C57443   | TABLE     | `deps_db`.`pending_deps` | NULL       | NULL      |
+| 313C57442:1027 | 313C57442   | TABLE     | `deps_db`.`pending_deps` | NULL       | NULL      |
++----------------+-------------+-----------+--------------------------+------------+-----------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 with InnoDB Plugin installed (with InnoDB INFORMATION_SCHEMA plugins enabled), or MySQL >= 5.5
+
+<h3>SEE ALSO</h3>
+<a href="innodb_locked_transactions.html">innodb_locked_transactions</a>,
+<a href="innodb_transactions.html">innodb_transactions</a>,
+<a href="innodb_transactions_summary.html">innodb_transactions_summary</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

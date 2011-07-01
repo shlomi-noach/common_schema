@@ -1,0 +1,62 @@
+<h3>NAME</h3>
+innodb_transactions_summary: A one line summary of InnoDB's transactions: count, state, locks
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>innodb_transactions_summary</i> provides a quick summary of InnoDB Plugin's current transactions state:
+number of running transactions, of which how many are executing or locked, on how many locks.</p>
+
+<p>
+The connection calling upon this view is never listed.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_transactions_summary;
++----------------------+---------------+------+-----+---------+-------+
+| Field                | Type          | Null | Key | Default | Extra |
++----------------------+---------------+------+-----+---------+-------+
+| count_transactions   | bigint(21)    | NO   |     | 0       |       |
+| running_transactions | decimal(23,0) | NO   |     | 0       |       |
+| locked_transactions  | decimal(23,0) | NO   |     | 0       |       |
+| distinct_locks       | bigint(21)    | NO   |     | 0       |       |
++----------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>count_transactions</strong>: number of current transactions</li>
+	<li><strong>running_transactions</strong>: number of transactions executing a query</li>
+	<li><strong>locked_transactions</strong>: number of transactions waiting on some lock</li>
+	<li><strong>distinct_locks</strong>: number of distinct locks transactions are waiting on, or <strong>0</strong> when no transaction is locked</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+
+<p>Get transactions summary:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_transactions_summary;
++--------------------+----------------------+---------------------+----------------+
+| count_transactions | running_transactions | locked_transactions | distinct_locks |
++--------------------+----------------------+---------------------+----------------+
+|                  9 |                    7 |                   2 |              2 |
++--------------------+----------------------+---------------------+----------------+
+</pre></blockquote>
+<p>In the above server, 9 transactions are open, of which 7 are executing a query (the other two are "in between queries").
+Of the 7 executing queries, 5 are running normally, but 2 are blocked.</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 with InnoDB Plugin installed (with InnoDB INFORMATION_SCHEMA plugins enabled), or MySQL >= 5.5
+
+<h3>SEE ALSO</h3>
+<a href="innodb_locked_transactions.html">innodb_locked_transactions</a>,
+<a href="innodb_simple_locks.html">innodb_simple_locks</a>,
+<a href="innodb_transactions.html">innodb_transactions</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

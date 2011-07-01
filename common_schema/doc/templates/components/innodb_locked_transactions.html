@@ -1,0 +1,85 @@
+<h3>NAME</h3>
+innodb_locked_transactions: List locked transactions, the locks they are waiting on and the transactions holding those locks.
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p>InnoDB Plugin provides with easy to query INFORMATION_SCHEMA tables. In particular, it offers information on running transactions,
+locked transactions and locks.</p>
+
+<p><i>innodb_locked_transactions</i> makes the obvious connection for blocked transactions: it lists blocked transactions, what they
+attempt to do, the locks on which they block, the transactions holding those locks and the queries they are executing.
+</p>
+
+<p>
+The view makes for a simple analysis of <i>"Why do I seem to have so many locks? What's locking what?"</i>
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_locked_transactions;
++-----------------------------+---------------------+------+-----+---------------------+-------+
+| Field                       | Type                | Null | Key | Default             | Extra |
++-----------------------------+---------------------+------+-----+---------------------+-------+
+| locked_trx_id               | varchar(18)         | NO   |     |                     |       |
+| locked_trx_started          | datetime            | NO   |     | 0000-00-00 00:00:00 |       |
+| locked_trx_wait_started     | datetime            | YES  |     | NULL                |       |
+| locked_trx_mysql_thread_id  | bigint(21) unsigned | NO   |     | 0                   |       |
+| locked_trx_query            | varchar(1024)       | YES  |     | NULL                |       |
+| requested_lock_id           | varchar(81)         | NO   |     |                     |       |
+| blocking_lock_id            | varchar(81)         | NO   |     |                     |       |
+| locking_trx_id              | varchar(18)         | NO   |     |                     |       |
+| locking_trx_started         | datetime            | NO   |     | 0000-00-00 00:00:00 |       |
+| locking_trx_wait_started    | datetime            | YES  |     | NULL                |       |
+| locking_trx_mysql_thread_id | bigint(21) unsigned | NO   |     | 0                   |       |
+| locking_trx_query           | varchar(1024)       | YES  |     | NULL                |       |
++-----------------------------+---------------------+------+-----+---------------------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>locked_trx_id</strong>: InnoDB locked transaction ID</li>
+	<li><strong>locked_trx_started</strong>: time at which locked transaction started</li>
+	<li><strong>locked_trx_wait_started</strong>: time at which locked transaction got blocked on this lock</li>
+	<li><strong>locked_trx_mysql_thread_id</strong>: thread ID (mapped to PROCESSLIST)</li>
+	<li><strong>locked_trx_query</strong>: current blocked query</li>
+	<li><strong>requested_lock_id</strong>: ID of lock on which transaction is blocked</li>
+	<li><strong>blocking_lock_id</strong>: ID of lock preventing transaction from getting requested lock</li>
+	<li><strong>locking_trx_id</strong>: InnoDB blocking transaction ID</li>
+	<li><strong>locking_trx_started</strong>: time at which blocking transaction started</li>
+	<li><strong>locking_trx_wait_started</strong>: time at which blocking transaction got blocked (it, too, may be blocked)</li>
+	<li><strong>locking_trx_mysql_thread_id</strong>: blocking thread ID (mapped to PROCESSLIST)</li>
+	<li><strong>locking_trx_query</strong>: current blocking query</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+
+<p>Show info on locked transactions:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_locked_transactions;
++---------------+---------------------+-------------------------+----------------------------+------------------------------------------------------------------------------------+-------------------------+-------------------------+----------------+---------------------+--------------------------+-----------------------------+-------------------+
+| locked_trx_id | locked_trx_started  | locked_trx_wait_started | locked_trx_mysql_thread_id | locked_trx_query                                                                   | requested_lock_id       | blocking_lock_id        | locking_trx_id | locking_trx_started | locking_trx_wait_started | locking_trx_mysql_thread_id | locking_trx_query |
++---------------+---------------------+-------------------------+----------------------------+------------------------------------------------------------------------------------+-------------------------+-------------------------+----------------+---------------------+--------------------------+-----------------------------+-------------------+
+| 313BDECF8     | 2011-07-01 07:53:12 | 2011-07-01 07:53:12     |                   11563685 | NULL                                                                               | 313BDECF8:995:126742:24 | 313BDECEA:995:126742:24 | 313BDECEA      | 2011-07-01 07:53:12 | NULL                     |                    11563674 | NULL              |
+| 313BDECF3     | 2011-07-01 07:53:12 | 2011-07-01 07:53:12     |                   11563683 | NULL                                                                               | 313BDECF3:995:40115:26  | 313BDECEA:995:40115:26  | 313BDECEA      | 2011-07-01 07:53:12 | NULL                     |                    11563674 | NULL              |
+| 313BDECF0     | 2011-07-01 07:53:12 | 2011-07-01 07:53:12     |                   11563687 | UPDATE deps_requests SET sig = '00ee8729724d4d04', count = count+1  WHERE sig = '' | 313BDECF0:995:40109:572 | 313BDECEA:995:40109:572 | 313BDECEA      | 2011-07-01 07:53:12 | NULL                     |                    11563674 | NULL              |
++---------------+---------------------+-------------------------+----------------------------+------------------------------------------------------------------------------------+-------------------------+-------------------------+----------------+---------------------+--------------------------+-----------------------------+-------------------+
+</pre></blockquote>
+<p>
+In the above example we are unable to catch the query blocking the 3rd transaction. In the first 2 transactions we are also unable to realize the blocked query.
+We don't always get all we want...
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 with InnoDB Plugin installed (with InnoDB INFORMATION_SCHEMA plugins enabled), or MySQL >= 5.5
+
+<h3>SEE ALSO</h3>
+<a href="innodb_simple_locks.html">innodb_simple_locks</a>,
+<a href="innodb_transactions.html">innodb_transactions</a>,
+<a href="innodb_transactions_summary.html">innodb_transactions_summary</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

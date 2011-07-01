@@ -1,0 +1,60 @@
+<h3>NAME</h3>
+innodb_transactions: Listing of active (InnoDB Plugin) transactions, which are currently performing queries
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>innodb_transactions</i> is a simplification of INFORMATION_SCHEMA.INNODB_TRX. 
+It only lists those transactions which are executing queries at the moment. "Sleeping" transactions are not listed.
+</p>
+
+<p>
+The connection calling upon this view is never listed.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_transactions;
++-----------------------+---------------------+------+-----+---------------------+-------+
+| Field                 | Type                | Null | Key | Default             | Extra |
++-----------------------+---------------------+------+-----+---------------------+-------+
+| trx_id                | varchar(18)         | NO   |     |                     |       |
+| trx_state             | varchar(13)         | NO   |     |                     |       |
+| trx_started           | datetime            | NO   |     | 0000-00-00 00:00:00 |       |
+| trx_requested_lock_id | varchar(81)         | YES  |     | NULL                |       |
+| trx_wait_started      | datetime            | YES  |     | NULL                |       |
+| trx_weight            | bigint(21) unsigned | NO   |     | 0                   |       |
+| trx_mysql_thread_id   | bigint(21) unsigned | NO   |     | 0                   |       |
+| trx_query             | varchar(1024)       | YES  |     | NULL                |       |
++-----------------------+---------------------+------+-----+---------------------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Structure of this view is identical to that of <a href="http://dev.mysql.com/doc/innodb-plugin/1.0/en/innodb-information-schema-innodb_trx.html">INFORMATION_SCHEMA.INNODB_TRX</a> table</p>
+
+<h3>EXAMPLES</h3>
+
+<p>Show all active transactions:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_top;
++-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+--------------------------------------------------------------------------------+
+| trx_id    | trx_state | trx_started         | trx_requested_lock_id | trx_wait_started | trx_weight | trx_mysql_thread_id | trx_query                                                                      |
++-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+--------------------------------------------------------------------------------+
+| 313AF223E | RUNNING   | 2011-07-01 07:28:18 | NULL                  | NULL             |          0 |            11548882 | SELECT * FROM dep_maps                                                         |
+| 313AF2237 | RUNNING   | 2011-07-01 07:28:18 | NULL                  | NULL             |          0 |            11548884 | SELECT * FROM deps_changes WHERE deps_condition = 'stateless' ORDER BY deps_id |
++-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+--------------------------------------------------------------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 with InnoDB Plugin installed (with InnoDB INFORMATION_SCHEMA plugins enabled), or MySQL >= 5.5
+
+<h3>SEE ALSO</h3>
+<a href="innodb_locked_transactions.html">innodb_locked_transactions</a>,
+<a href="innodb_simple_locks.html">innodb_simple_locks</a>,
+<a href="innodb_transactions_summary.html">innodb_transactions_summary</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
