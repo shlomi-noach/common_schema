@@ -139,6 +139,7 @@
 	</target>
 
 	<target name="doc">		
+		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}"></copy>
 		<foreach param="component_doc_filename" target="component_doc">
 			<path>
 				<fileset dir="${doc.templates.dir}/components">
