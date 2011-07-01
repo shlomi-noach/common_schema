@@ -100,6 +100,12 @@
 		</antcall>
 	</target>
 
+	<target name="deploy_percona_server" depends="percona_server">
+		<antcall target="deploy_file">
+			<param name="common_schema_sql_file" value="${build.dir}/${percona_server.output.file}" />
+		</antcall>
+	</target>
+
 	<target name="deploy_file">
 		<echo>
 			Deploying file: ${common_schema_sql_file}
