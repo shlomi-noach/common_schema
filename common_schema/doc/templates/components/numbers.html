@@ -1,0 +1,57 @@
+<h3>NAME</h3>
+numbers: Listing of numbers in the range 0..4095
+<h3>TYPE</h3>
+Table
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>numbers</i> provides with a reliable source of indexed numbers. Values range [0..4095]. 
+This table is utilized by a few of common_schema's views.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.numbers;
++-------+----------------------+------+-----+---------+-------+
+| Field | Type                 | Null | Key | Default | Extra |
++-------+----------------------+------+-----+---------+-------+
+| n     | smallint(5) unsigned | NO   | PRI | NULL    |       |
++-------+----------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this table:</p>
+<ul>
+	<li><strong>n</strong>: an unsigned integer. Numbers are sequential, ascending</li>
+</ul>
+
+
+<h3>EXAMPLES</h3>
+<p>Get 10 lowest values:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.numbers WHERE n < 10;
++---+
+| n |
++---+
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+| 4 |
+| 5 |
+| 6 |
+| 7 |
+| 8 |
+| 9 |
++---+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

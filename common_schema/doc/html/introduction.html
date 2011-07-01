@@ -23,27 +23,71 @@ It provides with useful views and routines which assist in schema diagnostics, m
 </p>
 
 <p>The available components are:</p>
-<ul>
-    <li><a href="routine_privileges.html">routine_privileges</a>: INFORMATION_SCHEMA-like view on routines privileges </li>
-    <li><a href="oak-block-account.html">oak-block-account</a>: block or release MySQL users accounts, disabling them or enabling them to login.</li>
-    <li><a href="oak-chunk-update.html">oak-chunk-update</a>: perform long, non-blocking UPDATE/DELETE operation in auto managed small chunks.</li>
-    <li><a href="oak-get-slave-lag.html">oak-get-slave-lag</a>: print slave replication lag and terminate with respective exit code.</li>
-    <li><a href="oak-hook-general-log.html">oak-hook-general-log</a>: hook up and filter general log entries based on entry type or execution plan criteria.</li>
-    <li><a href="oak-kill-slow-queries.html">oak-kill-slow-queries</a>: terminate long running queries.</li>
-    <li><a href="oak-modify-charset.html">oak-modify-charset</a>: change the character set (and collation) of a textual column.</li>
-    <li><a href="oak-online-alter-table.html">oak-online-alter-table</a>: perform a non-blocking ALTER TABLE operation.</li>
-    <li><a href="oak-prepare-shutdown.html">oak-prepare-shutdown</a>: make for a fast and safe MySQL shutdown.</li>
-    <li><a href="oak-purge-master-logs.html">oak-purge-master-logs</a>: purge master logs, depending on the state of replicating slaves.</li>
-    <li><a href="oak-repeat-query.html">oak-repeat-query</a>: repeat query execution until some condition holds.</li>
-    <li><a href="oak-security-audit.html">oak-security-audit</a>: audit accounts, passwords, privileges and other security settings.</li>
-    <li><a href="oak-show-limits.html">oak-show-limits</a>: show AUTO_INCREMENT “free space”.</li>
-    <li><a href="oak-show-replication-status.html">oak-show-replication-status</a>: show how far behind are replicating slaves on a given master.</li>
-</ul>
 
-<p>
-All tools are coded in Python, and require Python 2.3 or newer, and the python-mysqldb driver. 
-Some tools require MySQL 5.0 or higher; see the docs for each tool.
-</p>
+<h4>Views</h4>
+
+	<p>Schema analysis</p>
+	<ul>
+		<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a>: List InnoDB tables where no PRIMARY KEY is defined </li>
+		<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a>: List indexes which are made redundant (or duplicate) by other (dominant) keys. </li>
+		<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a>: Generate ALTER TABLE SQL statements per table, with engine and create options</li>
+		<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a>: Generate create/drop foreign key constraints SQL statements</li>
+		<li><a title="table_charset" href="table_charset.html">table_charset</a>: List tables, their character sets and collations</li>
+		<li><a title="text_columns" href="text_columns.html">text_columns</a>: List textual columns character sets & collations </li>
+	</ul>
+	<p>Data dimensions</p>
+	<ul>
+		<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a>: List AUTO_INCREMENT columns and their capacity</li>
+		<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a>: Present with data size measurements per storage engine</li>
+		<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a>: Present with data size measurements per schema </li>
+	</ul>
+	<p>Monitoring</p>
+	<ul>
+		<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a>: Status variables difference over time, with interpolation and extrapolation per time unit</li>
+		<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a>: Status variables difference over time, with spaces where zero diff encountered</li>
+		<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a>: Status variables difference over time, only nonzero findings listed </li>
+	</ul>
+	<p>Processes & transactions</p>
+	<ul>
+		<li><a title="innodb_locked_transactions" href="innodb_locked_transactions.html">innodb_locked_transactions</a>: List locked transactions, the locks they are waiting on and the transactions holding those locks.</li>
+		<li><a title="innodb_simple_locks" href="innodb_simple_locks.html">innodb_simple_locks</a>: Listing of locks, simplifying INFORMATION_SCHEMA.INNODB_LOCKS</li>
+		<li><a title="innodb_transactions" href="innodb_transactions.html">innodb_transactions</a>: Listing of active (InnoDB Plugin) transactions, which are currently performing queries</li>
+		<li><a title="innodb_transactions_summary" href="innodb_transactions_summary.html">innodb_transactions_summary</a>: A one line summary of InnoDB's transactions: count, state, locks </li>
+		
+		<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a>: State of processes per user/host: connected, executing, average execution time </li>
+		<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a>: Listing of replication processes: the server's slave threads and any replicating slaves</li>
+		<li><a title="processlist_summary" href="processlist_summary.html">processlist_summary</a>: Number of connected, sleeping, running connections and slow query count</li>
+		<li><a title="processlist_top" href="processlist_top.html">processlist_top</a>: Listing of active processes sorted by current query runtime, desc (longest first)</li>
+	</ul>
+	<p>Security</p>
+	<ul>
+		<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a>: INFORMATION_SCHEMA-like view on routines privileges</li>
+		<li><a title="sql_grants" href="sql_grants.html">sql_grants</a>: Generate SQL GRANT/REVOKE statements for existing accounts; provide with GRANT metadata</li>
+		<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a>: Generate complete accounts SHOW GRANTS FOR -like output</li>
+	</ul>
+
+<h4>Tables</h4>
+
+	<ul>
+		<li><a title="numbers" href="numbers.html">numbers</a></li>
+	</ul>
+
+<h4>Functions</h4>
+	<p>General functions</p>
+	<ul>
+		<li><a title="numbers" href="numbers.html">numbers</a></li>
+	</ul>
+
+	<p>Text functions</p>
+	<ul>
+		<li><a title="numbers" href="numbers.html">numbers</a></li>
+	</ul>
+
+	<p>Time & date functions</p>
+	<ul>
+		<li><a title="numbers" href="numbers.html">numbers</a></li>
+	</ul>
+
 
 <h3>LICENSE</h3>
 common_schema is released under the <a href="http://www.opensource.org/licenses/bsd-license.php">BSD license</a>.
@@ -65,14 +109,13 @@ Shlomi Noach
 			</div>
 			<div id="sidebarwrapper">
 				<div id="menu">
-					<h3>common_schema components</h3>
 					<ul>
 						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
 						<li><a title="Download" href="download.html">Download</a></li>
 						<li><a title="Install" href="install.html">Install</a></li>
-						
-						<li><strong>Views</strong></li>
-						
+					</ul>						
+					<h3>VIEWS</h3>
+					<ul>
 						<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
 						<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
 						<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
@@ -82,7 +125,7 @@ Shlomi Noach
 						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
 						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
 
-						<li><a title="innodb_locked_transactions" href="innodb_locked_transactions">innodb_locked_transactions</a></li>
+						<li><a title="innodb_locked_transactions" href="innodb_locked_transactions.html">innodb_locked_transactions</a></li>
 						<li><a title="innodb_simple_locks" href="innodb_simple_locks.html">innodb_simple_locks</a></li>
 						<li><a title="innodb_transactions" href="innodb_transactions.html">innodb_transactions</a></li>
 						<li><a title="innodb_transactions_summary" href="innodb_transactions_summary.html">innodb_transactions_summary</a></li>
@@ -103,9 +146,17 @@ Shlomi Noach
 						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
 
 						<li><a title="table_charset" href="table_charset.html">table_charset</a></li>
-						<li><a title="text_columns" href="text_columns.html">text_columns</a></li>
-						
-						<li><strong>Routines</strong></li>
+						<li><a title="text_columns" href="text_columns.html">text_columns</a></li>						
+					</ul>						
+					<h3>TABLES</h3>
+					<ul>
+						<li><a title="numbers" href="numbers.html">numbers</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="General functions" href="general_functions.html">General functions</a></li>
+						<li><a title="String functions" href="string_functions.html">String functions</a></li>
+						<li><a title="Time & date functions" href="temporal_functions.html">Time & date functions</a></li>
 					</ul>
 				</div>
 			</div>	
