@@ -98,6 +98,20 @@ VIEW _sql_grants_components AS
     GROUP BY
       GRANTEE, TABLE_SCHEMA, TABLE_NAME
   )
+  UNION ALL
+  (
+    SELECT
+      GRANTEE,
+      CONCAT('`', ROUTINE_SCHEMA, '`.`', ROUTINE_NAME, '`') AS priv_level,
+      'routine' AS priv_level_name,
+      GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
+      MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
+      6 AS result_order
+    FROM 
+      routine_privileges
+    GROUP BY
+      GRANTEE, ROUTINE_SCHEMA, ROUTINE_NAME
+  )
 ;
 
 -- 
