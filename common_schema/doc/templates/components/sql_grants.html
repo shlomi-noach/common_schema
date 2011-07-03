@@ -10,7 +10,7 @@ View
 </p>
 
 <p>
-It is a one-stop-shop for getting the set of privileges per account, per privilege level (db, schema, table, column). 
+It is a one-stop-shop for getting the set of privileges per account, per privilege level (db, schema, table, column, routine). 
 The view lists the set of privileges per account in several formats:
 <ul>
 	<li>In comma delimited format (e.g. <strong>SELECT, INSERT, UPDATE, EXECUTE</strong>)</li>
@@ -27,6 +27,8 @@ The only existing alternative to that is the <strong>SHOW GRANTS FOR</strong> co
 Alas, it is not a proper SQL query, and does not provide with structured result.</p>
 
 <p>The <i>sql_grants</i> view provides with structured results, easily filtered or searched.</p>
+
+<p>This view builds on <a href="routine_privileges.html">routine_privileges</a>.</p>
 
 <h3>STRUCTURE</h3>
 
@@ -56,7 +58,7 @@ mysql&gt; DESC sql_grants;
 	<li><strong>user</strong>: account user part</li>
 	<li><strong>host</strong>: account host part</li>
 	<li><strong>priv_level</strong>: the domain on which the privileges are set (e.g. <strong>*.*</strong>, <strong>sakila.*</strong>)</li>
-	<li><strong>priv_level_name</strong>: description of priv_level: <strong>'user'</strong>, <strong>'schema'</strong>, <strong>'table'</strong>, <strong>'column'</strong></li>
+	<li><strong>priv_level_name</strong>: description of priv_level: <strong>'user'</strong>, <strong>'schema'</strong>, <strong>'table'</strong>, <strong>'column'</strong>, <strong>'routine'</strong></li>
 	<li><strong>current_privileges</strong>: comma delimited list of privileges assigned to account on current privilege level</li>
 	<li><strong>IS_GRANTABLE</strong>: does current account have the GRANT privileges on this domain? <strong>'Yes'</strong> or <strong>'NO'</strong></li>
 	<li><strong>sql_grant</strong>: A <strong>GRANT</strong> query to generate current set of privileges</li>
@@ -130,6 +132,7 @@ current_privileges: SELECT (description, film_id, title), UPDATE (description)
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
+<a href="routine_privileges.html">routine_privileges</a>,
 <a href="sql_show_grants.html">sql_show_grants</a>
 <h3>AUTHOR</h3>
 Shlomi Noach
