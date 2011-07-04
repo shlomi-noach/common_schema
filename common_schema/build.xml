@@ -68,6 +68,7 @@
 			<fileset dir="views/foreign_keys/" includes="*.sql" />
 			<fileset dir="views/innodb/" includes="*.sql" />
 			<fileset dir="views/keys/" includes="*.sql" />
+			<fileset dir="views/privileges_base/" includes="*.sql" />
 			<fileset dir="views/privileges/" includes="*.sql" />
 			<fileset dir="views/process/" includes="*.sql" />
 			<fileset dir="views/status/" includes="*.sql" />
@@ -153,7 +154,16 @@
 			    	<include name="*.html"/>
 				</fileset>
 			</path>
-		</foreach>		
+		</foreach>	
+		<!--
+		<foreach param="routine_group_path" target="routinesdoc">
+			<path>
+				<dirset dir="${doc.templates.dir}/routines">
+			    	<include name="*"/>
+				</dirset>
+			</path>
+		</foreach>
+		-->		
 	</target>
 	<target name="component_doc">		
 		<basename property="doc_basename" file="${component_doc_filename}"/>
@@ -174,5 +184,25 @@
 		</concat>
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${docname}"/>
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${docname}"/>
+	</target>
+	<target name="routinesdoc">		
+		<basename property="routine_group_name" file="${routine_group_path}"/>
+		<propertyregex property="routine_group_name.spaced" input="${routine_group_name}" regexp="_" replace=" "></propertyregex>
+		<echo message="Generating documentation for ${routine_group_name}" /> 
+		<concat destfile="${doc.html.dir}/${routine_group_name}.html">
+			<filelist dir="${doc.templates.dir}" files="head.html.template"/>
+			<fileset dir="${doc.templates.dir}/routines/${routine_group_name}"></fileset>
+			<filelist dir="${doc.templates.dir}/routines" files="routine.tail.html.template"/>
+			<filelist dir="${doc.templates.dir}" files="tail.html.template"/>
+		</concat>
+		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagetitle" value="${routine_group_name.spaced}"/>
+		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagename" value="${routine_group_name.spaced}"/>
+	</target>
+	
+	<target name="test">
+		<loadfile property="f.c" srcfile="/tmp/crc64.sql"></loadfile>
+		<echo>prop: ${f.c}</echo>
+		<propertyregex property="f.c2" input="${f.c}" regexp="@desc (.*)" select="\1"></propertyregex>
+		<echo>prop2: ---${f.c2}---</echo>
 	</target>
 </project>
