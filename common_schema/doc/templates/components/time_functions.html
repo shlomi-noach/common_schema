@@ -1,0 +1,129 @@
+<h3>TIME & DATE FUNCTIONS</h3>
+
+<p>
+Time & date functions: stored functions managing temoral values. All functions are DETERMINISTIC, NO SQL.
+<ul>
+	<li><a href="#start_of_hour">start_of_hour</a>: Returns DATETIME of beginning of round hour of given DATETIME.</li>
+	<li><a href="#start_of_month">start_of_month</a>: Returns first day of month of given datetime, as DATE object</li>
+	<li><a href="#start_of_quarter">start_of_quarter</a>: Returns first day of quarter of given datetime, as DATE object</li>
+	<li><a href="#start_of_week">start_of_week</a>: Returns first day of week of given datetime (i.e. start of Monday), as DATE object</li>
+	<li><a href="#start_of_week_sunday">start_of_week_sunday</a>: Returns first day of week, Sunday based, of given datetime, as DATE object</li>
+	<li><a href="#start_of_year">start_of_year</a>: Returns first day of year of given datetime, as DATE object</li>
+</ul>
+</p>
+
+<h3>SYNOPSIS</h3>
+
+<p>
+<ul>
+	<li>
+		<a name="start_of_hour" href="#">start_of_hour()</a>
+		<p>
+			Returns DATETIME of beginning of round hour of given DATETIME, 
+			i.e. seconds and minutes are stripped off the given value.
+<blockquote><pre>start_of_hour(dt DATETIME)
+  RETURNS DATETIME</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_hour('2011-03-24 11:17:08') as dt;
++---------------------+
+| dt                  |
++---------------------+
+| 2011-03-24 11:00:00 |
++---------------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_month" href="#">start_of_month()</a>
+		<p>
+			Returns first day of month of given datetime, as DATE object (equivalent to midnight, the first second of given DATETIME's month).
+<blockquote><pre>start_of_month(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_month('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-03-01 |
++------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_quarter" href="#">start_of_quarter()</a>
+		<p>
+			Returns first day of quarter of given DATETIME, as DATE object (equivalent to midnight, first second entering quarter of given DATETIME).
+<blockquote><pre>start_of_quarter(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_quarter('2011-06-17 18:29:03') as dt;
++------------+
+| dt         |
++------------+
+| 2011-04-01 |
++------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_week" href="#">start_of_week()</a>
+		<p>
+			Returns first day of week of given DATETIME, i.e. midnight, entering Monday, as DATE object
+<blockquote><pre>start_of_week(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_week('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-03-21 |
++------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_week_sunday" href="#">start_of_week_sunday()</a>
+		<p>
+			Returns first day of week, Sunday based, of given DATETIME, as DATE object
+<blockquote><pre>start_of_week_sunday(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_week_sunday('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-03-20 |
++------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_year" href="#">start_of_year()</a>
+		<p>
+			Returns first day of year of given DATETIME, as DATE object
+<blockquote><pre>start_of_hour(dt DATETIME) 
+  RETURNS DATETIME</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_year('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-01-01 |
++------------+
+</pre></blockquote>
+	</li>
+
+</ul>
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach

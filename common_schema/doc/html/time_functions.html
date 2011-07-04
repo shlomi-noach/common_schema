@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>time_functions: common_schema documentation</title>
+	<meta name="description" content="time_functions: common_schema" />
+	<meta name="keywords" content="time_functions: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="time_functions.html">time_functions</a></h2>	
+<h3>TIME & DATE FUNCTIONS</h3>
+
+<p>
+Time & date functions: stored functions managing temoral values. All functions are DETERMINISTIC, NO SQL.
+<ul>
+	<li><a href="#start_of_hour">start_of_hour</a>: Returns DATETIME of beginning of round hour of given DATETIME.</li>
+	<li><a href="#start_of_month">start_of_month</a>: Returns first day of month of given datetime, as DATE object</li>
+	<li><a href="#start_of_quarter">start_of_quarter</a>: Returns first day of quarter of given datetime, as DATE object</li>
+	<li><a href="#start_of_week">start_of_week</a>: Returns first day of week of given datetime (i.e. start of Monday), as DATE object</li>
+	<li><a href="#start_of_week_sunday">start_of_week_sunday</a>: Returns first day of week, Sunday based, of given datetime, as DATE object</li>
+	<li><a href="#start_of_year">start_of_year</a>: Returns first day of year of given datetime, as DATE object</li>
+</ul>
+</p>
+
+<h3>SYNOPSIS</h3>
+
+<p>
+<ul>
+	<li>
+		<a name="start_of_hour" href="#">start_of_hour()</a>
+		<p>
+			Returns DATETIME of beginning of round hour of given DATETIME, 
+			i.e. seconds and minutes are stripped off the given value.
+<blockquote><pre>start_of_hour(dt DATETIME)
+  RETURNS DATETIME</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_hour('2011-03-24 11:17:08') as dt;
++---------------------+
+| dt                  |
++---------------------+
+| 2011-03-24 11:00:00 |
++---------------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_month" href="#">start_of_month()</a>
+		<p>
+			Returns first day of month of given datetime, as DATE object (equivalent to midnight, the first second of given DATETIME's month).
+<blockquote><pre>start_of_month(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_month('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-03-01 |
++------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_quarter" href="#">start_of_quarter()</a>
+		<p>
+			Returns first day of quarter of given DATETIME, as DATE object (equivalent to midnight, first second entering quarter of given DATETIME).
+<blockquote><pre>start_of_quarter(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_quarter('2011-06-17 18:29:03') as dt;
++------------+
+| dt         |
++------------+
+| 2011-04-01 |
++------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_week" href="#">start_of_week()</a>
+		<p>
+			Returns first day of week of given DATETIME, i.e. midnight, entering Monday, as DATE object
+<blockquote><pre>start_of_week(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_week('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-03-21 |
++------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_week_sunday" href="#">start_of_week_sunday()</a>
+		<p>
+			Returns first day of week, Sunday based, of given DATETIME, as DATE object
+<blockquote><pre>start_of_week_sunday(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_week_sunday('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-03-20 |
++------------+
+</pre></blockquote>
+	</li>
+
+	<li>
+		<a name="start_of_year" href="#">start_of_year()</a>
+		<p>
+			Returns first day of year of given DATETIME, as DATE object
+<blockquote><pre>start_of_hour(dt DATETIME) 
+  RETURNS DATETIME</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_year('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-01-01 |
++------------+
+</pre></blockquote>
+	</li>
+
+</ul>
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+					</ul>						
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
+						<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
+						<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
+
+
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+
+						<li><a title="innodb_locked_transactions" href="innodb_locked_transactions.html">innodb_locked_transactions</a></li>
+						<li><a title="innodb_simple_locks" href="innodb_simple_locks.html">innodb_simple_locks</a></li>
+						<li><a title="innodb_transactions" href="innodb_transactions.html">innodb_transactions</a></li>
+						<li><a title="innodb_transactions_summary" href="innodb_transactions_summary.html">innodb_transactions_summary</a></li>
+
+						<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_summary" href="processlist_summary.html">processlist_summary</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a></li>
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						
+						<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+						<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+
+						<li><a title="table_charset" href="table_charset.html">table_charset</a></li>
+						<li><a title="text_columns" href="text_columns.html">text_columns</a></li>						
+					</ul>						
+					<h3>TABLES</h3>
+					<ul>
+						<li><a title="numbers" href="numbers.html">numbers</a></li>
+					</ul>						
+					<h3>FUNCTIONS</h3>
+					<ul>
+						<li><a title="General functions" href="general_functions.html">General functions</a></li>
+						<li><a title="String functions" href="string_functions.html">String functions</a></li>
+						<li><a title="Time & date functions" href="time_functions.html">Time & date functions</a></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>
