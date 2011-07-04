@@ -1,6 +1,6 @@
 
 <p><i>common_schema</i> is a utility schema for MySQL. 
-It provides with useful views and routines which assist in schema diagnostics, meta data simplification & SQL code generation.
+It provides with useful views and routines to assist in schema analysis, monitoring, management & SQL code generation.
 </p>
 
 <p>The available components are:</p>
@@ -69,7 +69,12 @@ It provides with useful views and routines which assist in schema diagnostics, m
 
 	<p>Time & date functions</p>
 	<ul>
-		<li><a title="numbers" href="numbers.html">numbers</a></li>
+		<li><a href="time_functions.html#start_of_hour">start_of_hour</a>: Returns DATETIME of beginning of round hour of given DATETIME.</li>
+		<li><a href="time_functions.html#start_of_month">start_of_month</a>: Returns first day of month of given datetime, as DATE object</li>
+		<li><a href="time_functions.html#start_of_quarter">start_of_quarter</a>: Returns first day of quarter of given datetime, as DATE object</li>
+		<li><a href="time_functions.html#start_of_week">start_of_week</a>: Returns first day of week of given datetime (i.e. start of Monday), as DATE object</li>
+		<li><a href="time_functions.html#start_of_week_sunday">start_of_week_sunday</a>: Returns first day of week, Sunday based, of given datetime, as DATE object</li>
+		<li><a href="time_functions.html#start_of_year">start_of_year</a>: Returns first day of year of given datetime, as DATE object</li>
 	</ul>
 
 

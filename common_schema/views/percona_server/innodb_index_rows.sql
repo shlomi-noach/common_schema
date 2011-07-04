@@ -1,5 +1,5 @@
 -- 
--- Number of rows per keys per columns in InnoDB tables
+-- Number of row cardinality per keys per columns in InnoDB tables
 -- 
 CREATE OR REPLACE
 ALGORITHM = MERGE

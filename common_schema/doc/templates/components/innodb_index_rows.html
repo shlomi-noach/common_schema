@@ -1,0 +1,98 @@
+<h3>NAME</h3>
+innodb_index_rows: Number of row cardinality per keys per columns in InnoDB tables
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>innodb_index_rows</i> extends the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server, and presents with information on InnoDB keys cardinality as per indexed column.
+</p>
+
+<p>
+The Percona Server INNODB_INDEX_STATS table presents with cardinality values per index, per indexed column. 
+That is, it lets us know the average number of rows expected to be found in an index for some key.
+</p>
+
+<p>For single column keys, this is simple enough. However, for compound indexes (indexes over multiple columns), this information becomes even more
+interesting, as it lets us examine the reduction in cardinality per column. However, the Percona Server patch only informs us with numbers. 
+</p>
+
+<p><i>innodb_index_rows</i> extends that information and adds column information. It lists column names and their sequence within the key,
+and provides with easier read.</p>
+
+<p>This view depends upon the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server. Note that as of Percona Server 5.5.8-20.0 the schema of the INNODB_INDEX_STATS is incompatible with earlier releases, and is not yet supported. 
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_index_rows;
++-------------------------+--------------+------+-----+---------+-------+
+| Field                   | Type         | Null | Key | Default | Extra |
++-------------------------+--------------+------+-----+---------+-------+
+| TABLE_SCHEMA            | varchar(64)  | NO   |     |         |       |
+| TABLE_NAME              | varchar(64)  | NO   |     |         |       |
+| INDEX_NAME              | varchar(64)  | NO   |     |         |       |
+| SEQ_IN_INDEX            | bigint(2)    | NO   |     | 0       |       |
+| COLUMN_NAME             | varchar(64)  | NO   |     |         |       |
+| incremental_row_per_key | varchar(256) | NO   |     |         |       |
++-------------------------+--------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: Table schema of examined index</li>
+	<li><strong>TABLE_NAME</strong>: Examined index' table</li>
+	<li><strong>INDEX_NAME</strong>: name of index examined</li>
+	<li><strong>SEQ_IN_INDEX</strong>: position of column within index (<strong>1</strong> based)</li>
+	<li><strong>COLUMN_NAME</strong>: name of column within index</li>
+	<li><strong>incremental_row_per_key</strong>: Cardinality (number of values per key) of index up to and including current column</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Examine index cardinality on a specific table:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_index_rows WHERE TABLE_NAME='docs_template';
++--------------+---------------+-----------------+--------------+---------------------+-------------------------+
+| TABLE_SCHEMA | TABLE_NAME    | INDEX_NAME      | SEQ_IN_INDEX | COLUMN_NAME         | incremental_row_per_key |
++--------------+---------------+-----------------+--------------+---------------------+-------------------------+
+| databus      | docs_template | PRIMARY         |            1 | doc_id              | 1                       |
+| databus      | docs_template | unique_docs_idx |            1 | origin_id           | 28697765                |
+| databus      | docs_template | unique_docs_idx |            2 | doc_published       | 28697765                |
+| databus      | docs_template | unique_docs_idx |            3 | uniq_indicator      | 1                       |
+| databus      | docs_template | unique_docs_idx |            4 | info                | 1                       |
+| databus      | docs_template | doc_timestamp   |            1 | doc_timestamp       | 12                      |
++--------------+---------------+-----------------+--------------+---------------------+-------------------------+
+</pre></blockquote>
+
+<p>Compare with call to INFORMATION_SCHEMA.INNODB_INDEX_STATS:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM INFORMATION_SCHEMA.INNODB_INDEX_STATS WHERE TABLE_NAME='docs_template';
++--------------+---------------+---------------------+--------+--------------------------+------------+------------+
+| table_schema | table_name    | index_name          | fields | row_per_keys             | index_size | leaf_pages |
++--------------+---------------+---------------------+--------+--------------------------+------------+------------+
+| databus      | docs_template | PRIMARY             |      1 | 1                        |   18851201 |   16485198 |
+| databus      | docs_template | unique_docs_idx     |      4 | 28697765, 28697765, 1, 1 |     834310 |     725102 |
+| databus      | docs_template | doc_timestamp       |      2 | 12, 1                    |     127577 |     126428 |
++--------------+---------------+---------------------+--------+--------------------------+------------+------------+
+</pre></blockquote>
+<p>
+Note the following:
+<ul>
+	<li>The <i>PRIMARY</i> key is on <i>doc_id</i>, hence contains one column exactly. Since it is UNIQUE, it is certain to have <strong>1</strong> row per key.</li>
+	<li>The <i>unique_docs_idx</i> key is a UNIQUE key over four columns. The INFORMATION_SCHEMA.INNODB_INDEX_STATS table tells us that for 1st and 2nd columns,
+	cardinality is <strong>28697765</strong>. Only at 3rd and 4th columns does cardinality per key drop to <strong>1</strong>.</li>
+	<li>The <i>doc_timestamp</i> index is non unique. The INFORMATION_SCHEMA.INNODB_INDEX_STATS table lists two values for that column, although it only indexes one column only.
+	This is because it implicitly includes the PRIMARY key for that table (as with all InnoDB keys). However, in <i>innodb_index_rows</i> only the explicitly indexed columns are listed.</li>
+</ul>
+</p>
+
+<h3>ENVIRONMENT</h3>
+Percona Server &gt; 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
+
+<h3>SEE ALSO</h3>
+<a href="innodb_index_stats.html">innodb_index_stats</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
