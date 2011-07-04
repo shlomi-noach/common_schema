@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>innodb_index_stats: common_schema documentation</title>
+	<meta name="description" content="innodb_index_stats: common_schema" />
+	<meta name="keywords" content="innodb_index_stats: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="innodb_index_stats.html">innodb_index_stats</a></h2>	
+<h3>NAME</h3>
+innodb_index_stats: Estimated InnoDB depth & split factor of key's B+ Tree  
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>innodb_index_stats</i> extends the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server, and presents with estimated depth & split factor of InnoDB keys.
+</p>
+
+<p>
+Estimations are optimistic, in that they assume condensed trees. 
+It is possible that the depth is larger than estimated, and that split factor is lower than estimated.
+</p>
+
+<p>Estimated values are presented as floating point values, although in reality these are
+integer types. 
+</p>
+
+<p>This view is experimental and in BETA stage. 
+</p>
+
+<p>This view depends upon the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server. Note that as of Percona Server 5.5.8-20.0 the schema of the INNODB_INDEX_STATS is incompatible with earlier releases, and is not yet supported. 
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_index_stats;
++--------------+---------------------+------+-----+---------+-------+
+| Field        | Type                | Null | Key | Default | Extra |
++--------------+---------------------+------+-----+---------+-------+
+| table_schema | varchar(192)        | NO   |     |         |       |
+| table_name   | varchar(192)        | NO   |     |         |       |
+| index_name   | varchar(192)        | NO   |     |         |       |
+| fields       | bigint(21) unsigned | NO   |     | 0       |       |
+| row_per_keys | varchar(256)        | NO   |     |         |       |
+| index_size   | bigint(21) unsigned | NO   |     | 0       |       |
+| leaf_pages   | bigint(21) unsigned | NO   |     | 0       |       |
+| split_factor | decimal(23,1)       | NO   |     | 0.0     |       |
+| index_depth  | double(18,1)        | NO   |     | 0.0     |       |
++--------------+---------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view map directly to those of 
+<a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a>, 
+with the addition of:</p>
+<ul>
+	<li><strong>split_factor</strong>: Estimated split factor of the index tree</li>
+	<li><strong>index_depth</strong>: Estimated depth of the index tree</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Examine index attributes on a specific table:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_index_stats WHERE TABLE_NAME='docs_template';
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+| table_schema | table_name    | index_name      | fields | row_per_keys             | index_size | leaf_pages | split_factor | index_depth |
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+| databus      | docs_template | unique_docs_idx |      4 | 28697340, 28697340, 1, 1 |     834310 |     725102 |          7.6 |         7.6 |
+| databus      | docs_template | PRIMARY         |      1 | 1                        |   18851201 |   16485198 |          8.0 |         9.0 |
+| databus      | docs_template | doc_timestamp   |      2 | 12, 1                    |     127577 |     126428 |        111.0 |         3.5 |
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+Percona Server &lt; 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
+
+<h3>SEE ALSO</h3>
+<a href="innodb_index_rows.html">innodb_index_rows</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+					</ul>						
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
+						<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
+						<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
+
+
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+
+						<li><a title="innodb_locked_transactions" href="innodb_locked_transactions.html">innodb_locked_transactions</a></li>
+
+						<li><a title="innodb_index_rows" href="innodb_index_rows.html">innodb_index_rows</a></li>
+						<li><a title="innodb_index_stats" href="innodb_index_stats.html">innodb_index_stats</a></li>
+
+						<li><a title="innodb_simple_locks" href="innodb_simple_locks.html">innodb_simple_locks</a></li>
+						<li><a title="innodb_transactions" href="innodb_transactions.html">innodb_transactions</a></li>
+						<li><a title="innodb_transactions_summary" href="innodb_transactions_summary.html">innodb_transactions_summary</a></li>
+
+						<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
+						
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_summary" href="processlist_summary.html">processlist_summary</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a></li>
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						
+						<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+						<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+
+						<li><a title="table_charset" href="table_charset.html">table_charset</a></li>
+						<li><a title="text_columns" href="text_columns.html">text_columns</a></li>						
+					</ul>						
+					<h3>TABLES</h3>
+					<ul>
+						<li><a title="numbers" href="numbers.html">numbers</a></li>
+					</ul>						
+					<h3>FUNCTIONS</h3>
+					<ul>
+						<li><a title="General functions" href="general_functions.html">General functions</a></li>
+						<li><a title="String functions" href="string_functions.html">String functions</a></li>
+						<li><a title="Time & date functions" href="time_functions.html">Time & date functions</a></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

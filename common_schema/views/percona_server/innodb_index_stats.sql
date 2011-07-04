@@ -1,5 +1,5 @@
 -- 
--- Enhanced view of INNODB_INDEX_STATS
+-- Enhanced view of INNODB_INDEX_STATS: Estimated InnoDB depth & split factor of key's B+ Tree  
 -- 
 CREATE OR REPLACE
 ALGORITHM = MERGE

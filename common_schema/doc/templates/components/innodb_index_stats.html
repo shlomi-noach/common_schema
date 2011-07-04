@@ -1,0 +1,76 @@
+<h3>NAME</h3>
+innodb_index_stats: Estimated InnoDB depth & split factor of key's B+ Tree  
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>innodb_index_stats</i> extends the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server, and presents with estimated depth & split factor of InnoDB keys.
+</p>
+
+<p>
+Estimations are optimistic, in that they assume condensed trees. 
+It is possible that the depth is larger than estimated, and that split factor is lower than estimated.
+</p>
+
+<p>Estimated values are presented as floating point values, although in reality these are
+integer types. 
+</p>
+
+<p>This view is experimental and in BETA stage. 
+</p>
+
+<p>This view depends upon the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server. Note that as of Percona Server 5.5.8-20.0 the schema of the INNODB_INDEX_STATS is incompatible with earlier releases, and is not yet supported. 
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_index_stats;
++--------------+---------------------+------+-----+---------+-------+
+| Field        | Type                | Null | Key | Default | Extra |
++--------------+---------------------+------+-----+---------+-------+
+| table_schema | varchar(192)        | NO   |     |         |       |
+| table_name   | varchar(192)        | NO   |     |         |       |
+| index_name   | varchar(192)        | NO   |     |         |       |
+| fields       | bigint(21) unsigned | NO   |     | 0       |       |
+| row_per_keys | varchar(256)        | NO   |     |         |       |
+| index_size   | bigint(21) unsigned | NO   |     | 0       |       |
+| leaf_pages   | bigint(21) unsigned | NO   |     | 0       |       |
+| split_factor | decimal(23,1)       | NO   |     | 0.0     |       |
+| index_depth  | double(18,1)        | NO   |     | 0.0     |       |
++--------------+---------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view map directly to those of 
+<a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a>, 
+with the addition of:</p>
+<ul>
+	<li><strong>split_factor</strong>: Estimated split factor of the index tree</li>
+	<li><strong>index_depth</strong>: Estimated depth of the index tree</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Examine index attributes on a specific table:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_index_stats WHERE TABLE_NAME='docs_template';
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+| table_schema | table_name    | index_name      | fields | row_per_keys             | index_size | leaf_pages | split_factor | index_depth |
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+| databus      | docs_template | unique_docs_idx |      4 | 28697340, 28697340, 1, 1 |     834310 |     725102 |          7.6 |         7.6 |
+| databus      | docs_template | PRIMARY         |      1 | 1                        |   18851201 |   16485198 |          8.0 |         9.0 |
+| databus      | docs_template | doc_timestamp   |      2 | 12, 1                    |     127577 |     126428 |        111.0 |         3.5 |
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+Percona Server &lt; 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
+
+<h3>SEE ALSO</h3>
+<a href="innodb_index_rows.html">innodb_index_rows</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
