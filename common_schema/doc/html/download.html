@@ -17,22 +17,51 @@
 		<div id="contentwrapper">
 			<div id="content">
 				<h2><a href="download.html">download</a></h2>	
-<p>The <i>common_schema</i> project is currently hosted by Google Code. 
-Downloads are available at the Google Code <a href="http://code.google.com/p/common-schema/">common_schema project page</a>.
-</p>
+<p>The <i>common_schema</i> project is currently hosted by Google
+Code. Downloads are available at the Google Code 
+<a	href="http://code.google.com/p/common-schema/">common_schema project page</a></p>
 
-<p>All downloads are plain text SQL source files. There are </p>
+<p>All downloads are plain text SQL source files. There are several
+distributions of <i>common_schema</i>, compatible with different MySQL
+server versions, utilizing different features in the different versions:</p>
+
+<h4>common_schema_mysql_51</h4>
+<p>Includes the majority of features.</p>
+<p>Compatible with:</p>
 <ul>
-	<li><b>.deb</b> package, to be installed on <i>debian</i>, <i>ubuntu</i> and otherwise debian based distributions.</li>
-	<li><b>.rpm</b> package, architecture free (<i>noarch</i>), for RPM supporting Linux distributions such as <i>RedHat</i>, <i>Fedora</i>, <i>CentOS</i> etc.</li>
-	<li><b>.tar.gz</b> using python's distutils installer.</li>
-	<li><b>source</b>, directly retrieved from SVN or from above python package.</li>
-	<li>Some distribution specific <a href="http://software.opensuse.org/search?baseproject=ALL&amp;p=1&amp;q=openark-kit">RPM packages</a>, courtesy Lenz Grimmer.</li>
+	<li>MySQL <strong>5.1</strong> and above</li>
 </ul>
-<p><a href="http://code.google.com/p/openarkkit/">Take me to the downloads page</a>.</p>
-<p>
-	<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-</p>
+
+<h4>common_schema_mysql_innodb_plugin</h4>
+<p>Extends the former distribution. Adds InnoDB Plugin specific
+features (relies on introduced INFORMATION_SCHEMA tables).</p>
+<p>Compatible with:</p>
+<ul>
+	<li>MySQL <strong>5.1</strong> with InnoDB Plugin enabled (and
+	with all INFORMATION_SCHEMA plugins loaded).</li>
+	<li>MySQL <strong>5.5</strong> (includes InnoDB Plugin by
+	default)</li>
+	<li>Percona Server <strong>5.1</strong> and above (uses XtraDB, a
+	fork of InnoDB Plugin)</li>
+</ul>
+
+<h4>common_schema_percona_server</h4>
+<p>Extends the former distributions. Adds Percona Server specific
+features.</p>
+<p>Compatible with:</p>
+<ul>
+	<li>Percona Server <strong>5.1</strong> and above, with
+	INNODB_INDEX_STATS enabled</li>
+</ul>
+
+
+<h3>Get it</h3>
+I'm ready!
+<a href="http://code.google.com/p/common-schema/">Take me to
+downloads page</a>
+
+<h3>Notes</h3>
+<p>There is no MySQL <strong>5.0</strong> compatible distribution.</p>
 				<br/>
 			</div>
 			<div id="sidebarwrapper">

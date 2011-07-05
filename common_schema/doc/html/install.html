@@ -46,7 +46,26 @@ Make sure to execute them as a privileged user, e.g. 'root', as installation inv
 | sakila             |
 | world              |
 +--------------------+
-</pre></blockquote>				<br/>
+</pre></blockquote>
+
+<h3>Troubleshooting</h3>
+
+<p>Since installation is merely an import act, you should only expect trouble if
+schema generation is unable to execute on your server.
+</p>
+
+<ul>
+	<li>Are you executing on a <strong>5.0</strong> MySQL server? This version is not supported.</li>
+	<li>Are you trying to import the innodb_plugin version of <i>common_schema</i> on
+	a server where innodb_plugin is disabled?</li>
+	<li>Are you trying to import the innodb_plugin version of <i>common_schema</i> on
+	a server where innodb_plugin is enabled, but not all plugin's modules are loaded? 
+	Each innodb_plugin INFORMATION_SCHEMA table is its own plugin; you should enable them all.</li>
+	<li>Are you trying to import the Percona Server version of <i>common_schema</i> on
+	a standard MySQL server? This won't work</li> 
+	<li>Are you trying to import the Percona Server version of <i>common_schema</i> on
+	a Percona server where INNODB_INDEX_STATS is not enabled?</li> 
+</ul>				<br/>
 			</div>
 			<div id="sidebarwrapper">
 				<div id="menu">

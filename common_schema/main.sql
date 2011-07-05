@@ -19,6 +19,9 @@
 -- Generate schema
 --
 
+-- Uncomment if you want a clean build:
+-- DROP DATABASE IF EXISTS common_schema;
+
 CREATE DATABASE IF NOT EXISTS common_schema;
 
 USE common_schema;
