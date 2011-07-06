@@ -1,0 +1,75 @@
+<h3>RISKS</h3>
+
+<p>This is not the usual "It's your responsibility" stuff. Please read through.</p>
+
+<p>
+<i>common_schema</i> is not a code; it is a database schema. 
+The risks of using this schema are those affected by issuing queries against its views or functions.
+</p>
+
+<p>
+In particular, most of the views rely on INFORMATION_SCHEMA views.
+</p>
+
+<p>
+MySQL's INFORMATION_SCHEMA views are not all equal. Some are pretty lightweight (like PROCESSLIST); 
+some take a bit more time to evaluate (like GLOBAL_STATUS) but do not impose locks on the database. 
+</p>
+
+<p>Some views, however, require getting metadata for tables, and in fact, require metadata for all
+tables at once. First and foremost: the TABLES table, but also COLUMNS, STATISTICS etc. 
+Performing even the simplest query on one of these views may cause, in extreme cases, lockdown of
+your database for long minutes. The author has also witnessed databases crash because of
+queries on such tables. 
+See also: 
+<a href="http://www.xaprb.com/blog/2009/10/29/making-changes-to-many-tables-at-once/">Making changes to many tables at once</a>, 
+<a href="http://www.pythian.com/news/8633/how-to-tell-when-using-information_schema-might-crash-your-database/">How to tell when using INFORMATION_SCHEMA might crash your database</a>.
+</p>
+
+<p>It is safer to perform such heavyweight queries on a replicating slave. A slave may actually
+sustain less "damage" from these queries due to its single-threaded writing mode, making for
+less contention on table locks. At least this is the author's experience; no guarantees made.</p>
+
+<p>
+The good news is that those views relying on heavyweight INFORMATION_SCHEMA tables are those
+you don't mind running on the slave, or on an offline machine. These views usually analyze your
+table structure, data size, keys, AUTO_INCREMENT columns, etc. They don't have anything in particular
+for monitoring a live, running server. Some of these views don't actually require data to work on, just a schema.
+</p>
+
+<p>Examples of <i>common_schema</i> views which rely on heavyweight INFORMATION_SCHEMA tables:</p>
+<ul>
+	<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
+	<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a></li>
+	<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+	<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+	<li><a title="table_charset" href="table_charset.html">table_charset</a></li>
+	<li><a title="text_columns" href="text_columns.html">text_columns</a></li>
+	<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
+	<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
+	<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
+	<li><a title="innodb_index_rows" href="innodb_index_rows.html">innodb_index_rows</a></li>
+</ul>
+
+<p>The list above may change, or may not reflect the actual state of views & functions.</p>
+
+<p>You should also note that <i>"common_schema"</i> is hard coded into the distribution files; 
+if you have a schema after the same name, make sure to change <i>"common_schema"</i> in the distribution file.</p>
+
+<p>And, <i>it's your responsibility</i>. By using <i>common_schema</i>, your agree to it's license:</p>
+<h3>LICENSE</h3>
+common_schema is released under the BSD license.
+<blockquote><pre>Copyright (c) 2011, Shlomi Noach
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+* Neither the name of the organization nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
+</blockquote>
+<h3>AUTHOR</h3>
+Shlomi Noach
