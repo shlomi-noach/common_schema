@@ -17,8 +17,6 @@
 		<div id="contentwrapper">
 			<div id="content">
 				<h2><a href="risks.html">risks</a></h2>	
-<h3>RISKS</h3>
-
 <p>This is not the usual "It's your responsibility" stuff. Please read through.</p>
 
 <p>
@@ -32,7 +30,7 @@ In particular, most of the views rely on INFORMATION_SCHEMA views.
 
 <p>
 MySQL's INFORMATION_SCHEMA views are not all equal. Some are pretty lightweight (like PROCESSLIST); 
-some take a bit more time to evaluate (like GLOBAL_STATUS) but do not impose locks on the database. 
+some take a bit more time to evaluate (like GLOBAL_STATUS) but do not impose locks affecting your data. 
 </p>
 
 <p>Some views, however, require getting metadata for tables, and in fact, require metadata for all
