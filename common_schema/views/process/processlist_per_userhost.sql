@@ -7,7 +7,7 @@ SQL SECURITY INVOKER
 VIEW processlist_per_userhost AS
   SELECT 
     USER AS user,
-    SUBSTRING_INDEX(HOST, ':', 1) AS host,
+    MIN(SUBSTRING_INDEX(HOST, ':', 1)) AS host,
     COUNT(*) AS count_processes,
     SUM(COMMAND != 'Sleep') AS active_processes,
     AVG(IF(COMMAND != 'Sleep', TIME, NULL)) AS average_active_time
