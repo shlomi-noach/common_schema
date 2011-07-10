@@ -10,6 +10,7 @@
 	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
 
 	<property name="build.dir" value="build" />
+	<property name="dist.dir" value="dist" />
 	<property name="sql.mysql_51.output.file" value="common_schema_mysql_51.sql" />
 	<property name="sql.innodb_plugin.output.file" value="common_schema_innodb_plugin.sql" />
 	<property name="sql.percona_server.output.file" value="common_schema_percona_server.sql" />
@@ -25,7 +26,7 @@
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
-		<delete dir="dist" />
+		<delete dir="${dist.dir}" />
 	</target>
 
 	<target name="undeploy">
@@ -92,21 +93,22 @@
 		</concat>
 	</target>
 
-	<target name="release" depends="clean, build, revnumber">
-		<antcall target="release_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${sql.mysql_51.output.file}" />
+	<target name="dist" depends="clean, build, revnumber">
+		<mkdir dir="${dist.dir}" />
+		<antcall target="dist_file">
+			<param name="common_schema_sql_file" value="${sql.mysql_51.output.file}" />
 		</antcall>
-		<antcall target="release_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${sql.innodb_plugin.output.file}" />
+		<antcall target="dist_file">
+			<param name="common_schema_sql_file" value="${sql.innodb_plugin.output.file}" />
 		</antcall>
-		<antcall target="release_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${sql.percona_server.output.file}" />
+		<antcall target="dist_file">
+			<param name="common_schema_sql_file" value="${sql.percona_server.output.file}" />
 		</antcall>
 	</target>
 
-	<target name="release_file">
+	<target name="dist_file">
 		<propertyregex property="release_filename" input="${common_schema_sql_file}" regexp="(.*).sql" select="\1-r${svn.revision}.sql" />
-		<copy file="${common_schema_sql_file}" tofile="${release_filename}" />
+		<copy file="${build.dir}/${common_schema_sql_file}" tofile="${dist.dir}/${release_filename}" />
 	</target>
 
 	<target name="deploy_mysql_51" depends="build_mysql_51">
