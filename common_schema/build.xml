@@ -1,7 +1,7 @@
 <project name="util schema" default="all" basedir=".">
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
 		<classpath>
-			<pathelement location="/usr/share/java/ant-contrib.jar"/>
+			<pathelement location="/usr/share/java/ant-contrib.jar" />
 		</classpath>
 	</taskdef>
 
@@ -10,22 +10,25 @@
 	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
 
 	<property name="build.dir" value="build" />
-	<property name="mysql_51.output.file" value="common_schema_mysql_51.sql" />
-	<property name="mysql_innodb_plugin.output.file" value="common_schema_mysql_innodb_plugin.sql" />
-	<property name="percona_server.output.file" value="common_schema_percona_server.sql" />
+	<property name="sql.mysql_51.output.file" value="common_schema_mysql_51.sql" />
+	<property name="sql.innodb_plugin.output.file" value="common_schema_innodb_plugin.sql" />
+	<property name="sql.percona_server.output.file" value="common_schema_percona_server.sql" />
 
-	<property name="doc.templates.dir" value="doc/templates"/>
-	<property name="doc.html.dir" value="doc/html"/>
+	<property name="doc.templates.dir" value="doc/templates" />
+	<property name="doc.html.dir" value="doc/html" />
 
 	<target name="all" depends="build">
 	</target>
 
-	<target name="build" depends="mysql_51, mysql_innodb_plugin, percona_server">
+	<target name="build" depends="build_mysql_51, build_innodb_plugin, build_percona_server">
 	</target>
 
 	<target name="clean">
 		<delete dir="${build.dir}" />
 		<delete dir="dist" />
+	</target>
+
+	<target name="undeploy">
 		<antcall target="exec_mysql_command">
 			<param name="mysql_command" value="DROP DATABASE IF EXISTS common_schema" />
 		</antcall>
@@ -51,9 +54,9 @@
 	</target>
 
 
-	<target name="mysql_51">
+	<target name="build_mysql_51">
 		<mkdir dir="${build.dir}" />
-		<concat destfile="${build.dir}/${mysql_51.output.file}">
+		<concat destfile="${build.dir}/${sql.mysql_51.output.file}">
 			<fileset file="main.sql" />
 
 			<fileset dir="tables/" includes="*.sql" />
@@ -75,35 +78,52 @@
 		</concat>
 	</target>
 
-	<target name="mysql_innodb_plugin" depends="mysql_51">
-		<concat destfile="${build.dir}/${mysql_innodb_plugin.output.file}">
-			<fileset file="${build.dir}/${mysql_51.output.file}" />
+	<target name="build_innodb_plugin" depends="build_mysql_51">
+		<concat destfile="${build.dir}/${sql.innodb_plugin.output.file}">
+			<fileset file="${build.dir}/${sql.mysql_51.output.file}" />
 			<fileset dir="views/innodb_plugin/" includes="*.sql" />
 		</concat>
 	</target>
 
-	<target name="percona_server" depends="mysql_innodb_plugin">
-		<concat destfile="${build.dir}/${percona_server.output.file}">
-			<fileset file="${build.dir}/${mysql_innodb_plugin.output.file}" />
+	<target name="build_percona_server" depends="build_innodb_plugin">
+		<concat destfile="${build.dir}/${sql.percona_server.output.file}">
+			<fileset file="${build.dir}/${sql.innodb_plugin.output.file}" />
 			<fileset dir="views/percona_server/" includes="*.sql" />
 		</concat>
 	</target>
 
-	<target name="deploy_mysql_51" depends="mysql_51">
-		<antcall target="deploy_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${mysql_51.output.file}" />
+	<target name="release" depends="clean, build, revnumber">
+		<antcall target="release_file">
+			<param name="common_schema_sql_file" value="${build.dir}/${sql.mysql_51.output.file}" />
+		</antcall>
+		<antcall target="release_file">
+			<param name="common_schema_sql_file" value="${build.dir}/${sql.innodb_plugin.output.file}" />
+		</antcall>
+		<antcall target="release_file">
+			<param name="common_schema_sql_file" value="${build.dir}/${sql.percona_server.output.file}" />
 		</antcall>
 	</target>
 
-	<target name="deploy_mysql_innodb_plugin" depends="mysql_innodb_plugin">
+	<target name="release_file">
+		<propertyregex property="release_filename" input="${common_schema_sql_file}" regexp="(.*).sql" select="\1-r${svn.revision}.sql" />
+		<copy file="${common_schema_sql_file}" tofile="${release_filename}" />
+	</target>
+
+	<target name="deploy_mysql_51" depends="build_mysql_51">
 		<antcall target="deploy_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${mysql_innodb_plugin.output.file}" />
+			<param name="common_schema_sql_file" value="${build.dir}/${sql.mysql_51.output.file}" />
 		</antcall>
 	</target>
 
-	<target name="deploy_percona_server" depends="percona_server">
+	<target name="deploy_innodb_plugin" depends="build_innodb_plugin">
 		<antcall target="deploy_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${percona_server.output.file}" />
+			<param name="common_schema_sql_file" value="${build.dir}/${sql.innodb_plugin.output.file}" />
+		</antcall>
+	</target>
+
+	<target name="deploy_percona_server" depends="build_percona_server">
+		<antcall target="deploy_file">
+			<param name="common_schema_sql_file" value="${build.dir}/${sql.percona_server.output.file}" />
 		</antcall>
 	</target>
 
@@ -139,22 +159,23 @@
 		</exec>
 	</target>
 
-	<target name="doc">		
-		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}"></copy>
+	<target name="doc">
+		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}">
+		</copy>
 		<foreach param="component_doc_filename" target="component_doc">
 			<path>
 				<fileset dir="${doc.templates.dir}/components">
-			    	<include name="*.html"/>
+					<include name="*.html" />
 				</fileset>
 			</path>
-		</foreach>		
+		</foreach>
 		<foreach param="generaldoc_filename" target="generaldoc">
 			<path>
 				<fileset dir="${doc.templates.dir}/general">
-			    	<include name="*.html"/>
+					<include name="*.html" />
 				</fileset>
 			</path>
-		</foreach>	
+		</foreach>
 		<!--
 		<foreach param="routine_group_path" target="routinesdoc">
 			<path>
@@ -163,46 +184,50 @@
 				</dirset>
 			</path>
 		</foreach>
-		-->		
+		-->
 	</target>
-	<target name="component_doc">		
-		<basename property="doc_basename" file="${component_doc_filename}"/>
-		<basename property="component_name" file="${component_doc_filename}" suffix=".html"/>
-		<echo message="Generating documentation for ${component_name} component" /> 
+	<target name="component_doc">
+		<basename property="doc_basename" file="${component_doc_filename}" />
+		<basename property="component_name" file="${component_doc_filename}" suffix=".html" />
+		<echo message="Generating documentation for ${component_name} component" />
 		<concat destfile="${doc.html.dir}/${doc_basename}">
-			<filelist dir="${doc.templates.dir}" files="head.html.template, ${component_doc_filename}, tail.html.template"/>
+			<filelist dir="${doc.templates.dir}" files="head.html.template, ${component_doc_filename}, tail.html.template" />
 		</concat>
-		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${component_name}"/>
-		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${component_name}"/>
+		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${component_name}" />
+		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${component_name}" />
 	</target>
-	<target name="generaldoc">		
-		<basename property="doc_basename" file="${generaldoc_filename}"/>
-		<basename property="docname" file="${generaldoc_filename}" suffix=".html"/>
-		<echo message="Generating documentation for ${docname} file" /> 
+	<target name="generaldoc">
+		<basename property="doc_basename" file="${generaldoc_filename}" />
+		<basename property="docname" file="${generaldoc_filename}" suffix=".html" />
+		<echo message="Generating documentation for ${docname} file" />
 		<concat destfile="${doc.html.dir}/${doc_basename}">
-			<filelist dir="${doc.templates.dir}" files="head.html.template, ${generaldoc_filename}, tail.html.template"/>
+			<filelist dir="${doc.templates.dir}" files="head.html.template, ${generaldoc_filename}, tail.html.template" />
 		</concat>
-		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${docname}"/>
-		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${docname}"/>
+		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${docname}" />
+		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${docname}" />
 	</target>
-	<target name="routinesdoc">		
-		<basename property="routine_group_name" file="${routine_group_path}"/>
-		<propertyregex property="routine_group_name.spaced" input="${routine_group_name}" regexp="_" replace=" "></propertyregex>
-		<echo message="Generating documentation for ${routine_group_name}" /> 
+	<target name="routinesdoc">
+		<basename property="routine_group_name" file="${routine_group_path}" />
+		<propertyregex property="routine_group_name.spaced" input="${routine_group_name}" regexp="_" replace=" ">
+		</propertyregex>
+		<echo message="Generating documentation for ${routine_group_name}" />
 		<concat destfile="${doc.html.dir}/${routine_group_name}.html">
-			<filelist dir="${doc.templates.dir}" files="head.html.template"/>
-			<fileset dir="${doc.templates.dir}/routines/${routine_group_name}"></fileset>
-			<filelist dir="${doc.templates.dir}/routines" files="routine.tail.html.template"/>
-			<filelist dir="${doc.templates.dir}" files="tail.html.template"/>
+			<filelist dir="${doc.templates.dir}" files="head.html.template" />
+			<fileset dir="${doc.templates.dir}/routines/${routine_group_name}">
+			</fileset>
+			<filelist dir="${doc.templates.dir}/routines" files="routine.tail.html.template" />
+			<filelist dir="${doc.templates.dir}" files="tail.html.template" />
 		</concat>
-		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagetitle" value="${routine_group_name.spaced}"/>
-		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagename" value="${routine_group_name.spaced}"/>
+		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagetitle" value="${routine_group_name.spaced}" />
+		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagename" value="${routine_group_name.spaced}" />
 	</target>
-	
+
 	<target name="test">
-		<loadfile property="f.c" srcfile="/tmp/crc64.sql"></loadfile>
+		<loadfile property="f.c" srcfile="/tmp/crc64.sql">
+		</loadfile>
 		<echo>prop: ${f.c}</echo>
-		<propertyregex property="f.c2" input="${f.c}" regexp="@desc (.*)" select="\1"></propertyregex>
+		<propertyregex property="f.c2" input="${f.c}" regexp="@desc (.*)" select="\1">
+		</propertyregex>
 		<echo>prop2: ---${f.c2}---</echo>
 	</target>
 </project>
