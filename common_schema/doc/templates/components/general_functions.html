@@ -4,7 +4,6 @@
 General functions: stored functions managing general tasks. All functions are DETERMINISTIC, NO SQL.
 <ul>
 	<li><a href="#crc64">crc64()</a>: Return a 64 bit CRC of given input, as unsigned big integer</li>
-	<li><a href="#mysql_grantee">mysql_grantee()</a>: Return a qualified MySQL grantee (account) based on user and host.</li>
 </ul>
 </p>
 
@@ -34,24 +33,6 @@ General functions: stored functions managing general tasks. All functions are DE
 +---------------------+
 | 9350511318824990686 |
 +---------------------+
-</pre></blockquote>
-	</li>
-	<li>
-		<a name="mysql_grantee" href="#">mysql_grantee()</a>
-		<p>
-			Return a qualified MySQL grantee (account) name based on <strong>user</strong> and <strong>host</strong>. 
-			The output of this function is useful in automation of SQL query generation, or otherwise
-			in comparing and recognizing accounts in different formats (user+host vs. grantee formats).
-<blockquote><pre>mysql_grantee(mysql_user char(16) CHARSET utf8, mysql_host char(60) CHARSET utf8) 
-  RETURNS VARCHAR(100) CHARSET utf8</pre></blockquote>
-		</p>
-			<h4>EXAMPLES</h4>
-<blockquote><pre>SELECT common_schema.mysql_grantee('web_user', '192.128.0.%') AS grantee;
-+--------------------------+
-| grantee                  |
-+--------------------------+
-| 'web_user'@'192.128.0.%' |
-+--------------------------+
 </pre></blockquote>
 	</li>
 </ul>
