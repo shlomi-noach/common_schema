@@ -9,7 +9,7 @@
 DELIMITER $$
 
 DROP FUNCTION IF EXISTS match_grantee $$
-CREATE FUNCTION match_grantee(connection_user char(16) CHARSET utf8, connection_host char(60) CHARSET utf8) RETURNS VARCHAR(100) CHARSET utf8 
+CREATE FUNCTION match_grantee(connection_user char(16) CHARSET utf8, connection_host char(70) CHARSET utf8) RETURNS VARCHAR(100) CHARSET utf8 
 DETERMINISTIC
 READS SQL DATA
 SQL SECURITY INVOKER
