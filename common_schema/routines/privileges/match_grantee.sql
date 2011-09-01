@@ -3,8 +3,8 @@
 --
 -- Example:
 --
--- SELECT mysql_grantee('web_user', '192.128.0.%');
--- Returns (text): 'web_user'@'192.128.0.%'
+-- SELECT match_grantee('apps', '192.128.0.1:12345');
+-- Returns (text): 'apps'@'%', a closest matching account
 -- 
 DELIMITER $$
 
