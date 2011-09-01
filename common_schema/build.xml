@@ -63,6 +63,7 @@
 			<fileset dir="tables/" includes="*.sql" />
 
 			<fileset dir="routines/general/" includes="*.sql" />
+			<fileset dir="routines/privileges/" includes="*.sql" />
 			<fileset dir="routines/text/" includes="*.sql" />
 			<fileset dir="routines/time/" includes="*.sql" />
 
