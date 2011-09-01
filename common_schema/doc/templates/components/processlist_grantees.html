@@ -1,0 +1,111 @@
+<h3>NAME</h3>
+processlist_grantees: Assigning of GRANTEEs for connected processes
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>processlist_grantees</i> Lists connected processes, as with <strong>PROCESSLIST</strong>.
+For each process, it analyzes the connected GRANTEE. It does so by inspecting the user+host
+presented by <strong>PROCESSLIST</strong>, and matches those values, in a similar algorithm to that 
+of the MySQL server, to the list of known accounts.
+</p>
+
+<p>
+MySQL's <strong>PROCESSLIST</strong> fails to make the connection between a process ID and the account
+for which this process is assigned. It only tells us the connection's <strong>HOST</strong> and the
+specified <strong>USER</strong>. But these do not necessarily map directly to the known grantees:
+MySQL accounts can specify wildcards for both <strong>user</strong> and <strong>host</strong>.
+</p>
+<p>
+MySQL offers the <strong>USER()</strong> and <strong>CURRENT_USER()</strong> functions, which provide
+desired data, but only for current connection.
+</p>
+<p>
+<i>processlist_grantees</i> bridges the two by utilizing 
+<a href="privileges_functions.html#match_grantee">match_grantee()</a> for each process in the PROCESSLIST.
+It also provides with additional useful information about the matched account.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.processlist_grantees;
++---------------------+---------------+------+-----+---------+-------+
+| Field               | Type          | Null | Key | Default | Extra |
++---------------------+---------------+------+-----+---------+-------+
+| ID                  | bigint(4)     | NO   |     | 0       |       |
+| USER                | varchar(16)   | NO   |     |         |       |
+| HOST                | varchar(64)   | NO   |     |         |       |
+| GRANTEE             | varchar(81)   | YES  |     |         |       |
+| grantee_user        | char(16)      | YES  |     |         |       |
+| grantee_host        | char(60)      | YES  |     |         |       |
+| is_super            | decimal(23,0) | YES  |     | NULL    |       |
+| is_repl             | int(1)        | NO   |     | 0       |       |
+| is_current          | int(1)        | NO   |     | 0       |       |
+| sql_kill_query      | varbinary(31) | YES  |     | NULL    |       |
+| sql_kill_connection | varbinary(25) | YES  |     | NULL    |       |
++---------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>
+Rows of this view map directly to rows in <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a>.</p>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>ID</strong>: process ID, as in PROCESSLIST</li>
+		<li><strong>USER</strong>: name of connected user, as in PROCESSLIST</li>
+		<li><strong>HOST</strong>: connection's host + port, as in PROCESSLIST</li>
+		<li><strong>GRANTEE</strong>: account which is calculated by <a href="privileges_functions.html#match_grantee">match_grantee()</a> to match this process.</li>
+		<li><strong>grantee_user</strong>: <i>user</i> part of the <strong>GRANTEE</strong>.</li>
+		<li><strong>grantee_host</strong>: <i>host</i> part of the <strong>GRANTEE</strong>. This does not include port specification.</li>
+		<li><strong>is_super</strong>: <strong>1</strong> if the grantee has the <strong>SUPER</strong> privilege; <strong>0</strong> if not.</li>
+		<li><strong>is_repl</strong>: <strong>1</strong> if the connection appears to be a replication thread; <strong>0</strong> if not.</li>
+		<li><strong>is_current</strong>: <strong>1</strong> if the process is the current connection; <strong>0</strong> if not.</li>
+		<li><strong>sql_kill_query</strong>: generated statement to kill current query</li>
+		<li><strong>sql_kill_connection</strong>: generated statement to kill current connection</li>
+	</ul>
+</p>
+<h3>EXAMPLES</h3>
+<p>Show grantees for all processes:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_grantees;
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| ID     | USER       | HOST                | GRANTEE                | grantee_user | grantee_host | is_super | is_repl | sql_kill_query    | sql_kill_connection |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| 650472 | replica    | jboss00.myweb:34266 | 'replica'@'%.myweb'    | replica      | %.myweb      |        0 |       1 | KILL QUERY 650472 | KILL 650472         |
+| 692346 | openarkkit | jboss02.myweb:43740 | 'openarkkit'@'%.myweb' | openarkkit   | %.myweb      |        0 |       0 | KILL QUERY 692346 | KILL 692346         |
+| 842853 | root       | localhost           | 'root'@'localhost'     | root         | localhost    |        1 |       0 | KILL QUERY 842853 | KILL 842853         |
+| 843443 | jboss      | jboss03.myweb:40007 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843443 | KILL 843443         |
+| 843444 | jboss      | jboss03.myweb:40012 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843444 | KILL 843444         |
+| 843510 | jboss      | jboss00.myweb:49850 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843510 | KILL 843510         |
+| 844559 | jboss      | jboss01.myweb:37031 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844559 | KILL 844559         |
+| 844577 | jboss      | jboss03.myweb:38238 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844577 | KILL 844577         |
+| 844592 | jboss      | jboss02.myweb:34405 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844592 | KILL 844592         |
+| 844593 | jboss      | jboss01.myweb:37089 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844593 | KILL 844593         |
+| 844595 | jboss      | jboss04.myweb:46488 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844595 | KILL 844595         |
+| 844596 | jboss      | jboss00.myweb:41046 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844596 | KILL 844596         |
+| 844600 | jboss      | jboss01.myweb:37108 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844600 | KILL 844600         |
+| 844614 | jboss      | jboss04.myweb:46500 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844614 | KILL 844614         |
+| 844618 | jboss      | jboss02.myweb:44449 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844618 | KILL 844618         |
+| 844620 | jboss      | jboss02.myweb:44456 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844620 | KILL 844620         |
+| 844626 | jboss      | jboss04.myweb:46526 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844626 | KILL 844626         |
+| 844628 | jboss      | jboss02.myweb:44466 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844628 | KILL 844628         |
+| 844631 | jboss      | jboss03.myweb:38291 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844631 | KILL 844631         |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+</pre></blockquote>
+<p>In the above, <strong>'root'@'localhost'</strong> is a trivial match, but other connections are mapped to accounts based on wildcards.
+All <strong>jboss</strong> users are connected from <i>jboss??.myweb</i> servers, and are matched to the <strong>'jboss'@'%.myweb'</strong> account.</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer. Percona Server yields a different schema.
+
+<h3>SEE ALSO</h3>
+<a href="processlist_per_userhost.html">processlist_per_userhost</a>,
+<a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_summary.html">processlist_summary</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
