@@ -1,10 +1,10 @@
 -- 
--- Returns DATETIME of beginning of round hour of given DATETIME.
+-- Returns DATE of easter day in given DATETIME's year
 -- 
 -- Example:
 --
--- SELECT start_of_hour('2011-03-24 11:17:08');
--- Returns: '2011-03-24 11:00:00' (as DATETIME)
+-- SELECT easter_day('2011-01-01');
+-- Returns: '2011-04-24' (as DATE)
 --
 
 DELIMITER $$
@@ -32,7 +32,7 @@ BEGIN
     DECLARE m    SMALLINT DEFAULT (a + 11*h + 22*L) DIV 451;
     DECLARE v100 SMALLINT DEFAULT h + L - 7*m + 114;
         
-    RETURN  STR_TO_DATE(
+    RETURN STR_TO_DATE(
                 CONCAT(
                     p_year
                 ,   '-'
@@ -42,7 +42,6 @@ BEGIN
                 )
             ,   '%Y-%c-%e'
             );
-
 END $$
 
 DELIMITER ;
