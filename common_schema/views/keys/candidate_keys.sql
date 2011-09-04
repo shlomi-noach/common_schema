@@ -18,7 +18,7 @@ VIEW _unique_keys AS
 ;
 
 -- 
--- Candidate keys: listing of prirotized candidate keys: keys which are UNIQUE, by order of best-use. 
+-- Candidate keys: listing of prioritized candidate keys: keys which are UNIQUE, by order of best-use. 
 -- 
 
 CREATE OR REPLACE
@@ -26,14 +26,13 @@ ALGORITHM = TEMPTABLE
 SQL SECURITY INVOKER
 VIEW candidate_keys AS
 SELECT
-  COLUMNS.TABLE_SCHEMA,
-  COLUMNS.TABLE_NAME,
-  COLUMNS.COLUMN_NAME,
-  _unique_keys.INDEX_NAME,
-  _unique_keys.COLUMN_NAMES,
-  _unique_keys.COUNT_COLUMN_IN_INDEX,
-  COLUMNS.DATA_TYPE,
-  COLUMNS.CHARACTER_SET_NAME,
+  COLUMNS.TABLE_SCHEMA AS table_schema,
+  COLUMNS.TABLE_NAME AS table_name,
+  _unique_keys.INDEX_NAME AS index_name,
+  _unique_keys.COLUMN_NAMES AS column_names,
+  _unique_keys.COUNT_COLUMN_IN_INDEX AS count_column_in_index,
+  COLUMNS.DATA_TYPE AS data_type,
+  COLUMNS.CHARACTER_SET_NAME AS character_set_name,
   (CASE _unique_keys.INDEX_NAME
     WHEN 'PRIMARY' THEN 0
     ELSE 1
@@ -43,15 +42,17 @@ SELECT
       ELSE 1
   END << 20
   )
-  + (CASE DATA_TYPE
+  + (CASE LOWER(DATA_TYPE)
     WHEN 'tinyint' THEN 0
     WHEN 'smallint' THEN 1
     WHEN 'int' THEN 2
-    WHEN 'bigint' THEN 3
+    WHEN 'timestamp' THEN 3
+    WHEN 'bigint' THEN 4
+    WHEN 'datetime' THEN 5
     ELSE 9
   END << 16
   ) + (COUNT_COLUMN_IN_INDEX << 0
-  ) AS candidate_order_in_table  
+  ) AS candidate_key_rank_in_table  
 FROM 
   INFORMATION_SCHEMA.COLUMNS 
   INNER JOIN _unique_keys ON (
@@ -60,5 +61,5 @@ FROM
     COLUMNS.COLUMN_NAME = _unique_keys.FIRST_COLUMN_NAME
   )
 ORDER BY   
-  COLUMNS.TABLE_SCHEMA, COLUMNS.TABLE_NAME, candidate_order_in_table
+  COLUMNS.TABLE_SCHEMA, COLUMNS.TABLE_NAME, candidate_key_rank_in_table
 ;
