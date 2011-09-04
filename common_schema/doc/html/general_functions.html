@@ -23,7 +23,6 @@
 General functions: stored functions managing general tasks. All functions are DETERMINISTIC, NO SQL.
 <ul>
 	<li><a href="#crc64">crc64()</a>: Return a 64 bit CRC of given input, as unsigned big integer</li>
-	<li><a href="#mysql_grantee">mysql_grantee()</a>: Return a qualified MySQL grantee (account) based on user and host.</li>
 </ul>
 </p>
 
@@ -55,24 +54,6 @@ General functions: stored functions managing general tasks. All functions are DE
 +---------------------+
 </pre></blockquote>
 	</li>
-	<li>
-		<a name="mysql_grantee" href="#">mysql_grantee()</a>
-		<p>
-			Return a qualified MySQL grantee (account) name based on <strong>user</strong> and <strong>host</strong>. 
-			The output of this function is useful in automation of SQL query generation, or otherwise
-			in comparing and recognizing accounts in different formats (user+host vs. grantee formats).
-<blockquote><pre>mysql_grantee(mysql_user char(16) CHARSET utf8, mysql_host char(60) CHARSET utf8) 
-  RETURNS VARCHAR(100) CHARSET utf8</pre></blockquote>
-		</p>
-			<h4>EXAMPLES</h4>
-<blockquote><pre>SELECT common_schema.mysql_grantee('web_user', '192.128.0.%') AS grantee;
-+--------------------------+
-| grantee                  |
-+--------------------------+
-| 'web_user'@'192.128.0.%' |
-+--------------------------+
-</pre></blockquote>
-	</li>
 </ul>
 </p>
 
@@ -94,6 +75,9 @@ Shlomi Noach
 					<h3>VIEWS</h3>
 					<ul>
 						<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
+
+						<li><a title="candidate_keys" href="candidate_keys.html">candidate_keys</a></li>
+
 						<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
 						<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
 
@@ -113,6 +97,7 @@ Shlomi Noach
 
 						<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
 						
+						<li><a title="processlist_grantees" href="processlist_grantees.html">processlist_grantees</a></li>
 						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
 						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
 						<li><a title="processlist_summary" href="processlist_summary.html">processlist_summary</a></li>
@@ -136,8 +121,13 @@ Shlomi Noach
 					<h3>FUNCTIONS</h3>
 					<ul>
 						<li><a title="General functions" href="general_functions.html">General functions</a></li>
+						<li><a title="Privileges functions" href="privileges_functions.html">Privileges functions</a></li>
 						<li><a title="String functions" href="string_functions.html">String functions</a></li>
 						<li><a title="Time & date functions" href="time_functions.html">Time & date functions</a></li>
+					</ul>
+					<h3>PROCEDURES</h3>
+					<ul>
+						<li><a title="General procedures" href="general_procedures.html">General procedures</a></li>
 					</ul>
 				</div>
 			</div>	

@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>processlist_grantees: common_schema documentation</title>
+	<meta name="description" content="processlist_grantees: common_schema" />
+	<meta name="keywords" content="processlist_grantees: common_schema" />
+	<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">Common views & routines for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="processlist_grantees.html">processlist_grantees</a></h2>	
+<h3>NAME</h3>
+processlist_grantees: Assigning of GRANTEEs for connected processes
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>processlist_grantees</i> Lists connected processes, as with <strong>PROCESSLIST</strong>.
+For each process, it analyzes the connected GRANTEE. It does so by inspecting the user+host
+presented by <strong>PROCESSLIST</strong>, and matches those values, in a similar algorithm to that 
+of the MySQL server, to the list of known accounts.
+</p>
+
+<p>
+MySQL's <strong>PROCESSLIST</strong> fails to make the connection between a process ID and the account
+for which this process is assigned. It only tells us the connection's <strong>HOST</strong> and the
+specified <strong>USER</strong>. But these do not necessarily map directly to the known grantees:
+MySQL accounts can specify wildcards for both <strong>user</strong> and <strong>host</strong>.
+</p>
+<p>
+MySQL offers the <strong>USER()</strong> and <strong>CURRENT_USER()</strong> functions, which provide
+desired data, but only for current connection.
+</p>
+<p>
+<i>processlist_grantees</i> bridges the two by utilizing 
+<a href="privileges_functions.html#match_grantee">match_grantee()</a> for each process in the PROCESSLIST.
+It also provides with additional useful information about the matched account.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.processlist_grantees;
++---------------------+---------------+------+-----+---------+-------+
+| Field               | Type          | Null | Key | Default | Extra |
++---------------------+---------------+------+-----+---------+-------+
+| ID                  | bigint(4)     | NO   |     | 0       |       |
+| USER                | varchar(16)   | NO   |     |         |       |
+| HOST                | varchar(64)   | NO   |     |         |       |
+| GRANTEE             | varchar(81)   | YES  |     |         |       |
+| grantee_user        | char(16)      | YES  |     |         |       |
+| grantee_host        | char(60)      | YES  |     |         |       |
+| is_super            | decimal(23,0) | YES  |     | NULL    |       |
+| is_repl             | int(1)        | NO   |     | 0       |       |
+| is_current          | int(1)        | NO   |     | 0       |       |
+| sql_kill_query      | varbinary(31) | YES  |     | NULL    |       |
+| sql_kill_connection | varbinary(25) | YES  |     | NULL    |       |
++---------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>
+Rows of this view map directly to rows in <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a>.</p>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>ID</strong>: process ID, as in PROCESSLIST</li>
+		<li><strong>USER</strong>: name of connected user, as in PROCESSLIST</li>
+		<li><strong>HOST</strong>: connection's host + port, as in PROCESSLIST</li>
+		<li><strong>GRANTEE</strong>: account which is calculated by <a href="privileges_functions.html#match_grantee">match_grantee()</a> to match this process.</li>
+		<li><strong>grantee_user</strong>: <i>user</i> part of the <strong>GRANTEE</strong>.</li>
+		<li><strong>grantee_host</strong>: <i>host</i> part of the <strong>GRANTEE</strong>. This does not include port specification.</li>
+		<li><strong>is_super</strong>: <strong>1</strong> if the grantee has the <strong>SUPER</strong> privilege; <strong>0</strong> if not.</li>
+		<li><strong>is_repl</strong>: <strong>1</strong> if the connection appears to be a replication thread; <strong>0</strong> if not.</li>
+		<li><strong>is_current</strong>: <strong>1</strong> if the process is the current connection; <strong>0</strong> if not.</li>
+		<li><strong>sql_kill_query</strong>: generated statement to kill current query</li>
+		<li><strong>sql_kill_connection</strong>: generated statement to kill current connection</li>
+	</ul>
+</p>
+<h3>EXAMPLES</h3>
+<p>Show grantees for all processes:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_grantees;
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| ID     | USER       | HOST                | GRANTEE                | grantee_user | grantee_host | is_super | is_repl | sql_kill_query    | sql_kill_connection |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| 650472 | replica    | jboss00.myweb:34266 | 'replica'@'%.myweb'    | replica      | %.myweb      |        0 |       1 | KILL QUERY 650472 | KILL 650472         |
+| 692346 | openarkkit | jboss02.myweb:43740 | 'openarkkit'@'%.myweb' | openarkkit   | %.myweb      |        0 |       0 | KILL QUERY 692346 | KILL 692346         |
+| 842853 | root       | localhost           | 'root'@'localhost'     | root         | localhost    |        1 |       0 | KILL QUERY 842853 | KILL 842853         |
+| 843443 | jboss      | jboss03.myweb:40007 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843443 | KILL 843443         |
+| 843444 | jboss      | jboss03.myweb:40012 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843444 | KILL 843444         |
+| 843510 | jboss      | jboss00.myweb:49850 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843510 | KILL 843510         |
+| 844559 | jboss      | jboss01.myweb:37031 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844559 | KILL 844559         |
+| 844577 | jboss      | jboss03.myweb:38238 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844577 | KILL 844577         |
+| 844592 | jboss      | jboss02.myweb:34405 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844592 | KILL 844592         |
+| 844593 | jboss      | jboss01.myweb:37089 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844593 | KILL 844593         |
+| 844595 | jboss      | jboss04.myweb:46488 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844595 | KILL 844595         |
+| 844596 | jboss      | jboss00.myweb:41046 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844596 | KILL 844596         |
+| 844600 | jboss      | jboss01.myweb:37108 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844600 | KILL 844600         |
+| 844614 | jboss      | jboss04.myweb:46500 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844614 | KILL 844614         |
+| 844618 | jboss      | jboss02.myweb:44449 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844618 | KILL 844618         |
+| 844620 | jboss      | jboss02.myweb:44456 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844620 | KILL 844620         |
+| 844626 | jboss      | jboss04.myweb:46526 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844626 | KILL 844626         |
+| 844628 | jboss      | jboss02.myweb:44466 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844628 | KILL 844628         |
+| 844631 | jboss      | jboss03.myweb:38291 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844631 | KILL 844631         |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+</pre></blockquote>
+<p>In the above, <strong>'root'@'localhost'</strong> is a trivial match, but other connections are mapped to accounts based on wildcards.
+All <strong>jboss</strong> users are connected from <i>jboss??.myweb</i> servers, and are matched to the <strong>'jboss'@'%.myweb'</strong> account.</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer. Percona Server yields a different schema.
+
+<h3>SEE ALSO</h3>
+<a href="processlist_per_userhost.html">processlist_per_userhost</a>,
+<a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_summary.html">processlist_summary</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
+
+						<li><a title="candidate_keys" href="candidate_keys.html">candidate_keys</a></li>
+
+						<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
+						<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
+
+
+						<li><a title="global_status_diff" href="global_status_diff.html">global_status_diff</a></li>
+						<li><a title="global_status_diff_clean" href="global_status_diff_clean.html">global_status_diff_clean</a></li>
+						<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a></li>
+
+						<li><a title="innodb_locked_transactions" href="innodb_locked_transactions.html">innodb_locked_transactions</a></li>
+
+						<li><a title="innodb_index_rows" href="innodb_index_rows.html">innodb_index_rows</a></li>
+						<li><a title="innodb_index_stats" href="innodb_index_stats.html">innodb_index_stats</a></li>
+
+						<li><a title="innodb_simple_locks" href="innodb_simple_locks.html">innodb_simple_locks</a></li>
+						<li><a title="innodb_transactions" href="innodb_transactions.html">innodb_transactions</a></li>
+						<li><a title="innodb_transactions_summary" href="innodb_transactions_summary.html">innodb_transactions_summary</a></li>
+
+						<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
+						
+						<li><a title="processlist_grantees" href="processlist_grantees.html">processlist_grantees</a></li>
+						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
+						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
+						<li><a title="processlist_summary" href="processlist_summary.html">processlist_summary</a></li>
+						<li><a title="processlist_top" href="processlist_top.html">processlist_top</a></li>
+						
+						<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a></li>
+						<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a></li>
+						
+						<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+						<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+						<li><a title="sql_grants" href="sql_grants.html">sql_grants</a></li>
+						<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a></li>
+
+						<li><a title="table_charset" href="table_charset.html">table_charset</a></li>
+						<li><a title="text_columns" href="text_columns.html">text_columns</a></li>						
+					</ul>						
+					<h3>TABLES</h3>
+					<ul>
+						<li><a title="numbers" href="numbers.html">numbers</a></li>
+					</ul>						
+					<h3>FUNCTIONS</h3>
+					<ul>
+						<li><a title="General functions" href="general_functions.html">General functions</a></li>
+						<li><a title="Privileges functions" href="privileges_functions.html">Privileges functions</a></li>
+						<li><a title="String functions" href="string_functions.html">String functions</a></li>
+						<li><a title="Time & date functions" href="time_functions.html">Time & date functions</a></li>
+					</ul>
+					<h3>PROCEDURES</h3>
+					<ul>
+						<li><a title="General procedures" href="general_procedures.html">General procedures</a></li>
+					</ul>
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

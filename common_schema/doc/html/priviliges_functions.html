@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>table_charset: common_schema documentation</title>
-	<meta name="description" content="table_charset: common_schema" />
-	<meta name="keywords" content="table_charset: common_schema" />
+	<title>priviliges_functions: common_schema documentation</title>
+	<meta name="description" content="priviliges_functions: common_schema" />
+	<meta name="keywords" content="priviliges_functions: common_schema" />
 	<link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 
@@ -16,78 +16,68 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="table_charset.html">table_charset</a></h2>	
-<h3>NAME</h3>
-table_charset: list tables, their character sets and collations
-<h3>TYPE</h3>
-View
+				<h2><a href="priviliges_functions.html">priviliges_functions</a></h2>	
+<h3>GENERAL FUNCTIONS</h3>
 
-<h3>DESCRIPTION</h3>
-
-<p>A table is associated with a character set and a collation. 
-Surprisingly, INFORMATION_SCHEMA's TABLES table only lists a table's collation, and neglects to provide with the character set.</p>
-
-<p>A character set is easily deduced by given collation, since a collation relates to a single character set.</p>
-
-<p><i>table_charset</i> provides this convenient connection.</p>
-
-<h3>STRUCTURE</h3>
-
-<blockquote><pre>
-mysql&gt; DESC common_schema.table_charset;
-+--------------------+-------------+------+-----+---------+-------+
-| Field              | Type        | Null | Key | Default | Extra |
-+--------------------+-------------+------+-----+---------+-------+
-| TABLE_SCHEMA       | varchar(64) | NO   |     |         |       |
-| TABLE_NAME         | varchar(64) | NO   |     |         |       |
-| CHARACTER_SET_NAME | varchar(32) | NO   |     |         |       |
-| TABLE_COLLATION    | varchar(32) | YES  |     | NULL    |       |
-+--------------------+-------------+------+-----+---------+-------+
-</pre></blockquote>
+<p>
+General functions: stored functions managing general tasks. All functions are DETERMINISTIC, NO SQL.
+<ul>
+	<li><a href="#crc64">crc64()</a>: Return a 64 bit CRC of given input, as unsigned big integer</li>
+	<li><a href="#mysql_grantee">mysql_grantee()</a>: Return a qualified MySQL grantee (account) based on user and host.</li>
+</ul>
+</p>
 
 <h3>SYNOPSIS</h3>
 
-<p>Columns of this view:</p>
+<p>
 <ul>
-	<li><strong>TABLE_SCHEMA</strong>: name of schema (database)</li>
-	<li><strong>TABLE_NAME</strong>: name of table</li>
-	<li><strong>CHARACTER_SET_NAME</strong>: table's defined character set</li>
-	<li><strong>TABLE_COLLATION</strong>: table's collation</li>
-</ul>
-
-<h3>EXAMPLES</h3>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.table_charset WHERE TABLE_SCHEMA IN ('sakila', 'world');
-+--------------+-----------------+--------------------+-------------------+
-| TABLE_SCHEMA | TABLE_NAME      | CHARACTER_SET_NAME | TABLE_COLLATION   |
-+--------------+-----------------+--------------------+-------------------+
-| world        | City            | latin1             | latin1_swedish_ci |
-| world        | Country         | latin1             | latin1_swedish_ci |
-| world        | CountryLanguage | latin1             | latin1_swedish_ci |
-| sakila       | actor           | utf8               | utf8_general_ci   |
-| sakila       | address         | utf8               | utf8_general_ci   |
-| sakila       | category        | utf8               | utf8_general_ci   |
-| sakila       | city            | utf8               | utf8_general_ci   |
-| sakila       | country         | utf8               | utf8_general_ci   |
-| sakila       | customer        | utf8               | utf8_general_ci   |
-| sakila       | film            | utf8               | utf8_general_ci   |
-| sakila       | film_actor      | utf8               | utf8_general_ci   |
-| sakila       | film_category   | utf8               | utf8_general_ci   |
-| sakila       | film_text       | utf8               | utf8_general_ci   |
-| sakila       | inventory       | utf8               | utf8_general_ci   |
-| sakila       | language        | utf8               | utf8_general_ci   |
-| sakila       | payment         | utf8               | utf8_general_ci   |
-| sakila       | rental          | utf8               | utf8_general_ci   |
-| sakila       | staff           | utf8               | utf8_general_ci   |
-| sakila       | store           | utf8               | utf8_general_ci   |
-+--------------+-----------------+--------------------+-------------------+
+	<li>
+		<a name="crc64" href="#">crc64()</a>
+		<p>
+			Return a 64 bit CRC of given input, as unsigned big integer. This function complements MySQL's crc32() function,
+			which results with poor distribution on large number of values.
+<blockquote><pre>crc64(data LONGTEXT CHARSET utf8) 
+  RETURNS BIGINT UNSIGNED</pre></blockquote>
+		</p>
+		<p>
+		  While input <strong>data</strong> is textual, any type can be passed in, due to SQL's implicit casting nature.
+		</p>
+		<p>
+			This code is based on the idea presented in the book
+			<i>High Performance MySQL, 2nd Edition</i>, By Baron Schwartz et al., published by O'REILLY
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>mysql&gt; SELECT common_schema.crc64('mysql') AS crc64;
++---------------------+
+| crc64               |
++---------------------+
+| 9350511318824990686 |
++---------------------+
 </pre></blockquote>
-
+	</li>
+	<li>
+		<a name="mysql_grantee" href="#">mysql_grantee()</a>
+		<p>
+			Return a qualified MySQL grantee (account) name based on <strong>user</strong> and <strong>host</strong>. 
+			The output of this function is useful in automation of SQL query generation, or otherwise
+			in comparing and recognizing accounts in different formats (user+host vs. grantee formats).
+<blockquote><pre>mysql_grantee(mysql_user char(16) CHARSET utf8, mysql_host char(60) CHARSET utf8) 
+  RETURNS VARCHAR(100) CHARSET utf8</pre></blockquote>
+		</p>
+			<h4>EXAMPLES</h4>
+<blockquote><pre>SELECT common_schema.mysql_grantee('web_user', '192.128.0.%') AS grantee;
++--------------------------+
+| grantee                  |
++--------------------------+
+| 'web_user'@'192.128.0.%' |
++--------------------------+
+</pre></blockquote>
+	</li>
+</ul>
+</p>
 
 <h3>ENVIRONMENT</h3>
-MySQL 5.1 or newer.
-
-<h3>SEE ALSO</h3>
-<a href="text_columns.html">text_columns</a>
+MySQL 5.1 or newer
 
 <h3>AUTHOR</h3>
 Shlomi Noach
@@ -104,9 +94,6 @@ Shlomi Noach
 					<h3>VIEWS</h3>
 					<ul>
 						<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
-
-						<li><a title="candidate_keys" href="candidate_keys.html">candidate_keys</a></li>
-
 						<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
 						<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
 
@@ -126,7 +113,6 @@ Shlomi Noach
 
 						<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
 						
-						<li><a title="processlist_grantees" href="processlist_grantees.html">processlist_grantees</a></li>
 						<li><a title="processlist_per_userhost" href="processlist_per_userhost.html">processlist_per_userhost</a></li>
 						<li><a title="processlist_repl" href="processlist_repl.html">processlist_repl</a></li>
 						<li><a title="processlist_summary" href="processlist_summary.html">processlist_summary</a></li>
@@ -153,10 +139,6 @@ Shlomi Noach
 						<li><a title="Privileges functions" href="privileges_functions.html">Privileges functions</a></li>
 						<li><a title="String functions" href="string_functions.html">String functions</a></li>
 						<li><a title="Time & date functions" href="time_functions.html">Time & date functions</a></li>
-					</ul>
-					<h3>PROCEDURES</h3>
-					<ul>
-						<li><a title="General procedures" href="general_procedures.html">General procedures</a></li>
 					</ul>
 				</div>
 			</div>	
