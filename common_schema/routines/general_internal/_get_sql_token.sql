@@ -1,13 +1,16 @@
 delimiter //
 
+set names utf8
+//
+
 drop procedure if exists _get_sql_token;
 //
 
 create procedure _get_sql_token(
-    in      p_text      text
+    in      p_text      text charset utf8
 ,   inout   p_from      int unsigned
 ,   inout   p_level     int unsigned
-,   out     p_token     text
+,   out     p_token     text charset utf8
 ,   inout   p_state     enum(
                             'alpha'
                         ,   'alphanum'
@@ -17,7 +20,8 @@ create procedure _get_sql_token(
                         ,   'bitwise or'
                         ,   'bitwise not'
                         ,   'bitwise xor'
-                        ,   'comma'
+                        ,   'colon'
+                        ,   'comma'                        
                         ,   'decimal'
                         ,   'delimiter'
                         ,   'divide'
@@ -49,6 +53,7 @@ create procedure _get_sql_token(
                         ,   'user-defined variable'
                         ,   'whitespace'
                         ,   'not'
+                        ,   'statement delimiter'
                         )               
 )
 comment 'Reads a token according to lexical rules for SQL'
@@ -59,7 +64,7 @@ sql security invoker
 begin    
     declare v_length int unsigned default character_length(p_text);
     declare v_no_ansi_quotes        bool default find_in_set('ANSI_QUOTES', @@sql_mode) = FALSE;
-    declare v_char, v_lookahead, v_quote_char    char(1);
+    declare v_char, v_lookahead, v_quote_char    char(1) charset utf8;
     declare v_from int unsigned;
 
     if p_from is null then
@@ -75,13 +80,12 @@ begin
     
     set p_token = ''
     ,   p_state = 'start';
-    
     my_loop: while v_from <= v_length do
         set v_char = substr(p_text, v_from, 1)
         ,   v_lookahead = substr(p_text, v_from+1, 1)
         ;
-        if @debug then
-            select v_from, v_char, p_state;
+        if @debug_get_sql_token then
+            select p_state, v_from, v_char;
         end if;
         state_case: begin case p_state
             when 'error' then 
@@ -114,8 +118,11 @@ begin
                             set p_state = 'dot', v_from = v_from + 1;
                             leave my_loop;
                         end if;
+                    when v_char = ';' then
+                        set p_state = 'statement delimiter', v_from = v_from + 1;
+                        leave my_loop;
                     when v_char = ',' then
-                        set p_state = 'comma', v_from = v_from + 1;                        
+                        set p_state = 'comma', v_from = v_from + 1;
                         leave my_loop;
                     when v_char = '=' then
                         set p_state = 'equals', v_from = v_from + 1;
@@ -128,25 +135,35 @@ begin
                         leave my_loop;
                     when v_char = '/' then
                         if v_lookahead = '*' then
-                            set p_state = 'multi line comment';
-                            set v_from = v_from + 1;
+                            set p_state = 'multi line comment', v_from = v_from + 1;
                         else
                             set p_state = 'divide', v_from = v_from + 1;
                             leave my_loop;
                         end if;
                     when v_char = '-' then
                         case 
-                            when v_lookahead = '-' then
-                                if substr(p_text, v_from + 2, 1) = ' ' then
-                                    set p_state = 'single line comment'
-                                    ,   v_from = if(locate('\n', p_text, p_from), 0, v_length)
-                                    ;
-                                    leave my_loop;
+                            when v_lookahead = '-' and substr(p_text, v_from + 2, 1) = ' ' then
+                                set p_state = 'single line comment'
+                                ,   v_from = locate('\n', p_text, p_from)
+                                ;
+                                if not v_from then
+                                    set v_from = v_length;
                                 end if;
+                                set v_from = v_from + 1;
+                                leave my_loop;
                             else
                                 set p_state = 'minus', v_from = v_from + 1;
                                 leave my_loop;
                         end case;
+                    when v_char = '#' then
+                        set p_state = 'single line comment'
+                        ,   v_from = locate('\n', p_text, p_from)
+                        ;
+                        if not v_from then
+                            set v_from = v_length;
+                        end if;
+                        set v_from = v_from + 1;
+                        leave my_loop;
                     when v_char = '+' then
                         set p_state = 'plus', v_from = v_from + 1;
                         leave my_loop;
@@ -158,7 +175,7 @@ begin
                         if v_lookahead = '=' then
                             set p_state = 'assign', v_from = v_from + 2;
                         else
-                            set p_state = 'error';
+                            set p_state = 'colon', v_from = v_from + 1;
                         end if;
                         leave my_loop;
                     when v_char = '(' then 
@@ -213,9 +230,11 @@ begin
                         leave my_loop;
                 end case;
             when 'less than or equals' then
-                case v_char 
-                    when '>' then set p_state = 'null safe equals';
-                end case;
+                if v_char = '>' then 
+                    set p_state = 'null safe equals'
+                    ,   v_from = v_from + 1
+                    ;
+                end if;
                 leave my_loop;
             when 'greater than' then
                 case v_char 
@@ -309,7 +328,7 @@ begin
         end case; end state_case;
         set v_from = v_from + 1;
     end while my_loop;
-    set p_token = substr(p_text, p_from, v_from - p_from);
+    set p_token = substr(p_text, p_from, v_from - p_from) collate utf8_general_ci;
     set p_from = v_from;
 end;
 //
