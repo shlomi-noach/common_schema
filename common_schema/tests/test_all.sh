@@ -33,8 +33,15 @@ do
 	for TEST_PATH in $(find * -maxdepth 0 -type d)
 	do
 		# Particular test
-		echo "  Testing: ${TEST_FAMILY_PATH}/${TEST_PATH}"
 		cd $TESTS_ROOT_PATH/$TEST_FAMILY_PATH/$TEST_PATH
+
+		# verbose
+		if [ -f description.txt ] ; then
+			export TEST_BRIEF_DESCRIPTION="$(cat description.txt | head -n 1 | cut -c 1-60)"
+		else
+			export TEST_BRIEF_DESCRIPTION=""
+		fi
+		echo "  ${TEST_FAMILY_PATH}/${TEST_PATH}: ${TEST_BRIEF_DESCRIPTION}"
 		
 		# prepare test
 		if [ -f pre.sql ] ; then
