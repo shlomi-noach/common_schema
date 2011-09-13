@@ -11,6 +11,7 @@
 
 	<property name="build.dir" value="build" />
 	<property name="dist.dir" value="dist" />
+	<property name="tests.dir" value="tests" />
 	<property name="sql.mysql_51.output.file" value="common_schema_mysql_51.sql" />
 	<property name="sql.innodb_plugin.output.file" value="common_schema_innodb_plugin.sql" />
 	<property name="sql.percona_server.output.file" value="common_schema_percona_server.sql" />
@@ -225,7 +226,17 @@
 		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagename" value="${routine_group_name.spaced}" />
 	</target>
 
+
 	<target name="test">
+		<echo>Testing</echo>
+		<exec executable="bash" dir="${tests.dir}" failonerror="true">
+			<arg value="test_all.sh" />
+			<arg value="${mysql.user}" />
+			<arg value="${mysql.password}" />
+			<arg value="${mysql.socket}" />
+		</exec>
+	</target>
+	<target name="__test__">
 		<loadfile property="f.c" srcfile="/tmp/crc64.sql">
 		</loadfile>
 		<echo>prop: ${f.c}</echo>
