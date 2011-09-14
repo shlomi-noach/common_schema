@@ -18,6 +18,10 @@ my_main: begin
     declare v_scan_state varchar(32) charset utf8 default 'start';
     declare v_schema_name, v_object_name, v_object_type, v_definer, v_action varchar(64) charset utf8 default null;
     declare v_error_message text charset utf8 default '';
+    
+    if p_default_schema IS NULL then
+    	set p_default_schema := DATABASE();
+    end if;
 
   my_error: begin
     
@@ -196,7 +200,7 @@ my_main: begin
                     into _sql_dependencies (schema_name, object_name, object_type, action) 
                     values (v_schema_name, v_object_name, v_object_type, v_action);
 
-                    if v_object_type = 'tablé' then 
+                    if v_object_type = 'tablï¿½' then 
                         set v_scan_state = 'expect join';
                     else 
                         set v_scan_state = 'start';
