@@ -19,10 +19,6 @@ my_main: begin
     declare v_schema_name, v_object_name, v_object_type, v_definer, v_action varchar(64) charset utf8 default null;
     declare v_error_message text charset utf8 default '';
     
-    if p_default_schema IS NULL then
-    	set p_default_schema := DATABASE();
-    end if;
-
   my_error: begin
     
     declare exit handler for 1339
