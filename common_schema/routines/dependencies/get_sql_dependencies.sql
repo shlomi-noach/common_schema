@@ -18,7 +18,7 @@ my_main: begin
     declare v_scan_state varchar(32) charset utf8 default 'start';
     declare v_schema_name, v_object_name, v_object_type, v_definer, v_action varchar(64) charset utf8 default null;
     declare v_error_message text charset utf8 default '';
-    
+
   my_error: begin
     
     declare exit handler for 1339
@@ -29,6 +29,7 @@ my_main: begin
     drop temporary table if exists _sql_dependencies;
     create temporary table if not exists _sql_dependencies(
         id              int unsigned auto_increment primary key
+    ,   start           int unsigned
     ,   action          enum('alter', 'call', 'create', 'delete', 'drop', 'insert', 'replace', 'select', 'truncate', 'update')
     ,   object_type     enum('event', 'function', 'index', 'procedure', 'table', 'trigger', 'view')
     ,   schema_name     varchar(64)
@@ -193,10 +194,10 @@ my_main: begin
                     end if;
                     
                     insert 
-                    into _sql_dependencies (schema_name, object_name, object_type, action) 
-                    values (v_schema_name, v_object_name, v_object_type, v_action);
+                    into _sql_dependencies (start, schema_name, object_name, object_type, action) 
+                    values (v_from, v_schema_name, v_object_name, v_object_type, v_action);
 
-                    if v_object_type = 'tablï¿½' then 
+                    if v_object_type = 'tablé' then 
                         set v_scan_state = 'expect join';
                     else 
                         set v_scan_state = 'start';
@@ -210,8 +211,8 @@ my_main: begin
                     set v_scan_state = 'expect identifier2';
                 else
                     insert 
-                    into _sql_dependencies (schema_name, object_name, object_type, action) 
-                    values (v_schema_name, v_object_name, v_object_type, v_action);
+                    into _sql_dependencies (start, schema_name, object_name, object_type, action) 
+                    values (v_from,v_schema_name, v_object_name, v_object_type, v_action);
                     
                     if v_object_type = 'table' then 
                         if v_state = 'comma' then
@@ -244,8 +245,12 @@ my_main: begin
                         set v_object_name = substr(v_token, 2, character_length(v_token) - 2)
                         ,   v_scan_state = 'expect dot'
                         ;
-                    when v_state = 'alpha' and v_token in ('low_priority', 'delayed', 'high_priority', 'ignore', 'into') then
+                    when v_state = 'alpha' and v_token in ('low_priority', 'delayed', 'high_priority', 'ignore', 'into') 
+                    or   v_token = '(' 
+                    then
                         do null;
+                    when v_state = 'alpha' and v_token = 'select' then 
+                        set v_scan_state = 'select';
                     when v_state in ('alpha', 'alphanum') then
                         set v_object_name = v_token
                         ,   v_scan_state = 'expect dot'
@@ -263,8 +268,8 @@ my_main: begin
                         set v_object_name = v_token;
                     end if;
                     insert 
-                    into _sql_dependencies (schema_name, object_name, object_type, action) 
-                    values (v_schema_name, v_object_name, v_object_type, v_action) 
+                    into _sql_dependencies (start, schema_name, object_name, object_type, action) 
+                    values (v_from, v_schema_name, v_object_name, v_object_type, v_action) 
                     ;
                 end if;
                 set v_scan_state = 'start';
