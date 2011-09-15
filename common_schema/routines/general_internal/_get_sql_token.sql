@@ -9,7 +9,7 @@ drop procedure if exists _get_sql_token;
 create procedure _get_sql_token(
     in      p_text      text charset utf8
 ,   inout   p_from      int unsigned
-,   inout   p_level     int unsigned
+,   inout   p_level     int
 ,   out     p_token     text charset utf8
 ,   inout   p_state     enum(
                             'alpha'
@@ -22,6 +22,7 @@ create procedure _get_sql_token(
                         ,   'bitwise xor'
                         ,   'colon'
                         ,   'comma'                        
+                        ,   'conditional comment'
                         ,   'decimal'
                         ,   'delimiter'
                         ,   'divide'
@@ -84,9 +85,6 @@ begin
         set v_char = substr(p_text, v_from, 1)
         ,   v_lookahead = substr(p_text, v_from+1, 1)
         ;
-        if @debug_get_sql_token then
-            select p_state, v_from, v_char;
-        end if;
         state_case: begin case p_state
             when 'error' then 
                 set p_from = v_length;
@@ -97,9 +95,14 @@ begin
                         set p_state = 'integer';
                     when v_char between 'A' and 'Z' 
                     or   v_char between 'a' and 'z' 
-                    or   v_char = '_' then 
-                        set p_state = 'alpha';
-                    when v_char in (' ', '\t', '\n', '\r') then 
+                    or   v_char = '_' then
+                        set p_state = 'alpha';                        
+                    when v_char = ' ' then 
+                        set p_state = 'whitespace'
+                        ,   v_from = v_length - character_length(ltrim(substring(p_text, v_from)))
+                        ;
+                        leave state_case;
+                    when v_char in ('\t', '\n', '\r') then 
                         set p_state = 'whitespace';
                     when v_char = '''' or v_no_ansi_quotes and v_char = '"' then
                         set p_state = 'string', v_quote_char = v_char;
@@ -135,7 +138,15 @@ begin
                         leave my_loop;
                     when v_char = '/' then
                         if v_lookahead = '*' then
-                            set p_state = 'multi line comment', v_from = v_from + 1;
+                            set v_from = locate('*/', p_text, p_from + 2);
+                            if v_from then
+                                set p_state = if (substr(p_text, p_from + 2, 1) = '!', 'conditional comment', 'multi line comment')
+                                ,   v_from = v_from + 2
+                                ;
+                                leave my_loop;
+                            else
+                                set p_state = 'error';
+                            end if;
                         else
                             set p_state = 'divide', v_from = v_from + 1;
                             leave my_loop;
@@ -213,7 +224,6 @@ begin
                         leave my_loop;
                     else 
                         set p_state = 'error';
-                        leave my_loop;
                 end case;
             when 'less than' then
                 case v_char 
@@ -227,7 +237,6 @@ begin
                         leave my_loop;
                     else
                         set p_state = 'error';
-                        leave my_loop;
                 end case;
             when 'less than or equals' then
                 if v_char = '>' then 
@@ -246,7 +255,6 @@ begin
                         leave my_loop;
                     else
                         set p_state = 'error';
-                        leave my_loop;
                 end case;
             when 'multi line comment' then
                 if v_char = '*' and v_lookahead = '/' then
@@ -291,23 +299,18 @@ begin
                         leave my_loop;
                 end case;
             when 'whitespace' then
-                case 
-                    when v_char in (' ', '\t', '\n', '\r') then
-                        leave state_case;
-                    else 
-                        leave my_loop;                        
-                end case;
+                if v_char not in ('\t', '\n', '\r') then
+                    leave my_loop;                        
+                end if;
             when 'string' then
-                if v_char != v_quote_char then 
-                    leave state_case;
+                if v_char = v_quote_char then 
+                    if v_lookahead = v_quote_char then
+                        set v_from = v_from + 2;
+                    elseif substr(p_text, v_from - 2, 1) != '\\' then 
+                        set v_from = v_from + 1;
+                        leave my_loop;
+                    end if;
                 end if;
-                set v_from = v_from + 1;
-                if substr(p_text, v_from - 2, 1) = '\\' then 
-                    leave state_case;
-                elseif v_lookahead = v_quote_char then
-                    leave state_case;
-                end if;
-                leave my_loop;
             when 'quoted identifier' then
                 if v_char != v_quote_char then 
                     leave state_case;
