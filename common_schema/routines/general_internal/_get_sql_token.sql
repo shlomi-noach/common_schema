@@ -267,7 +267,8 @@ begin
                     or   v_char between 'a' and 'z' 
                     or   v_char = '_' then
                         leave state_case;
-                    when v_char between '0' and '9' then 
+                    when v_char between '0' and '9' 
+                    or   v_char = '$' then 
                         set p_state = 'alphanum';
                     else
                         leave my_loop;
@@ -303,13 +304,17 @@ begin
                     leave my_loop;                        
                 end if;
             when 'string' then
-                if v_char = v_quote_char then 
-                    if v_lookahead = v_quote_char then
-                        set v_from = v_from + 2;
-                    elseif substr(p_text, v_from - 2, 1) != '\\' then 
+                set v_from = locate(v_quote_char, p_text, v_from);
+                if v_from then
+                    if substr(p_text, v_from + 1, 1) = v_quote_char then
+                        set v_from = v_from + 1;
+                    elseif substr(p_text, v_from - 1, 1) != '\\' then
                         set v_from = v_from + 1;
                         leave my_loop;
                     end if;
+                else
+                    set p_state = 'error';
+                    leave my_loop;
                 end if;
             when 'quoted identifier' then
                 if v_char != v_quote_char then 
@@ -319,11 +324,11 @@ begin
                     leave my_loop;                
                 end if;
             when 'user-defined variable' then
-                if v_char in (' ', '\t', '\n', '\r') then
+                if v_char in (';', ',', ' ', '\t', '\n', '\r', '!', '~', '^', '%', '>', '<', ':', '=', '+', '-', '&', '*', '|', '(', ')') then
                     leave my_loop;
                 end if;
             when 'system variable' then
-                if v_char in (' ', '\t', '\n', '\r') then
+                if v_char in (';', ',', ' ', '\t', '\n', '\r', '!', '~', '^', '%', '>', '<', ':', '=', '+', '-', '&', '*', '|', '(', ')') then
                     leave my_loop;
                 end if;
             else
