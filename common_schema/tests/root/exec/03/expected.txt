@@ -1,0 +1,2 @@
+SET @test_value := 17
+1

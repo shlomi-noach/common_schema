@@ -1,0 +1,1 @@
+TRUNCATE test.test_exec_single;
