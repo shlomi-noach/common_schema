@@ -16,11 +16,11 @@ begin
         select concat('Routine `', p_routine_schema, '`.`', p_routine_name, '` not found.') error
     ; 
     
-    select  routine_definition
+    select  body
     into    v_routine_definition
-    from    information_schema.routines
-    where   routine_schema = p_routine_schema
-    and     routine_name = p_routine_name;
+    from    mysql.proc
+    where   db      = p_routine_schema
+    and     name    = p_routine_name;
 
     call get_sql_dependencies(v_routine_definition, p_routine_schema);
 end
