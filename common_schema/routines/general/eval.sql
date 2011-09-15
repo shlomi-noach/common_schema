@@ -6,6 +6,12 @@
 -- Invoker of this procedure must have the CREATE TEMPORARY TABLES privilege, as well as any privilege 
 -- required for evaluating implied queries.
 -- 
+-- This procedure calls upon exec(), which means it will:
+-- - skip executing empty queries (whitespace only)
+-- - Avoid executing queries when @common_schema_dryrun is set (queries merely printed)
+-- - Include verbose message when @common_schema_verbose is set
+-- - Set @common_schema_rowcount to reflect the last executed query's ROW_COUNT(). 
+--
 -- Example:
 --
 -- CALL eval('select concat(\'KILL \',id) from information_schema.processlist where user=\'unwanted\'');
@@ -40,12 +46,7 @@ BEGIN
         LEAVE read_loop;
       END IF;
       SET @execute_query := current_query;
-      IF @common_schema_verbose THEN
-	      SELECT @execute_query AS now_executing FROM DUAL;
-	  END IF;
-      PREPARE st FROM @execute_query;
-      EXECUTE st;
-      DEALLOCATE PREPARE st;
+	  call exec_single(@execute_query);
     END LOOP;
 
     CLOSE eval_cursor;
