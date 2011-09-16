@@ -19,13 +19,16 @@ my_main: begin
     declare v_schema_name, v_object_name, v_object_type, v_definer, v_action varchar(64) charset utf8 default null;
     declare v_error_message text charset utf8 default '';
 
+    set @old_autocommit = @@autocommit
+    ,   autocommit = off
+    ;
   my_error: begin
     
     declare exit handler for 1339
         set v_error_message = concat('case not defined for state: "', v_scan_state, '" ("', v_state, '")');
     declare exit handler for 1265
         set v_error_message = concat('not valid for enum ', v_token);
-
+    
     drop temporary table if exists _sql_dependencies;
     create temporary table if not exists _sql_dependencies(
         id              int unsigned auto_increment primary key
@@ -43,6 +46,11 @@ my_main: begin
         if v_state in ('whitespace', 'single line comment', 'multi line comment') then
             iterate my_loop;
         elseif v_state = 'statement delimiter' then
+            if v_scan_state = 'expect dot' then
+                insert 
+                into _sql_dependencies (start, schema_name, object_name, object_type, action) 
+                values (v_from, v_schema_name, v_object_name, v_object_type, v_action);
+            end if;
             set v_scan_state = 'start'
             ,   v_action = null;
         end if;
@@ -215,10 +223,12 @@ my_main: begin
                     values (v_from,v_schema_name, v_object_name, v_object_type, v_action);
                     
                     if v_object_type = 'table' then 
-                        if v_state = 'comma' then
-                            set v_scan_state = 'expect table';
-                        elseif v_state = 'alpha' and v_token in ('into', 'where', 'group', 'having', 'order', 'limit') then
+                        if  (v_state = 'alpha' and v_token in ('into', 'where', 'group', 'having', 'order', 'limit'))
+                        or  v_action != 'select'
+                        then
                             set v_scan_state = 'start';
+                        elseif v_state = 'comma' then
+                            set v_scan_state = 'expect table';
                         else
                             set v_scan_state = 'expect join';
                         end if;
@@ -280,6 +290,9 @@ my_main: begin
     until 
         v_old_from = v_from
     end repeat;
+
+    commit;
+    set autocommit = @old_autocommit;
     
     select distinct schema_name, object_name, object_type, action
     from _sql_dependencies
