@@ -47,7 +47,7 @@ my_main: begin
             ,   v_action = null;
         end if;
         if @debug_get_sql_dependencies then
-            select v_scan_state, v_token, v_state;
+            select v_scan_state, v_from, v_token, v_state;
         end if;
         case v_scan_state
             when 'start' then
