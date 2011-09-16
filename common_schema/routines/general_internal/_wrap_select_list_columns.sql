@@ -42,7 +42,10 @@ my_main: begin
     my_loop: repeat 
         set v_old_from = v_from;
         call _get_sql_token(p_text, v_from, v_level, v_token, v_state);
-        if v_column_number < p_column_count then
+        if v_state = 'error' then
+            set p_error = 'Tokenizer returned error state';
+            leave my_main;
+        elseif v_column_number < p_column_count then
             if  v_level = 0 and (
                 (v_state, v_token) in (('alpha', 'from'), ('comma', ',')) 
             or  v_old_from = v_from
