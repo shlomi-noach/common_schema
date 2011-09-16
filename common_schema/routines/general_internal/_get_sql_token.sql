@@ -229,15 +229,15 @@ begin
                 case v_char 
                     when '=' then 
                         set p_state = 'less than or equals';
+                        leave state_case;
                     when '>' then 
                         set p_state = 'not equals';
-                        leave my_loop;
                     when '<' then 
                         set p_state = 'left shift';
-                        leave my_loop;
                     else
-                        set p_state = 'error';
+                        do null;
                 end case;
+                leave my_loop;
             when 'less than or equals' then
                 if v_char = '>' then 
                     set p_state = 'null safe equals'
@@ -249,13 +249,12 @@ begin
                 case v_char 
                     when '=' then 
                         set p_state = 'greater than or equals';
-                        leave my_loop;
                     when '>' then 
                         set p_state = 'right shift';
-                        leave my_loop;
                     else
                         set p_state = 'error';
                 end case;
+                leave my_loop;
             when 'multi line comment' then
                 if v_char = '*' and v_lookahead = '/' then
                     set v_from = v_from + 2;
