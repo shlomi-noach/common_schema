@@ -11,6 +11,7 @@ create procedure _get_sql_token(
 ,   inout   p_from      int unsigned
 ,   inout   p_level     int
 ,   out     p_token     text charset utf8
+-- ,   inout   p_state     varchar(64)charset utf8
 ,   inout   p_state     enum(
                             'alpha'
                         ,   'alphanum'
@@ -47,15 +48,15 @@ create procedure _get_sql_token(
                         ,   'plus'
                         ,   'quoted identifier'
                         ,   'right parenthesis'
-                        ,   'rigth shift'
+                        ,   'right shift'
                         ,   'single line comment'
                         ,   'start'
+                        ,   'statement delimiter'
                         ,   'string'
                         ,   'system variable'
                         ,   'user-defined variable'
                         ,   'whitespace'
                         ,   'not'
-                        ,   'statement delimiter'
                         )               
 )
 comment 'Reads a token according to lexical rules for SQL'
