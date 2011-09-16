@@ -244,6 +244,8 @@ my_main: begin
                         set v_scan_state = 'expect join';
                     elseif v_token = 'select' then
                         set v_scan_state = 'select';
+                    elseif v_token in ('into', 'where', 'group', 'having', 'order', 'limit') then
+                        set v_scan_state = 'start';
                     end if;
                 elseif v_state = 'comma' then 
                     set v_scan_state = 'expect table';
