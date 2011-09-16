@@ -1,4 +1,4 @@
-delimiter //
+ï»¿delimiter //
 
 set names utf8
 //
@@ -197,7 +197,7 @@ my_main: begin
                     into _sql_dependencies (start, schema_name, object_name, object_type, action) 
                     values (v_from, v_schema_name, v_object_name, v_object_type, v_action);
 
-                    if v_object_type = 'tablé' then 
+                    if v_object_type = 'table' then 
                         set v_scan_state = 'expect join';
                     else 
                         set v_scan_state = 'start';
