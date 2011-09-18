@@ -4,7 +4,7 @@
 -- The procedure accpets:
 --
 -- - interval_seconds: sleep time between executions. 
---   First sleep occurs afetr first execution of query or queries.
+--   First sleep occurs after first execution of query or queries.
 --   Value of 0 or NULL indicate no sleep
 -- - execute_queries: query or queries, in similar format as that of exec()
 -- - stop_condition: one of the following:

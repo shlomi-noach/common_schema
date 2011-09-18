@@ -25,34 +25,34 @@ MODIFIES SQL DATA
 SQL SECURITY INVOKER
 COMMENT 'Evaluates queries resulting from given query'
 
-BEGIN
+begin
   DROP TEMPORARY TABLE IF EXISTS _tmp_eval_queries;
   CREATE TEMPORARY TABLE _tmp_eval_queries (query TEXT CHARSET utf8);
-  SET @q := CONCAT('INSERT INTO _tmp_eval_queries ', sql_query);  
+  set @q := CONCAT('INSERT INTO _tmp_eval_queries ', sql_query);  
   PREPARE st FROM @q;
   EXECUTE st;
   DEALLOCATE PREPARE st;
   
-  BEGIN	
-	DECLARE current_query TEXT CHARSET utf8 DEFAULT NULL;
-    DECLARE done INT DEFAULT 0;
-    DECLARE eval_cursor CURSOR FOR SELECT query FROM _tmp_eval_queries;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+  begin	
+	declare current_query TEXT CHARSET utf8 DEFAULT NULL;
+    declare done INT DEFAULT 0;
+    declare eval_cursor cursor for SELECT query FROM _tmp_eval_queries;
+    declare continue handler for NOT FOUND SET done = 1;
     
-    OPEN eval_cursor;
-    read_loop: LOOP
-      FETCH eval_cursor INTO current_query;
-      IF done THEN
-        LEAVE read_loop;
-      END IF;
-      SET @execute_query := current_query;
+    open eval_cursor;
+    read_loop: loop
+      fetch eval_cursor into current_query;
+      if done then
+        leave read_loop;
+      end if;
+      set @execute_query := current_query;
 	  call exec_single(@execute_query);
-    END LOOP;
+    end loop;
 
-    CLOSE eval_cursor;
-  END;
+    close eval_cursor;
+  end;
   
   DROP TEMPORARY TABLE IF EXISTS _tmp_eval_queries;
-END $$
+end $$
 
 DELIMITER ;

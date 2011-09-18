@@ -17,13 +17,13 @@
 DELIMITER $$
 
 DROP FUNCTION IF EXISTS shorttime_to_seconds $$
-CREATE FUNCTION shorttime_to_seconds(shorttime VARCHAR(10) CHARSET ascii) RETURNS INT UNSIGNED 
+CREATE FUNCTION shorttime_to_seconds(shorttime VARCHAR(16) CHARSET ascii) RETURNS INT UNSIGNED 
 DETERMINISTIC
 NO SQL
 SQL SECURITY INVOKER
 COMMENT 'Return a 64 bit CRC of given input, as unsigned big integer'
 
-BEGIN
+begin
   declare numeric_value INT UNSIGNED DEFAULT NULL;
   
   if shorttime is NULL then
@@ -40,6 +40,6 @@ BEGIN
     when 'h' then set numeric_value := numeric_value*60*60;
   end case;
   return numeric_value;
-END $$
+end $$
 
 DELIMITER ;

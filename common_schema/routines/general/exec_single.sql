@@ -21,28 +21,28 @@ MODIFIES SQL DATA
 SQL SECURITY INVOKER
 COMMENT ''
 
-_proc_body: BEGIN
-  SET @_execute_query := TRIM(execute_query);
-  IF CHAR_LENGTH(@_execute_query) = 0 THEN
+_proc_body: begin
+  set @_execute_query := TRIM(execute_query);
+  if CHAR_LENGTH(@_execute_query) = 0 then
     -- An empty statement
     -- This can happen as result of splitting by semicolon ';'
-    LEAVE _proc_body;
-  END IF;
+    leave _proc_body;
+  end if;
 
   set @common_schema_rowcount := NULL;
   
-  IF @common_schema_dryrun > 0 THEN
+  if @common_schema_dryrun > 0 then
     SELECT @_execute_query AS 'exec_single: @common_schema_dryrun';
-  ELSE
-    IF @common_schema_verbose THEN
+  else
+    if @common_schema_verbose then
 	  SELECT @_execute_query AS 'exec_single: @common_schema_verbose';
-    END IF;
+    end if;
   
     PREPARE st FROM @_execute_query;
     EXECUTE st;
-    SET @common_schema_rowcount := ROW_COUNT();
+    set @common_schema_rowcount := ROW_COUNT();
     DEALLOCATE PREPARE st;    
-  END IF;
-END $$
+  end if;
+end $$
 
 DELIMITER ;
