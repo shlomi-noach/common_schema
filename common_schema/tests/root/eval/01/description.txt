@@ -1,0 +1,1 @@
+evaluate static UPDATE query

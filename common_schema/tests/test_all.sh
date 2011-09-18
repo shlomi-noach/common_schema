@@ -63,7 +63,11 @@ do
 		if [ -f expected.txt ] ; then
 			diff expected.txt ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE} > ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}
 			if [ $? -ne 0 ] ; then
-			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed: unexpected output. See ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}"
+			  echo "** Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed: unexpected output."
+			  echo "**   Output:   ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE}"
+			  echo "**   Expected: $(pwd)/expected.txt"
+			  echo "**   Diff:     ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}"
+			  
 			  exit 1
 			fi
 		else

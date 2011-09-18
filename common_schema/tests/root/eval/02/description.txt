@@ -1,0 +1,1 @@
+evaluate a dynamic ALTER query, based on INFORMATION_SCHEMA

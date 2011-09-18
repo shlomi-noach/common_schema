@@ -1,0 +1,1 @@
+SELECT (select  id) as col1, (select  name AS city_name) as col2, (select  IF(population < 1000000, 'small', 'large') AS size_description ) as col3 from world.City
