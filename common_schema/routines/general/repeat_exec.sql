@@ -68,7 +68,8 @@ _proc_body: begin
   end if;
   
   repeat
-    call exec(execute_queries);
+    set @_execute_queries := REPLACE(execute_queries, '${NR}', (num_iterations + 1));
+    call exec(@_execute_queries);
     set num_iterations := num_iterations + 1;
     
     if stop_condition_type = 'no_limit' then
