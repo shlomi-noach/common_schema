@@ -19,6 +19,8 @@ my_proc: begin
     declare v_expression text default '';
     declare v_column_number int unsigned default 0;
 
+    set @_wrap_select_num_original_columns := 0;
+    
 my_main: begin
     -- part one: find the SELECT keyword.
     my_loop: repeat 
@@ -71,6 +73,7 @@ my_main: begin
     end repeat;
 
     -- part three: pad null columns
+    set @_wrap_select_num_original_columns := v_column_number;
     while v_column_number < p_column_count do
         set v_column_number = v_column_number + 1
         ,   v_statement = concat(v_statement, ', null as col', v_column_number)
