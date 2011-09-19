@@ -1,0 +1,5 @@
+SELECT @val := @val + 1
+SELECT @val := @val + 2
+SELECT @val := @val + 3
+SELECT @val := @val + 4
+SELECT @val := @val + 5
