@@ -17,8 +17,12 @@ NO SQL
 SQL SECURITY INVOKER
 COMMENT 'Return number of tokens in delimited text'
 
-BEGIN
-  RETURN (CHAR_LENGTH(txt) - CHAR_LENGTH(REPLACE(txt, delimiter, '')))/CHAR_LENGTH(delimiter) + 1;
-END $$
+begin
+  if CHAR_LENGTH(delimiter) = 0 then
+    return CHAR_LENGTH(txt);
+  else
+    return (CHAR_LENGTH(txt) - CHAR_LENGTH(REPLACE(txt, delimiter, '')))/CHAR_LENGTH(delimiter) + 1;
+  end if;
+end $$
 
 DELIMITER ;

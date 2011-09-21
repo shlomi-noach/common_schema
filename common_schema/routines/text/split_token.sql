@@ -18,8 +18,12 @@ NO SQL
 SQL SECURITY INVOKER
 COMMENT 'Return substring by index in delimited text'
 
-BEGIN
-  RETURN SUBSTRING_INDEX(SUBSTRING_INDEX(txt, delimiter, token_index), delimiter, -1);
-END $$
+begin
+  if CHAR_LENGTH(delimiter) = '' then
+    return SUBSTRING(txt, token_index, 1);
+  else
+    return SUBSTRING_INDEX(SUBSTRING_INDEX(txt, delimiter, token_index), delimiter, -1);
+  end if;
+end $$
 
 DELIMITER ;
