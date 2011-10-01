@@ -10,7 +10,12 @@ View
 <p>Candidate keys are, technically, simply <strong>UNIQUE KEY</strong>s. Conceptually, these are keys whose values are able to represent tuples (rows).
 Such keys can be used by different operations on a table, such as separating it to chunks, breaking long, heavy weight operations into 
 smaller, faster operations.</p>
-
+<p>
+MySQL's <strong>PRIMARY KEY</strong>s must not cover NULLable columns. This view indicates whether a key has NULLable columns. While technically this means the key is not 
+an immediate candidate (trying to turn it into <strong>PRIMARY KEY</strong> will fail due to NULLable columns), such keys are nevertheless listed, 
+as often times columns are created NULLable by mistake; that is: many times a NULLable column never has NULL values. 
+In such cases, an <strong>ALTER TABLE MODIFY COLUMN</strong> is required so as to make the key a true candidate key. 
+</p>
 <p>
 Not all candidate keys are the same. Some are "better" than others in terms of space and I/O. A <strong>UNIQUE KEY</strong> over a couple of 
 <strong>INTEGER</strong> columns is smaller (hence "better") than a <strong>UNIQUE KEY</strong> over a <strong>VARCHAR(192)</strong> field (e.g. some URL). 
@@ -23,13 +28,12 @@ It is easier to walk through the table using smaller keys, since less search is 
 
 <p>The heuristic works as follows:
 <ul>
-	<li><strong>PRIMARY KEY</strong>s are always considered to be <i>better</i>. This takes the assumption one uses InnoDB as storage engine. 
-	InnoDB tables are clustered by <strong>PRIMARY KEY</strong>, and any search on any secondary key involves an implicit search on the primary. 
-	Hence, the <strong>PRIMARY KEY</strong> on InnoDB tables is, by definition, the fastest to use.</li>
 	<li>Non-character-typed columns get better score than character-typed columns. Only first column in index is compared in this heuristic.</li>
 	<li>Smaller data types get better score than larger data types (e.g. <strong>INT</strong> is smaller than <strong>DATETIME</strong>). 
 		Only first column in index is compared in this heuristic.</li>
-	<li>Keys convering fewer columns get better score</li>
+	<li>Keys covering fewer columns get better score</li>
+	<li>There is no preference for <strong>PRIMARY KEY</strong>s, although with InnoDB they are technically fastest in access to row data due to the 
+	    clustering index structure of InnoDB tables. Consult the <strong>is_primary</strong> column to prefer <strong>PRIMARY KEY</strong>s.</li>
 </ul>
 
 <h3>STRUCTURE</h3>
@@ -42,11 +46,13 @@ mysql&gt; DESC common_schema.candidate_keys;
 | table_schema                | varchar(64)         | NO   |     |         |       |
 | table_name                  | varchar(64)         | NO   |     |         |       |
 | index_name                  | varchar(64)         | NO   |     |         |       |
+| has_nullable                | int(1)              | NO   |     | 0       |       |
+| is_primary                  | int(1)              | NO   |     | 0       |       |
 | column_names                | longtext            | YES  |     | NULL    |       |
 | count_column_in_index       | bigint(21)          | NO   |     | 0       |       |
 | data_type                   | varchar(64)         | NO   |     |         |       |
 | character_set_name          | varchar(32)         | YES  |     | NULL    |       |
-| candidate_key_rank_in_table | bigint(24) unsigned | YES  |     | NULL    |       |
+| candidate_key_rank_in_table | bigint(23) unsigned | YES  |     | NULL    |       |
 +-----------------------------+---------------------+------+-----+---------+-------+
 </pre></blockquote>
 
@@ -57,6 +63,8 @@ mysql&gt; DESC common_schema.candidate_keys;
 	<li><strong>table_schema</strong>: schema of candidate key</li>
 	<li><strong>table_name</strong>: table of candidate key</li>
 	<li><strong>index_name</strong>: name of candidate key</li>
+	<li><strong>has_nullable</strong>: <strong>1</strong> if any column in this index is NULLable; <strong>0</strong> if all columns are NOT NULL</li>
+	<li><strong>is_primary</strong>: <strong>1</strong> is this key is PRIMARY, <strong>0</strong> otherwise.</li>
 	<li><strong>column_names</strong>: names of columns covered by key</li>
 	<li><strong>count_column_in_index</strong>: number of columns covered by key</li>
 	<li><strong>data_type</strong>: data type of first column covered by key</li>
@@ -67,29 +75,28 @@ mysql&gt; DESC common_schema.candidate_keys;
 <h3>EXAMPLES</h3>
 <p>Show candidate key ranking for tables in <strong>sakila</strong></p>
 <blockquote><pre>mysql&gt; SELECT * FROM common_schema.candidate_keys WHERE TABLE_SCHEMA='sakila';
-+--------------+---------------+------------------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
-| table_schema | table_name    | index_name             | column_names                         | count_column_in_index | data_type | character_set_name | candidate_key_rank_in_table |
-+--------------+---------------+------------------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
-| sakila       | actor         | PRIMARY                | actor_id                             |                     1 | smallint  | NULL               |                       65537 |
-| sakila       | address       | PRIMARY                | address_id                           |                     1 | smallint  | NULL               |                       65537 |
-| sakila       | category      | PRIMARY                | category_id                          |                     1 | tinyint   | NULL               |                           1 |
-| sakila       | city          | PRIMARY                | city_id                              |                     1 | smallint  | NULL               |                       65537 |
-| sakila       | country       | PRIMARY                | country_id                           |                     1 | smallint  | NULL               |                       65537 |
-| sakila       | customer      | PRIMARY                | customer_id                          |                     1 | smallint  | NULL               |                       65537 |
-| sakila       | film          | PRIMARY                | film_id                              |                     1 | smallint  | NULL               |                       65537 |
-| sakila       | film_actor    | PRIMARY                | actor_id,film_id                     |                     2 | smallint  | NULL               |                       65538 |
-| sakila       | film_actor    | film_and_actor_ids_idx | film_id,actor_id                     |                     2 | smallint  | NULL               |                    16842754 |
-| sakila       | film_category | PRIMARY                | film_id,category_id                  |                     2 | smallint  | NULL               |                       65538 |
-| sakila       | film_text     | PRIMARY                | film_id                              |                     1 | smallint  | NULL               |                       65537 |
-| sakila       | inventory     | PRIMARY                | inventory_id                         |                     1 | mediumint | NULL               |                      589825 |
-| sakila       | language      | PRIMARY                | language_id                          |                     1 | tinyint   | NULL               |                           1 |
-| sakila       | payment       | PRIMARY                | payment_id                           |                     1 | smallint  | NULL               |                       65537 |
-| sakila       | rental        | PRIMARY                | rental_id                            |                     1 | int       | NULL               |                      131073 |
-| sakila       | rental        | rental_date            | rental_date,inventory_id,customer_id |                     3 | datetime  | NULL               |                    17104899 |
-| sakila       | staff         | PRIMARY                | staff_id                             |                     1 | tinyint   | NULL               |                           1 |
-| sakila       | store         | PRIMARY                | store_id                             |                     1 | tinyint   | NULL               |                           1 |
-| sakila       | store         | idx_unique_manager     | manager_staff_id                     |                     1 | tinyint   | NULL               |                    16777217 |
-+--------------+---------------+------------------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
++--------------+---------------+--------------------+--------------+------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
+| table_schema | table_name    | index_name         | has_nullable | is_primary | column_names                         | count_column_in_index | data_type | character_set_name | candidate_key_rank_in_table |
++--------------+---------------+--------------------+--------------+------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
+| sakila       | actor         | PRIMARY            |            0 |          1 | actor_id                             |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | address       | PRIMARY            |            0 |          1 | address_id                           |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | category      | PRIMARY            |            0 |          1 | category_id                          |                     1 | tinyint   | NULL               |                           1 |
+| sakila       | city          | PRIMARY            |            0 |          1 | city_id                              |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | country       | PRIMARY            |            0 |          1 | country_id                           |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | customer      | PRIMARY            |            0 |          1 | customer_id                          |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | film          | PRIMARY            |            0 |          1 | film_id                              |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | film_actor    | PRIMARY            |            0 |          1 | actor_id,film_id                     |                     2 | smallint  | NULL               |                       65538 |
+| sakila       | film_category | PRIMARY            |            0 |          1 | film_id,category_id                  |                     2 | smallint  | NULL               |                       65538 |
+| sakila       | film_text     | PRIMARY            |            0 |          1 | film_id                              |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | inventory     | PRIMARY            |            0 |          1 | inventory_id                         |                     1 | mediumint | NULL               |                      589825 |
+| sakila       | language      | PRIMARY            |            0 |          1 | language_id                          |                     1 | tinyint   | NULL               |                           1 |
+| sakila       | payment       | PRIMARY            |            0 |          1 | payment_id                           |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | rental        | PRIMARY            |            0 |          1 | rental_id                            |                     1 | int       | NULL               |                      131073 |
+| sakila       | rental        | rental_date        |            0 |          0 | rental_date,inventory_id,customer_id |                     3 | datetime  | NULL               |                      327683 |
+| sakila       | staff         | PRIMARY            |            0 |          1 | staff_id                             |                     1 | tinyint   | NULL               |                           1 |
+| sakila       | store         | idx_unique_manager |            0 |          0 | manager_staff_id                     |                     1 | tinyint   | NULL               |                           1 |
+| sakila       | store         | PRIMARY            |            0 |          1 | store_id                             |                     1 | tinyint   | NULL               |                           1 |
++--------------+---------------+--------------------+--------------+------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
 </pre></blockquote>
 <p>
 In the above we can see tables <strong>film</strong> and <strong>store</strong> each have <strong>2</strong> possible candidate keys.
