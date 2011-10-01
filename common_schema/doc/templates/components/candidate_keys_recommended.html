@@ -1,0 +1,85 @@
+<h3>NAME</h3>
+candidate_keys_recommended: Recommended candidate key per table. 
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>candidate_keys_recommended</i> recommends a single candidate key per table, where such keys are available.</p>
+
+<p>Follow discussion on <a href="candidate_keys.html">candidate_keys</a> for more on candidate keys.</p>
+<p>
+This view assist in deciding whether assigned <strong>PRIMARY KEY</strong>s for tables are indeed the best candidate keys assigned.
+With InnoDB, where a <strong>PRIMARY KEY</strong> is of greater significance than secondary keys, it is important to choose the 
+<strong>PRIMARY KEY</strong> wisely. Other candidate keys can be promoted to <strong>PRIMARY</strong> in place of a weak <strong>PRIMARY KEY</strong>.
+</p>
+<p>
+The common utilization of this view would be to note down recommended keys which are <italic>not</italic> <strong>PRIMARY KEY</strong>s.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.candidate_keys_recommended;
++------------------------+---------------------+------+-----+---------+-------+
+| Field                  | Type                | Null | Key | Default | Extra |
++------------------------+---------------------+------+-----+---------+-------+
+| table_schema           | varchar(64)         | NO   |     |         |       |
+| table_name             | varchar(64)         | NO   |     |         |       |
+| recommended_index_name | longtext            | YES  |     | NULL    |       |
+| has_nullable           | bigint(67) unsigned | YES  |     | NULL    |       |
+| is_primary             | bigint(67) unsigned | YES  |     | NULL    |       |
+| column_names           | longtext            | YES  |     | NULL    |       |
++------------------------+---------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>table_schema</strong>: schema of candidate key</li>
+	<li><strong>table_name</strong>: table of candidate key</li>
+	<li><strong>recommended_index_name</strong>: name of recommended candidate key</li>
+	<li><strong>has_nullable</strong>: <strong>1</strong> if any column in recommended index is NULLable; <strong>0</strong> if all columns are NOT NULL</li>
+	<li><strong>is_primary</strong>: <strong>1</strong> if recommended key is PRIMARY, <strong>0</strong> otherwise.</li>
+	<li><strong>column_names</strong>: names of columns covered by key</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Show recommended candidate keys for tables in <strong>sakila</strong></p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.candidate_keys_recommended WHERE TABLE_SCHEMA='sakila';
++--------------+---------------+------------------------+--------------+------------+--------------+
+| table_schema | table_name    | recommended_index_name | has_nullable | is_primary | column_names |
++--------------+---------------+------------------------+--------------+------------+--------------+
+| sakila       | actor         | PRIMARY                |            0 |          1 | actor_id     |
+| sakila       | address       | PRIMARY                |            0 |          1 | address_id   |
+| sakila       | category      | PRIMARY                |            0 |          1 | category_id  |
+| sakila       | city          | PRIMARY                |            0 |          1 | city_id      |
+| sakila       | country       | PRIMARY                |            0 |          1 | country_id   |
+| sakila       | customer      | PRIMARY                |            0 |          1 | customer_id  |
+| sakila       | film          | PRIMARY                |            0 |          1 | film_id      |
+| sakila       | film_actor    | PRIMARY                |            0 |          1 | actor_id     |
+| sakila       | film_category | PRIMARY                |            0 |          1 | film_id      |
+| sakila       | film_text     | PRIMARY                |            0 |          1 | film_id      |
+| sakila       | inventory     | PRIMARY                |            0 |          1 | inventory_id |
+| sakila       | language      | PRIMARY                |            0 |          1 | language_id  |
+| sakila       | payment       | PRIMARY                |            0 |          1 | payment_id   |
+| sakila       | rental        | PRIMARY                |            0 |          1 | rental_id    |
+| sakila       | staff         | PRIMARY                |            0 |          1 | staff_id     |
+| sakila       | store         | PRIMARY                |            0 |          1 | store_id     |
++--------------+---------------+------------------------+--------------+------------+--------------+
+</pre></blockquote>
+<p>
+In the above we note that for all tables the recommended candidate key is indeed the PRIMARY KEY.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="candidate_keys.html">candidate_keys</a>,
+<a href="no_pk_innodb_tables.html">no_pk_innodb_tables</a>,
+<a href="redundant_keys.html">redundant_keys</a>,
+<a href="sql_foreign_keys.html">sql_foreign_keys</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
