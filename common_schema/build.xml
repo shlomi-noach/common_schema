@@ -63,7 +63,9 @@
 
 			<fileset dir="tables/" includes="*.sql" />
 
+			<fileset dir="routines/dependencies/" includes="*.sql" />
 			<fileset dir="routines/general/" includes="*.sql" />
+			<fileset dir="routines/general_internal/" includes="*.sql" />
 			<fileset dir="routines/privileges/" includes="*.sql" />
 			<fileset dir="routines/text/" includes="*.sql" />
 			<fileset dir="routines/time/" includes="*.sql" />
@@ -95,7 +97,7 @@
 		</concat>
 	</target>
 
-	<target name="dist" depends="clean, build, revnumber">
+	<target name="dist" depends="clean, build, revnumber, test">
 		<mkdir dir="${dist.dir}" />
 		<antcall target="dist_file">
 			<param name="common_schema_sql_file" value="${sql.mysql_51.output.file}" />
@@ -106,6 +108,7 @@
 		<antcall target="dist_file">
 			<param name="common_schema_sql_file" value="${sql.percona_server.output.file}" />
 		</antcall>
+		<tar destfile="${dist.dir}/common_schema_doc_r${svn.revision}.tar.gz" basedir="doc/html" compression="gzip" />
 	</target>
 
 	<target name="dist_file">
