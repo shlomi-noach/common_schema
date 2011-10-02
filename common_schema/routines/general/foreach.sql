@@ -103,20 +103,21 @@ begin
 	  --
       -- input is integers range, both inclusive (e.g. '-10:55')
       -- 
-      set @_foreach_start_index := CAST(split_token(iterate_data, ':', 1) AS SIGNED INTEGER);
-      set @_foreach_end_index := CAST(split_token(iterate_data, ':', 2) AS SIGNED INTEGER);
-
+      declare _foreach_start_index INT SIGNED DEFAULT CAST(split_token(iterate_data, ':', 1) AS SIGNED INTEGER);
+      declare _foreach_end_index INT SIGNED DEFAULT CAST(split_token(iterate_data, ':', 2) AS SIGNED INTEGER);
+      declare _foreach_loop_index INT SIGNED DEFAULT NULL;
+      
       set iteration_number := 1;
-      set @_foreach_loop_index := @_foreach_start_index;
-      while @_foreach_loop_index <= @_foreach_end_index do
+      set _foreach_loop_index := _foreach_start_index;
+      while _foreach_loop_index <= _foreach_end_index do
         set @_foreach_exec_query := execute_query;
-        set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', @_foreach_loop_index);
+        set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', _foreach_loop_index);
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${NR}', iteration_number);
       
         call exec(@_foreach_exec_query);
 
         set iteration_number := iteration_number + 1;
-        set @_foreach_loop_index := @_foreach_loop_index + 1;
+        set _foreach_loop_index := _foreach_loop_index + 1;
       end while;
     end;
   else
@@ -124,16 +125,24 @@ begin
 	  --
       -- input is constant tokens (e.g. 'read green blue')
       --
-      set @_foreach_num_tokens := get_num_tokens(iterate_data, ' ');
+      declare _foreach_num_tokens INT UNSIGNED DEFAULT get_num_tokens(iterate_data, ' ');
+      declare _foreach_token TEXT CHARSET utf8;
+      declare _foreach_row_number INT UNSIGNED DEFAULT 1;
+      
       set iteration_number := 1;
-      while iteration_number <= @_foreach_num_tokens do
+      constant_tokens_loop: while iteration_number <= _foreach_num_tokens do
+        set _foreach_token := split_token(iterate_data, ' ', iteration_number);
+        set iteration_number := iteration_number + 1;
+        if CHAR_LENGTH(_foreach_token) = 0 then
+          iterate constant_tokens_loop;
+        end if;
         set @_foreach_exec_query := execute_query;
-        set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', split_token(iterate_data, ' ', iteration_number));
-        set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${NR}', iteration_number);
+        set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', _foreach_token);
+        set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${NR}', _foreach_row_number);
       
         call exec(@_foreach_exec_query);
 
-        set iteration_number := iteration_number + 1;
+        set _foreach_row_number := _foreach_row_number + 1;
       end while;
     end;
   end if;    
