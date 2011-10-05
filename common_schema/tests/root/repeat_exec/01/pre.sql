@@ -1,4 +1,4 @@
-USE test;
+USE test_cs;
 DROP TABLE IF EXISTS test_repeat_exec;
 CREATE TABLE test_repeat_exec (id INT UNSIGNED, name VARCHAR(10) CHARSET ascii);
 INSERT INTO test_repeat_exec VALUES (7, 'first');

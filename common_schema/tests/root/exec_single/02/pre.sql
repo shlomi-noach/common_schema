@@ -1,1 +1,1 @@
-TRUNCATE test.test_exec_single;
+TRUNCATE test_cs.test_exec_single;
