@@ -17,6 +17,14 @@ export DIFF_OUTPUT_FILE=common_schema_test_diff.txt
 
 cd $TESTS_ROOT_PATH
 
+if [ -f pre.sql ] ; then
+	mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < pre.sql
+	if [ $? -ne 0 ] ; then
+	  echo "Test startup failed on pre.sql"
+	  exit 1
+	fi
+fi
+
 for TEST_FAMILY_PATH in $(find * -maxdepth 0 -type d)
 do
 	# Test family: suite of tests, testing a specific feature or feature set
@@ -61,6 +69,7 @@ do
 
 		# check test results
 		if [ -f expected.txt ] ; then
+			# There is an "expected.txt" file: results must match that file
 			diff expected.txt ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE} > ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}
 			if [ $? -ne 0 ] ; then
 			  echo "** Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed: unexpected output."
@@ -71,13 +80,40 @@ do
 			  exit 1
 			fi
 		else
+			# No explicit "expected.txt" result.
 			# By default, we expect "1"
 			TEST_RESULT=$(cat ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE})
-			if [ $TEST_RESULT != "1" ] ; then
+			if [ "$TEST_RESULT" != "1" ] ; then
 			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed: got $TEST_RESULT"
 			  exit 1
 			fi
 		fi
+		# post test code (typically cleanup)
+		if [ -f post.sql ] ; then
+			mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
+			if [ $? -ne 0 ] ; then
+			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed on post.sql"
+			  exit 1
+			fi
+		fi
 	done
+	# Post family code (typicaly cleanup)
+	if [ -f post.sql ] ; then
+		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
+		if [ $? -ne 0 ] ; then
+		  echo "Test family ${TEST_FAMILY_PATH} failed on post.sql"
+		  exit 1
+		fi
+	fi
 done
+
+cd $TESTS_ROOT_PATH
+if [ -f post.sql ] ; then
+	mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
+	if [ $? -ne 0 ] ; then
+	  echo "Test cleanup failed on post.sql"
+	  exit 1
+	fi
+fi
+
 cd ${INITIAL_PATH}
