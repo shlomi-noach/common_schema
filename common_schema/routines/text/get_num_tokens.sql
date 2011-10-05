@@ -8,6 +8,7 @@
 -- SELECT get_num_tokens('the quick brown fox', ' ') AS num_token;
 -- Returns: 4
 -- 
+
 DELIMITER $$
 
 DROP FUNCTION IF EXISTS get_num_tokens $$
@@ -18,6 +19,9 @@ SQL SECURITY INVOKER
 COMMENT 'Return number of tokens in delimited text'
 
 begin
+  if CHAR_LENGTH(txt) = 0 then
+    return 0;
+  end if;
   if CHAR_LENGTH(delimiter) = 0 then
     return CHAR_LENGTH(txt);
   else
