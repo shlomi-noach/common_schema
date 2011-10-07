@@ -22,7 +22,9 @@ COMMENT 'Trim whitespace characters on both sides'
 begin
   declare len INT UNSIGNED DEFAULT 0;
   declare done TINYINT UNSIGNED DEFAULT 0;
-
+  if txt IS NULL then
+    return txt;
+  end if;
   while not done do
     set len := CHAR_LENGTH(txt);
     set txt = trim(' ' FROM txt);
