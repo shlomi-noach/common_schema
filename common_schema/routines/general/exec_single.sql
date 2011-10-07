@@ -10,7 +10,7 @@
 --
 -- Example:
 --
--- CALL exec('UPDATE world.City SET Population = Population + 1 WHERE Name =\'Paris\'');
+-- CALL exec_single('UPDATE world.City SET Population = Population + 1 WHERE Name =\'Paris\'');
 --
 
 DELIMITER $$
@@ -22,7 +22,7 @@ SQL SECURITY INVOKER
 COMMENT ''
 
 _proc_body: begin
-  set @_execute_query := TRIM(execute_query);
+  set @_execute_query := trim_wspace(execute_query);
   if CHAR_LENGTH(@_execute_query) = 0 then
     -- An empty statement
     -- This can happen as result of splitting by semicolon ';'

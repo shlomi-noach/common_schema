@@ -1,5 +1,5 @@
 --
--- Executes a given query or semicolon delimitied list of queries
+-- Executes a given query or semicolon delimited list of queries
 -- Input to this procedure is either:
 -- - A single query (no limitation on query)
 -- - A list of queries, separated by semicolon (;) and ending with a semicolon. 
@@ -30,7 +30,7 @@ begin
   declare num_query_tokens, queries_loop_counter TINYINT UNSIGNED DEFAULT 0;
   declare single_query TEXT CHARSET utf8; 
   
-  set execute_queries := TRIM(execute_queries);
+  set execute_queries := trim_wspace(execute_queries);
   if RIGHT(execute_queries, 1) = ';' then
     -- There are multiple statements
     -- The semicolon ';' is assumed to split queries. It must not appear within a query

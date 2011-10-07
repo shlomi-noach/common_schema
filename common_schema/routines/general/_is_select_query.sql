@@ -19,7 +19,7 @@ SQL SECURITY INVOKER
 COMMENT 'Returns 1 when given input starts with SELECT'
 
 BEGIN
-  RETURN (LOCATE('select', LOWER(LTRIM(input))) = 1);
+  RETURN (LOCATE('select', LOWER(trim_wspace(input))) = 1);
 END $$
 
 DELIMITER ;
