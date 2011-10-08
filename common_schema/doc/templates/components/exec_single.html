@@ -16,6 +16,8 @@ Query may be of any valid type:
 	<li>DDL (e.g. CREATE, ALTER, ...)</li>
 	<li>Other (e.g. KILL, SHOW, ...)</li>
 </ul>
+Refer to the <a href="http://dev.mysql.com/doc/refman/5.1/en/sql-syntax-prepared-statements.html">MySQL Manual</a> 
+for complete listing of valid statements.
 </p>
 <p>
 The procedure is used as the underlying execution mechanism for other <i>common_schema</i> routines.
@@ -35,7 +37,10 @@ Users will often not use this routine directly.
   Input:
   <ul>
     <li><strong>execute_query</strong>: a single query to execute. This can be DML, DDL or any other valid MySQL command.
-      The procedure will not execute nor change anything when this input is empty (blank space)</li>
+      The procedure will not execute nor change anything when this input is empty (blank space).
+      There is no need to terminate query by semicolon. A semicolon may appear within query 
+      (e.g. in quoted text).
+    </li>
   </ul>
   Input config:
   <ul>

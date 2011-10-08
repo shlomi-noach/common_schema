@@ -1,0 +1,59 @@
+<h3>NAME</h3>
+exec_file(): Executes queries from given file, residing on server
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+This procedure will read and execute a given file. The file is expected to contain valid SQL
+statements.
+</p>
+<p>
+The procedure acts in similar manner to the <strong>SOURCE</strong> command; only the SOURCE command
+is a <a href="http://dev.mysql.com/doc/refman/5.1/en/mysql.html">mysql command line tool</a> command, and works by reading a file from the <i>client</i>. 
+<br/><i>exec_file()</i>
+reads the file from the server machine. It does not require the <i>mysql</i> command line tool, and works exclusively in server side.
+</p>
+<p>
+Invoker of this procedure must have the FILE privilege, as well as any other privilege required for
+executing the commands in the input file.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>exec_file(IN file_name TEXT CHARSET utf8) 
+MODIFIES SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>file_name</strong>: input file name. This file must exist on the server host; 
+    must be readable (some Linux distributions contain <i>AppArmor</i> or similar security enhancements
+    which place strict restrictions on reading files from MySQL). The file is assumed to contain
+    valid SQL statements.
+    <br/>
+    Refer to the <a href="http://dev.mysql.com/doc/refman/5.1/en/sql-syntax-prepared-statements.html">MySQL Manual</a> 
+for complete listing of valid statements.
+    </li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Execute command in file:
+	</p>
+	<blockquote><pre>call exec_file('/tmp/my_statements.sql');
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="eval.html">eval()</a>,
+<a href="exec.html">exec()</a>,
+<a href="exec_single.html">exec_single()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

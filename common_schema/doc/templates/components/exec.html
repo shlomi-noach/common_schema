@@ -1,0 +1,97 @@
+<h3>NAME</h3>
+exec(): Executes a given query or semicolon delimited list of queries.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+This procedure will invoke a list of queries (one or more), by utilizing dynamic SQL. 
+It calls upon <a href="exec_single.html">exec_single()</a> for each query.
+</p>
+<p>
+Queries may be of any valid type, that is allowed to invoke from within a prepared statement:
+<ul>
+	<li>DML (e.g. INSERT, UPDATE, ...)</li>
+	<li>DDL (e.g. CREATE, ALTER, ...)</li>
+	<li>Other (e.g. KILL, SHOW, ...)</li>
+</ul>
+Refer to the <a href="http://dev.mysql.com/doc/refman/5.1/en/sql-syntax-prepared-statements.html">MySQL Manual</a> 
+for complete listing of valid statements.
+</p>
+<p>
+The procedure is used as the underlying execution mechanism for other <i>common_schema</i> routines,
+such as <a href="foreach.html">foreach()</a>, <a href="repeat_exec.html">repeat_exec()</a> and <a href="exec_file.html">exec_file()</a>.
+Users will often not use this routine directly.
+Since it relies on <i>exec_single()</i>, it respects the same input configuration (see following).
+</p>
+<p>
+	Invoker of this procedure must have the privileges required for execution of given queries.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>exec(IN execute_queries TEXT CHARSET utf8) 
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>execute_queries</strong>: one or more queries to execute.
+    	<ul>
+    		<li>If one single query is provided, this procedure behaves just as <i>exec_single()</i>. 
+    		  There is no need to terminate query by semicolon. A semicolon (";") may appear within query 
+    		  (e.g. in quoted text).
+    		</li>
+    		<li>If multiple queries are provided, they <strong>must</strong> be separated by semicolons (";"). 
+    		The last query <strong>must end</strong> with a semicolon. A semicolon must not appear within
+    		query (this last restriction is to be alleviated in future versions).
+    		</li>
+    	</ul>
+    </li>
+  </ul>
+  Input config (see also <a href="exec_single.html">exec_single()</a>):
+  <ul>
+    <li><strong>@common_schema_dryrun</strong>: when <strong>1</strong>, queries are not executed, but rather printed.</li>
+    <li><strong>@common_schema_verbose</strong>: when <strong>1</strong>, queries are verbosed.</li>
+  </ul>
+  Output:
+  <ul>
+    <li>Whatever output the queries may produce.</li>
+    <li><strong>@common_schema_rowcount</strong>: number of rows affected by execution of the <i>last query</i>.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Execute sequence of commands, both DDL and DML:
+	</p>
+	<blockquote><pre>call exec('CREATE TABLE test.t(id INT); INSERT INTO test.t VALUES (2),(3),(5); SELECT SUM(id) FROM test.t INTO @result;');
+Query OK, 0 rows affected (0.06 sec)
+
+mysql&gt; SELECT @result;
++---------+
+| @result |
++---------+
+|      10 |
++---------+
+</pre></blockquote>
+	<p>
+		Execute queries from server-side file (see also <a href="exec_file.html">exec_file()</a>).
+	</p>
+	<blockquote><pre>mysql&gt; call exec(LOAD_FILE('/tmp/statements.sql'));
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="eval.html">eval()</a>,
+<a href="exec_file.html">exec_file()</a>,
+<a href="exec_single.html">exec_single()</a>,
+<a href="foreach.html">foreach()</a>,
+<a href="repeat_exec.html">repeat_exec()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
