@@ -1,0 +1,49 @@
+<h3>NAME</h3>
+crc64(): Return a 64 bit CRC of given input, as unsigned big integer.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function complements MySQL's crc32() function,	which results with poor distribution
+	on large number of values.
+	The <i>crc64()</i> algorithm relies on <strong>MD5</strong> as underlying mechanism. 
+</p>
+<p>
+  While input <strong>data</strong> is textual, any type can be passed in, due to SQL's implicit casting nature.
+</p>
+<p>
+	This code is based on the idea presented in the book
+	<i>High Performance MySQL, 2nd Edition</i>, By Baron Schwartz et al., published by O'REILLY
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>crc64(data LONGTEXT CHARSET utf8) 
+  RETURNS BIGINT UNSIGNED</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>data</strong>: data to run CRC on. This can be textual, numeric, temporal, or any other type
+      that can be implicitly converted to <strong>TEXT</strong>.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Calculate 64 bit CRC for some text:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT common_schema.crc64('mysql') AS crc64;
++---------------------+
+| crc64               |
++---------------------+
+| 9350511318824990686 |
++---------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach

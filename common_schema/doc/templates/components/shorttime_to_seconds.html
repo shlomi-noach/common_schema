@@ -1,0 +1,63 @@
+<h3>NAME</h3>
+shorttime_to_seconds(): Return the number of seconds represented by the given short form
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function evaluates the number of seconds expressed by the given input. 
+	Input is expected to be in <i>short time</i> format (see following).
+</p>
+<p>
+  The function returns NULL on invalid input: any input which is not in short-time format,
+  including plain numbers (to emphasize: the input '12' is invalid)
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>shorttime_to_seconds(shorttime VARCHAR(16) CHARSET ascii)
+  RETURNS INT UNSIGNED 
+</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>shorttime</strong>: <i>short time</i> format, denoted by a number followed by a unit.
+      Valid units are:
+      <ul>
+        <li><strong>s</strong> (seconds), e.g. '30s' makes for 30 seconds.</li>
+        <li><strong>m</strong> (minutes), e.g. '3m' makes for 3 minutes, resulting with 180 seconds.</li>
+        <li><strong>h</strong> (hours), e.g. '2h' makes for 2 hours, resulting with 7200 seconds.</li>
+      </ul>
+    </li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Parse '2h', making for 2 hours:
+	</p>
+	<blockquote><pre>SELECT shorttime_to_seconds('2h') as seconds;
++---------+
+| seconds |
++---------+
+|    7200 |
++---------+
+</pre></blockquote>
+
+	<p>
+		Fail on invalid input:
+	</p>
+	<blockquote><pre>SELECT shorttime_to_seconds('2') as seconds;
++---------+
+| seconds |
++---------+
+|    NULL |
++---------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach
