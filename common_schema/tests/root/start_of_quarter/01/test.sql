@@ -1,0 +1,1 @@
+SELECT start_of_quarter('2011-06-17 18:29:03') = DATE('2011-04-01');

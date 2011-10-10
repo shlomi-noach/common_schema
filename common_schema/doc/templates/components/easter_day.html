@@ -1,0 +1,39 @@
+<h3>NAME</h3>
+easter_day(): Returns DATE of easter day in given DATETIME's year.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	Compute date for Easter Day on given year.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>easter_day(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>dt</strong>: a DATETIME object, by which computation is made. 
+	    <strong>dt</strong> is only checked for its <strong>YEAR</strong> part. All other information (month, day, time) is irrelevant.
+		Hence, the two inputs <strong>'2012-01-01'</strong> and <strong>'2012-08-27 15:16:17'</strong> yield with the same result.
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT common_schema.easter_day('2012-01-01') AS easter_day_2012;
++-----------------+
+| easter_day_2012 |
++-----------------+
+| 2012-04-08      |
++-----------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach, based on contribution by Roland Bouman 

@@ -37,7 +37,7 @@ Function
 	<p>
 		Parse '2h', making for 2 hours:
 	</p>
-	<blockquote><pre>SELECT shorttime_to_seconds('2h') as seconds;
+	<blockquote><pre>mysql&gt; SELECT shorttime_to_seconds('2h') as seconds;
 +---------+
 | seconds |
 +---------+
@@ -48,7 +48,7 @@ Function
 	<p>
 		Fail on invalid input:
 	</p>
-	<blockquote><pre>SELECT shorttime_to_seconds('2') as seconds;
+	<blockquote><pre>mysql&gt; SELECT shorttime_to_seconds('2') as seconds;
 +---------+
 | seconds |
 +---------+

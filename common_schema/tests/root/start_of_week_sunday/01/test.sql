@@ -1,0 +1,1 @@
+SELECT start_of_week_sunday('2011-03-24 11:17:08') = DATE('2011-03-20');

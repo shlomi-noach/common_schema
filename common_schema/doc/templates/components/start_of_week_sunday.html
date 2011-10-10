@@ -1,0 +1,39 @@
+<h3>NAME</h3>
+start_of_week_sunday(): Returns first day of week, Sunday based, of given datetime, as DATE object
+
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	Returns midnight, starting Sunday in same week as given DATETIME.
+	Some calendars (i.e. Jewish/Israeli calendar) begin the working week on Sunday.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>start_of_week_sunday(dt DATETIME)
+  RETURNS DATE</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>dt</strong>: a DATETIME object, from which to extract same week's Sunday (the Sunday just before or at the given DATETIME).
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT common_schema.start_of_week_sunday('2011-03-24 11:17:08') as dt;
++------------+
+| dt         |
++------------+
+| 2011-03-20 |
++------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach
