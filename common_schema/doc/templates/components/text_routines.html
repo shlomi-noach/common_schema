@@ -1,0 +1,34 @@
+<h3>SYNOPSIS</h3>
+
+<p>
+Text routines: string operations
+<ul>
+	<li><a href="get_num_tokens.html">get_num_tokens()</a>: Return number of tokens in delimited text</li>
+	<li><a href="like_to_rlike.html">like_to_rlike()</a>: Convert a LIKE expression to an RLIKE (REGEXP) expression</li>
+	<li><a href="mysql_qualify.html">mysql_qualify()</a>: Return a qualified MySQL object name</li>
+	<li><a href="split_token.html">split_token()</a>: Return substring by index in delimited text</li>
+</ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Calculate 64 bit CRC for some text:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT common_schema.crc64('mysql') AS crc64;
++---------------------+
+| crc64               |
++---------------------+
+| 9350511318824990686 |
++---------------------+
+</pre></blockquote>
+
+	<p>
+		Use <i>shorttime_to_seconds()</i> to parse '2h', making for 2 hours:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT shorttime_to_seconds('2h') as seconds;
++---------+
+| seconds |
++---------+
+|    7200 |
++---------+
+</pre></blockquote>

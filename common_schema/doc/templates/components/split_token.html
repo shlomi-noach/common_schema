@@ -1,0 +1,50 @@
+<h3>NAME</h3>
+split_token(): Return substring by index in delimited text.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function splits the input text <strong>txt</strong> into tokens, according to 
+	given <strong>delimiter</strong>. It returns a single token,
+	indicated by the <strong>1</strong>-based <strong>token_index</strong>.
+</p>
+<p>
+	The function is a shortcut to the common pattern of using two SUBSTRING_INDEX() invocations.			
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>split_token(txt TEXT CHARSET utf8, delimiter VARCHAR(255) CHARSET utf8, token_index INT UNSIGNED) 
+  RETURNS TEXT CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: text to be parsed. When <strong>NULL</strong>, the result is <strong>NULL</strong>.
+	</li>
+    <li><strong>delimiter</strong>: delimiter text; can be zero or more characters. 
+	    <br/>When <strong>delimiter</strong> is the empty text (zero characters), function's result is 
+	    the character in the position of <strong>token_index</strong>.
+	</li>
+    <li><strong>token_index</strong>: <strong>1</strong>-based index. At current, there is no
+    validation that given index is within tokenized text's bounds.
+    </li> 
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Tokenize by space:</p>
+<blockquote><pre>mysql&gt; SELECT common_schema.split_token('the quick brown fox', ' ', 3) AS token;
++-------+
+| token |
++-------+
+| brown |
++-------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach
