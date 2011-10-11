@@ -22,7 +22,7 @@
 	<target name="all" depends="build">
 	</target>
 
-	<target name="build" depends="build_mysql_51, build_innodb_plugin, build_percona_server">
+	<target name="build" depends="revnumber, build_mysql_51, build_innodb_plugin, build_percona_server">
 	</target>
 
 	<target name="clean">
@@ -56,7 +56,7 @@
 	</target>
 
 
-	<target name="build_mysql_51">
+	<target name="build_mysql_51" depends="revnumber">
 		<mkdir dir="${build.dir}" />
 		<concat destfile="${build.dir}/${sql.mysql_51.output.file}">
 			<fileset file="main.sql" />
@@ -81,7 +81,8 @@
 			<fileset dir="views/process/" includes="*.sql" />
 			<fileset dir="views/status/" includes="*.sql" />
 		</concat>
-	</target>
+		<replace file="${build.dir}/${sql.mysql_51.output.file}" token="revision.placeholder" value="${svn.revision}"/>
+		</target>
 
 	<target name="build_innodb_plugin" depends="build_mysql_51">
 		<concat destfile="${build.dir}/${sql.innodb_plugin.output.file}">
