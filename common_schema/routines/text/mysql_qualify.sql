@@ -17,8 +17,11 @@ NO SQL
 SQL SECURITY INVOKER
 COMMENT 'Return a qualified MySQL name from given text'
 
-BEGIN
-  RETURN CONCAT('`', name, '`');
-END $$
+begin
+  if name RLIKE '^`[^`]*`$' then
+    return name;
+  end if;
+  return CONCAT('`', REPLACE(name, '`', '``'), '`');
+end $$
 
 DELIMITER ;
