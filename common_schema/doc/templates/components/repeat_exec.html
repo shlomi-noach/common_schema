@@ -1,0 +1,120 @@
+<h3>NAME</h3>
+repeat_exec(): Repeatedly executes given query or queries until some condition holds.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+This procedure repeats execution of query or queries, on a given interval. It terminates according
+to a given condition, which may be one of several types (see following), including dynamic calculation.
+</p>
+<p>
+The procedure is essentially a <i>repeat-until</i> looping device. It is tailored to fit common
+use case scenarios, such as <i>repeat-until no more rows are affected</i> or 
+<i>repeat-until some time has passed</i>. 
+Use cases range from breaking down huge transactions to smaller ones,
+through load testing, to data access & manipulation simulation. 
+</p>
+<p>
+It calls upon <i>exec()</i> for query execution.
+Queries may be of varying types (DML, DDL, other commands). See <a href="exec.html">exec()</a>.
+</p>
+
+<p>
+	Invoker of this procedure must have the privileges required for execution of given queries.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>repeat_exec(interval_seconds DOUBLE, execute_queries TEXT CHARSET utf8, stop_condition TEXT CHARSET utf8)</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>interval_seconds</strong>: number of seconds to sleep between invocation of queries.
+    	<br/>This value can be a floating point number, e.g. <strong>0.1</strong> indicates one-tenth of a second.
+    	<br/><i>repeat_exec()</i> begins with query execution, then follows on to sleeping. Once the 
+    	<strong>stop_condition</strong> is met, no more sleeping is performed. 
+    </li>
+    <li><strong>execute_queries</strong>: one or more queries to execute per loop iteration.
+    	<br/>If more than one query specified, all queries <i>including last</i> must terminate with
+    	a semicolon (<strong>;</strong>)
+    </li>
+    <li><strong>stop_condition</strong>: the condition by which the loop terminates. Can be in one
+    	of several forms and formats:
+    	<ul>
+    		<li><strong>NULL</strong>: no stop condition. The loop is infinite.</li>
+    		<li><strong>0</strong>: The loop terminates when no rows are affected by query (if
+	    		multiple queries specified, loop terminates when no rows are affected by last of queries).
+    			This is in particular useful for DELETE or UPDATE statements, see examples.
+    		</li>
+    		<li><strong>A positive integer (1, 2, 3, ...)</strong>: loop terminates after given number
+    			of iterations.
+    		</li>
+    		<li><strong>Short time format (e.g. '30s', '45m', '2h')</strong>: loop terminates after
+    			specified time has passed. See <a href="shorttime_to_seconds.html">shorttime_to_seconds()</a>
+    			for more on <i>short time</i> format.
+    		</li>
+    		<li><strong>a SELECT query</strong>: query is re-evaluated at the end of each iteration.
+    			Loop terminates when query evaluates to a TRUE value. The query must return with one
+    			single row and one single value.
+    		</li>
+    	</ul>
+    </li>
+  </ul>
+  Since the routines relies on <a href="exec.html">exec()</a>, it accepts the following
+  input config:
+  <ul>
+    <li><strong>@common_schema_dryrun</strong>: when <strong>1</strong>, queries are not executed, but rather printed.</li>
+    <li><strong>@common_schema_verbose</strong>: when <strong>1</strong>, queries are verbosed.</li>
+  </ul>
+  Output:
+  <ul>
+    <li>Whatever output the queries may produce.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		DELETE all rows matching some condition. Break a potentially huge DELETE (e.g. 500,000 rows)
+		into smaller chunks, as follows:
+		<ul>
+			<li><strong>sleep_time</strong> is <strong>2</strong> seconds</li>
+			<li><strong>execute_queries</strong> only deletes <strong>1000</strong> rows at a time</li>
+			<li><strong>stop_condition</strong> is set to <strong>0</strong>, meaning the query
+				terminates when no more rows are affected, i.e., all matching rows have been
+				deleted.</li>
+		</ul>
+		This makes for smaller transactions, less locks, and better replication slave catch-up:
+	</p>
+	<blockquote><pre>mysql&gt; call repeat_exec(2, 
+	  'DELETE FROM sakila.rental WHERE customer_id=7 ORDER BY rental_id LIMIT 1000', 
+	  0);
+</pre></blockquote>
+	<p>
+		Make a <strong>15</strong> seconds random INSERT, UPDATE and DELETE access pattern:
+	</p>
+	<blockquote><pre>mysql&gt; call repeat_exec(0.01, 
+	  'UPDATE world.City SET Name=MD5(RAND()) WHERE id=FLOOR(RAND()*4000); INSERT INTO world.City (Name, Population) VALUES (MD5(RAND()), 0); DELETE FROM world.City WHERE id=FLOOR(RAND()*4000);', 
+	  '15s');
+</pre></blockquote>
+	<p>
+		Execute a query until some dynamic condition holds:
+	</p>
+	<blockquote><pre>mysql&gt; call repeat_exec(0.5, 
+	  'DELETE FROM sakila.rental WHERE customer_id=7 ORDER BY rental_id LIMIT 100', 
+	  'SELECT SUM(customer_id = 7) < SUM(customer_id = 3) FROM sakila.rental');
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="exec.html">exec()</a>,
+<a href="exec_single.html">exec_single()</a>,
+<a href="foreach.html">foreach()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

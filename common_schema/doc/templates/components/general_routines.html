@@ -1,0 +1,32 @@
+<h3>SYNOPSIS</h3>
+
+<p>
+General routines: general purpose tasks routines.
+<ul>
+	<li><a href="crc64.html">crc64()</a>: Return a 64 bit CRC of given input, as unsigned big integer.</li>
+	<li><a href="shorttime_to_seconds.html">shorttime_to_seconds()</a>: Return the number of seconds represented by the given short form.</li>
+</ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Calculate 64 bit CRC for some text:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT common_schema.crc64('mysql') AS crc64;
++---------------------+
+| crc64               |
++---------------------+
+| 9350511318824990686 |
++---------------------+
+</pre></blockquote>
+
+	<p>
+		Use <i>shorttime_to_seconds()</i> to parse '2h', making for 2 hours:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT shorttime_to_seconds('2h') as seconds;
++---------+
+| seconds |
++---------+
+|    7200 |
++---------+
+</pre></blockquote>
