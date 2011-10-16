@@ -1,0 +1,4 @@
+test_cs_foreach_00 test_foreach_table_0a
+test_cs_foreach_00 test_foreach_table_0b
+test_cs_foreach_01 test_foreach_table_0c
+test_cs_foreach_01 test_foreach_table_0d

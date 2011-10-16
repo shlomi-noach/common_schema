@@ -1,0 +1,1 @@
+table LIKE expression, ${schema}, ${table}, ignore views
