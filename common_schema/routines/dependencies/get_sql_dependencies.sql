@@ -1,4 +1,5 @@
-﻿delimiter //
+
+delimiter //
 
 set names utf8
 //
