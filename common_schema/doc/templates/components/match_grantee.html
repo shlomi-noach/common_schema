@@ -1,0 +1,53 @@
+<h3>NAME</h3>
+match_grantee(): Match an existing account based on user+host.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	MySQL does not provide with identification of logged in accounts. It only provides with 
+	user + host:port combination within processlist. Alas, these do not directly map to accounts,
+	as MySQL lists the host:port from which the connection is made, but not the (possibly wildcard)
+	user or host.
+</p>
+<p>
+    This function matches a user+host combination against the known accounts, using the same
+    matching method as the MySQL server, to detect the account which MySQL identifies as the 
+    one matching. It is similar in essence to <strong>CURRENT_USER()</strong>, only it works for all sessions,
+    not just for the current session.
+</p>
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>match_grantee(connection_user char(16) CHARSET utf8, connection_host char(70) CHARSET utf8) 
+  RETURNS VARCHAR(100) CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>connection_user</strong>: user login (e.g. as specified by <strong>PROCESSLIST</strong>)
+	</li>
+    <li><strong>connection_host</strong>: login host. May optionally specify port number 
+    	(e.g. <i>webhost:12345</i>), which is discarded by the function. 
+    	This is to support immediate input from  as specified by <strong>PROCESSLIST</strong>.
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Find an account matching the given use+host combination:</p>
+<blockquote><pre>mysql&gt; SELECT match_grantee('apps', '192.128.0.1:12345') AS grantee;
++------------+
+| grantee    |
++------------+
+| 'apps'@'%' |
++------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="processlist_grantees.html">processlist_grantees</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

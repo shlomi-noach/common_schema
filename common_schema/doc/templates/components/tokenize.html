@@ -1,0 +1,52 @@
+<h3>NAME</h3>
+tokenize(): Outputs ordered result set of tokens of given text
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure splits given text using given delimiter, and returns to tokens as
+	a result set.
+</p>
+<p>
+	The number of tokens is limited by the number of values 
+	in the <a href="numbers.html">numbers</a> table.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>tokenize(txt TEXT CHARSET utf8, delimiter VARCHAR(255) CHARSET utf8)</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: text to be tokenized.
+	</li>
+    <li><strong>delimiter</strong>: delimiter by which to tokenize (can be of any length,
+    	including an empty text).
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Tokenize a given text:</p>
+<blockquote><pre>call tokenize('the quick brown fox', ' ');
++---+-------+
+| n | token |
++---+-------+
+| 1 | the   |
+| 2 | quick |
+| 3 | brown |
+| 4 | fox   |
++---+-------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="get_num_tokens.html">get_num_tokens()</a>,
+<a href="split_token.html">split_token()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

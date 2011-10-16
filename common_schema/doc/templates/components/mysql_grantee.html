@@ -1,0 +1,52 @@
+<h3>NAME</h3>
+mysql_grantee(): Return a qualified MySQL grantee (account) based on user and host.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	MySQL is inconsistent in its reference to user accounts. At times, a user+host combination is
+	used (e.g. the <strong>mysql.user</strong> table, or the even fuzzier <strong>PROCESSLIST</strong>).
+	Other times, a <i>grantee</i> is used (e.g. with <strong>INFORMATION_SCHEMA</strong> tables).
+</p>
+<p>
+	This function is a simple text wrapper function, which is useful in automation of SQL query 
+	generation,	or otherwise in comparing and recognizing accounts in different formats 
+	(user+host vs. grantee formats).
+</p>
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>mysql_grantee(mysql_user char(16) CHARSET utf8, mysql_host char(60) CHARSET utf8) 
+  RETURNS VARCHAR(100) CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>mysql_user</strong>: name of user.
+	</li>
+    <li><strong>mysql_host</strong>: name of host.
+	</li>
+  </ul>
+</p>
+<p>
+Output: fully qualified GRANTEE name
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Qualify a GRANTEE:</p>
+<blockquote><pre>SELECT common_schema.mysql_grantee('web_user', '192.128.0.%') AS grantee;
++--------------------------+
+| grantee                  |
++--------------------------+
+| 'web_user'@'192.128.0.%' |
++--------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="match_grantee.html">match_grantee()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

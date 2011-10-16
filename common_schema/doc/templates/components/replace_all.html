@@ -1,0 +1,56 @@
+<h3>NAME</h3>
+replace_all(): Replaces characters in a given text with a given replace-text.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function replaces any appearance of character within a given set, with a replace-text. 	
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>replace_all(txt TEXT CHARSET utf8, from_characters VARCHAR(1024) CHARSET utf8, to_str TEXT CHARSET utf8)
+  RETURNS TEXT CHARSET utf8 </pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: input text, on which to work the search/replace. It is unmodified.
+	</li>
+    <li><strong>from_characters</strong>: a set of characters. Any appearance of any character within this set
+      makes for a replace action.
+	</li>
+    <li><strong>to_str</strong>: text to be injected in place of any character in <strong>from_characters</strong>.
+    	<br/>Can be an empty text, which makes for a deletion of any character in the set.
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Replace any appearance of comma, colon & semicolon with a pipeline:</p>
+<blockquote><pre>SELECT replace_all('common_schema: routines, views;tables', ';:,', '|') AS replaced_text;
++---------------------------------------+
+| replaced_text                         |
++---------------------------------------+
+| common_schema| routines| views|tables |
++---------------------------------------+
+</pre></blockquote>
+
+<p>As above, include whitespace (note that adjacent characters are NOT compressed)</p>
+<blockquote><pre>SELECT replace_all('common_schema: routines, views;tables', ';:, \t', '|') AS replaced_text;
++---------------------------------------+
+| replaced_text                         |
++---------------------------------------+
+| common_schema||routines||views|tables |
++---------------------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="trim_wspace.html">trim_wspace()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

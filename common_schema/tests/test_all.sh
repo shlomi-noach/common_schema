@@ -15,6 +15,8 @@ export TEST_OUTPUT_PATH=/tmp
 export TEST_OUTPUT_FILE=common_schema_test_output.txt
 export DIFF_OUTPUT_FILE=common_schema_test_diff.txt
 
+let num_tests=0
+
 cd $TESTS_ROOT_PATH
 
 if [ -f pre.sql ] ; then
@@ -96,6 +98,7 @@ do
 			  exit 1
 			fi
 		fi
+		let num_tests=num_tests+1
 	done
 	# Post family code (typicaly cleanup)
 	if [ -f post.sql ] ; then
@@ -115,5 +118,7 @@ if [ -f post.sql ] ; then
 	  exit 1
 	fi
 fi
+
+echo "Tests complete. Total num tests: ${num_tests}"
 
 cd ${INITIAL_PATH}

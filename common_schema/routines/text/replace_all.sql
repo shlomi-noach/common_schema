@@ -1,5 +1,5 @@
 -- 
--- Replaces any character in a given text with a given replace-text.
+-- Replaces characters in a given text with a given replace-text.
 -- txt: input text
 -- from_characters: a text consisting of characters to replace.
 -- to_str: a string to plant in place of each occurance of a character from from_characters.

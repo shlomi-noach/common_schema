@@ -12,6 +12,20 @@ Execution routines: stored routines managing dynamic query execution, iteration 
 </ul>
 </p>
 
+<h3>DESCRIPTION</h3>
+<p>
+These featured routines allow for semi-scripting capabilities in MySQL. Looping through collections,
+row sets, numbers, tables; repeating tasks until a given condition hold, or dynamically evaluating
+queries. The execution routines simplify a DBA's maintenance work by providing with a simpler,
+cleaner and more familiar syntax.
+</p>
+<p>
+The majority of operations in these routines use dynamic queries, based on prepared statements.
+Note that MySQL does not support invoking a prepared statement from within a prepared statement. 
+This means you may wish to avoid calling on these routines using prepared statements code (some 
+frameworks will, by default, invoke queries using prepared statements regardless of the query type).
+</p>
+
 <h3>EXAMPLES</h3>
 <p>Use <i>foreach()</i> to convert <strong>sakila</strong> tables to InnoDB:
 </p>

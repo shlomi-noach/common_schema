@@ -1,0 +1,54 @@
+<h3>NAME</h3>
+trim_wspace(): Trim white space characters on both sides of text.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	As opposed to the standard <strong>TRIM()</strong> function, which only trims
+	strict space characters (' '), <i>trim_wspace()</i> also trims new line, 
+	tab and backspace characters.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>trim_wspace(txt TEXT CHARSET utf8)
+  RETURNS TEXT CHARSET utf8 </pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: text to trim In case of <strong>NULL</strong>, the function returns <strong>NULL</strong>.
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Trim text (spaces between literals are unaffected):</p>
+<blockquote><pre>SELECT trim_wspace('\n a b c \n   ') AS res;
++-------+
+| res   |
++-------+
+| a b c |
++-------+
+</pre></blockquote>
+
+<p>Similar to the above, quoted for clarity:</p>
+<blockquote><pre>SELECT CONCAT('"', trim_wspace('\n the quick brown fox \n   '), '"') AS res;
++-----------------------+
+| res                   |
++-----------------------+
+| "the quick brown fox" |
++-----------------------+
+</pre></blockquote>
+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="replace_all.html">replace_all()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

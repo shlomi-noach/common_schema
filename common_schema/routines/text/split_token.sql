@@ -9,6 +9,7 @@
 -- SELECT split_token('the quick brown fox', ' ', 3) AS token;
 -- Returns: 'brown'
 -- 
+
 DELIMITER $$
 
 DROP FUNCTION IF EXISTS split_token $$
