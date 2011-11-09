@@ -48,7 +48,6 @@ my_main: begin
     my_loop: repeat 
         set v_old_from = v_from;
         call _get_sql_token(p_text, v_from, v_level, v_token, v_state);
-        select v_state, v_token, v_prev_tokens;
         if v_state = 'error' then
             set p_error = 'Tokenizer returned error state';
             leave my_main;
@@ -74,13 +73,15 @@ my_main: begin
                         when v_handle = 'AS' then    -- handle indicates an explicit alias.
                             3 + character_length(substring_index(v_expression, 'AS', -1))
                         when coalesce(v_handle, '') not in (  -- if the handle is not a keyword then the last token must be an alias. chop it off 
-                            '', 'AND', 'BINARY', 'COLLATE', 'DIV', 'ESCAPE', 'LIKE', 'MOD', 'NOT', ''
-                        ) 
-                        and not (   -- what also counts as a keyword is a character set specifier. consider moving this into the tokenizer.
-                            v_handle LIKE '_%'
-                        and exists (select null from information_schema.character_sets where character_set_name = substring(v_handle, 2))
-                        )
-                        then
+                                '', 'AND', 'BINARY', 'COLLATE', 'DIV', 'ESCAPE', 'LIKE', 'MOD', 'NOT', ''
+                        ) and not (   -- what also counts as a keyword is a character set specifier. consider moving this into the tokenizer.
+                                v_handle LIKE '_%'
+                            and exists (
+                                select  null 
+                                from    information_schema.character_sets 
+                                where   character_set_name = substring(v_handle, 2)
+                            )
+                        ) then
                             character_length(substring_index(v_prev_tokens, v_token_separator, -1))
                         else 0
                     end;
