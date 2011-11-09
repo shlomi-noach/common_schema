@@ -1,0 +1,1 @@
+SELECT  id  AS col1,  name AS col2,  name like 'boe'  AS col3,  name like `boe`  AS col4,  name between district and countrycode  AS col5,  case countrycode when 'NLD' then 1 else 0 end  AS col6,  id mod 2  AS col7,  group_concat(name order by name) AS col8,  (select 1 as cons)  AS col9, NULL as col10 from world.City
