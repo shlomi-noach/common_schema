@@ -76,7 +76,11 @@ my_proc: begin
                             when v_handle = 'AS' then    -- handle indicates an explicit alias.
                                 2 + character_length(substring_index(v_expression, 'AS', -1))
                             when coalesce(v_handle, '') not in (  -- if the handle is not a keyword then the last token must be an alias. chop it off 
-                                '', 'AND', 'BINARY', 'COLLATE', 'DIV', 'ESCAPE', 'LIKE', 'MOD', 'NOT'
+                                '', 'AND', 'BINARY', 'COLLATE', 'DIV', 'ESCAPE', 'IS', 'LIKE', 'MOD', 'NOT', 'OR', 'REGEXP', 'RLIKE', 'XOR'
+                            ,   '+', '-', '/', '*', '%'
+                            ,   '||', '&&', '!' 
+                            ,   '<', '<=', '=>', '>', '<=>', '=', '!=', ':='
+                            ,   '|', '&', '~', '^', '<<', '>>'
                             ) and not (   -- what also counts as a keyword is a character set specifier. consider moving this into the tokenizer.
                                     v_handle = '_bin' 
                                 or  v_handle LIKE '_%'
