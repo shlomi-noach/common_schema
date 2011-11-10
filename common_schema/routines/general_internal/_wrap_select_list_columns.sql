@@ -25,7 +25,7 @@ my_proc: begin
     declare v_substr_length int unsigned default 0;
     set @_wrap_select_num_original_columns := 0;
     
-my_main: begin
+    my_main: begin
     -- part one: find the SELECT keyword.
     my_loop: repeat 
         set v_old_from = v_from;
@@ -59,6 +59,8 @@ my_main: begin
                 ) 
                 or v_old_from = v_from
             ) then
+                -- if we ran into the from clause and there is whitespace (or comments) between the last column expression and the from keyword,
+                -- then v_prev_tokens will end with a v_token_separator. We remove that here to not mess up finding the handle
                 if v_token = 'from' 
                 and substr(v_prev_tokens, character_length(v_prev_tokens) + 1 - character_length(v_token_separator)) = v_token_separator then
                     set v_prev_tokens = substr(v_prev_tokens, 1, character_length(v_prev_tokens) - character_length(v_token_separator));
@@ -66,27 +68,30 @@ my_main: begin
                 -- check if we have multiple separated tokens
                 if character_length(v_prev_tokens) - character_length(replace(v_prev_tokens, v_token_separator, '')) > 1 then
                     -- store the 2nd last token in v_handle
-                    set v_handle = substring_index(substring_index(v_prev_tokens, v_token_separator, -2), v_token_separator, 1);
-
-                    set v_substr_length = character_length(v_expression);
-                    set v_substr_length = v_substr_length - case 
-                        when v_handle = 'AS' then    -- handle indicates an explicit alias.
-                            3 + character_length(substring_index(v_expression, 'AS', -1))
-                        when coalesce(v_handle, '') not in (  -- if the handle is not a keyword then the last token must be an alias. chop it off 
-                                '', 'AND', 'BINARY', 'COLLATE', 'DIV', 'ESCAPE', 'LIKE', 'MOD', 'NOT', ''
-                        ) and not (   -- what also counts as a keyword is a character set specifier. consider moving this into the tokenizer.
-                                v_handle LIKE '_%'
-                            and exists (
-                                select  null 
-                                from    information_schema.character_sets 
-                                where   character_set_name = substring(v_handle, 2)
-                            )
-                        ) then
-                            character_length(substring_index(v_prev_tokens, v_token_separator, -1))
-                        else 0
-                    end;
+                    set v_handle = substring_index(substring_index(v_prev_tokens, v_token_separator, -2), v_token_separator, 1)
+                    -- get the max length of the column expression
+                    ,   v_substr_length = character_length(v_expression)
+                    -- substract length that makes up the alias (and AS keyword if applicable)
+                    ,   v_substr_length = v_substr_length - case 
+                            when v_handle = 'AS' then    -- handle indicates an explicit alias.
+                                2 + character_length(substring_index(v_expression, 'AS', -1))
+                            when coalesce(v_handle, '') not in (  -- if the handle is not a keyword then the last token must be an alias. chop it off 
+                                '', 'AND', 'BINARY', 'COLLATE', 'DIV', 'ESCAPE', 'LIKE', 'MOD', 'NOT'
+                            ) and not (   -- what also counts as a keyword is a character set specifier. consider moving this into the tokenizer.
+                                    v_handle = '_bin' 
+                                or  v_handle LIKE '_%'
+                                and exists (
+                                    select  null 
+                                    from    information_schema.character_sets 
+                                    where   character_set_name = substring(v_handle, 2)
+                                )
+                            ) then
+                                1+character_length(substring_index(v_prev_tokens, v_token_separator, -1))
+                            else 0
+                        end
                     -- chop off the alias.
-                    set v_expression = substring(v_expression, 1, v_substr_length);
+                    ,   v_expression = substring(v_expression, 1, v_substr_length)
+                    ;
                 end if;
                 
                 set v_statement = concat(
@@ -97,21 +102,25 @@ my_main: begin
                     )
                 ,   v_column_number = v_column_number + 1
                 ,   v_expression = ''
+                ,   v_prev_tokens = ''
                 ;
-                set v_prev_tokens = '';
             else
                 set v_expression = concat(v_expression, v_token);
-                if v_level = 0
-                and v_state in (
-                    'whitespace'
-                ,   'multi line comment'
-                ,   'single line comment'
-                )
-                then                
-                    set v_prev_tokens = concat(v_prev_tokens, v_token_separator);
-                else
-                    set v_prev_tokens = concat(v_prev_tokens, replace(v_token, v_token_separator, v_token_separator_esc)); 
-                end if;
+                set v_prev_tokens = concat(
+                    v_prev_tokens
+                ,   if( v_level != 0
+                    or  v_state not in (
+                            'whitespace'
+                        ,   'multi line comment'
+                        ,   'single line comment'
+                        )
+                    ,   concat(
+                            if(v_level, '', v_token_separator)
+                        ,   replace(v_token, v_token_separator, v_token_separator_esc)
+                        )
+                    ,   ''
+                    )
+                );
             end if;            
         end if;
     until 
@@ -126,7 +135,7 @@ my_main: begin
         ;
     end while;
 
-    end;
+    end my_main;
     
     set p_text= concat(
                     v_statement
