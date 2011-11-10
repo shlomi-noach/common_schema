@@ -1,0 +1,1 @@
+checking wrapped query output: compound expressions

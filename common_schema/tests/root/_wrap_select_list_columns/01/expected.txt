@@ -1,1 +1,0 @@
-SELECT  id AS col1,  name AS col2,  IF(population < 1000000, 'small', 'large') AS col3 from world.City

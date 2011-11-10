@@ -1,0 +1,6 @@
+1	wallace	2
+2	gromit	1
+3	penguin	1
+4	preston	3
+5	shaun	4
+6	fluffy	4
