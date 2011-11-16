@@ -37,7 +37,7 @@
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS foreach $$
-CREATE PROCEDURE foreach(collection TEXT CHARSET utf8, execute_query TEXT CHARSET utf8) 
+CREATE PROCEDURE foreach(collection TEXT CHARSET utf8, execute_queries TEXT CHARSET utf8) 
 MODIFIES SQL DATA
 SQL SECURITY INVOKER
 COMMENT 'Invoke queries per element of given collection'
@@ -72,7 +72,7 @@ begin
 	  set collection := CONCAT(
 	    'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME RLIKE ',
 	    '\'', re, '\'');
-      set execute_query := REPLACE(execute_query, '${schema}', '${1}');
+      set execute_queries := REPLACE(execute_queries, '${schema}', '${1}');
 	end;
   end if;
   if collection RLIKE '^table[ ]+in[ ]+[^ ]+[ ]*$' then
@@ -81,9 +81,9 @@ begin
 	  set collection := CONCAT(
 	    'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=',
 	    '\'', db, '\' AND TABLE_TYPE=\'BASE TABLE\'');
-      set execute_query := REPLACE(execute_query, '${schema}', '${2}');
-      set execute_query := REPLACE(execute_query, '${2}', db);
-      set execute_query := REPLACE(execute_query, '${table}', '${1}');
+      set execute_queries := REPLACE(execute_queries, '${schema}', '${2}');
+      set execute_queries := REPLACE(execute_queries, '${2}', db);
+      set execute_queries := REPLACE(execute_queries, '${table}', '${1}');
 	end;
   end if;
   if collection RLIKE '^table[ ]+like[ ]+[^ ]+[ ]*$' then
@@ -130,7 +130,7 @@ begin
         set iteration_number := 1;
         while iteration_number <= count_tables do
           set table_name := split_token(@_foreach_table_names, '\n', iteration_number);
-          set @_foreach_exec_query := execute_query;
+          set @_foreach_exec_query := execute_queries;
           set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${table}', '${1}');
           set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', table_name);
           set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${schema}', '${2}');
@@ -174,7 +174,7 @@ begin
         end if;
         -- Replace placeholders
         -- NULL values are allowed, and are translated to the literal 'NULL', or else the REPLACE method would return NULL.
-        set @_foreach_exec_query := execute_query;
+        set @_foreach_exec_query := execute_queries;
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', IFNULL(foreach_col1, 'NULL'));
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${2}', IFNULL(foreach_col2, 'NULL'));
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${3}', IFNULL(foreach_col3, 'NULL'));
@@ -212,7 +212,7 @@ begin
       while @_foreach_first_loop_index <= @_foreach_first_end_index do
         set @_foreach_second_loop_index := @_foreach_second_start_index;
         while @_foreach_second_loop_index <= @_foreach_second_end_index do
-          set @_foreach_exec_query := execute_query;
+          set @_foreach_exec_query := execute_queries;
           set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', @_foreach_first_loop_index);
           set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${2}', @_foreach_second_loop_index);
           set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${NR}', iteration_number);
@@ -237,7 +237,7 @@ begin
       set iteration_number := 1;
       set _foreach_loop_index := _foreach_start_index;
       while _foreach_loop_index <= _foreach_end_index do
-        set @_foreach_exec_query := execute_query;
+        set @_foreach_exec_query := execute_queries;
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', _foreach_loop_index);
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${NR}', iteration_number);
       
@@ -264,7 +264,7 @@ begin
         if CHAR_LENGTH(_foreach_token) = 0 then
           iterate constant_tokens_loop;
         end if;
-        set @_foreach_exec_query := execute_query;
+        set @_foreach_exec_query := execute_queries;
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', _foreach_token);
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${NR}', _foreach_row_number);
       
