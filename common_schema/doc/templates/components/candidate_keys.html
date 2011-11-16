@@ -64,7 +64,7 @@ mysql&gt; DESC common_schema.candidate_keys;
 	<li><strong>table_name</strong>: table of candidate key</li>
 	<li><strong>index_name</strong>: name of candidate key</li>
 	<li><strong>has_nullable</strong>: <strong>1</strong> if any column in this index is NULLable; <strong>0</strong> if all columns are NOT NULL</li>
-	<li><strong>is_primary</strong>: <strong>1</strong> is this key is PRIMARY, <strong>0</strong> otherwise.</li>
+	<li><strong>is_primary</strong>: <strong>1</strong> if this key is PRIMARY, <strong>0</strong> otherwise.</li>
 	<li><strong>column_names</strong>: names of columns covered by key</li>
 	<li><strong>count_column_in_index</strong>: number of columns covered by key</li>
 	<li><strong>data_type</strong>: data type of first column covered by key</li>
@@ -106,6 +106,7 @@ In the above we can see tables <strong>film</strong> and <strong>store</strong> 
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
+<a href="candidate_keys_recommended.html">candidate_keys_recommended</a>,
 <a href="no_pk_innodb_tables.html">no_pk_innodb_tables</a>,
 <a href="redundant_keys.html">redundant_keys</a>,
 <a href="sql_foreign_keys.html">sql_foreign_keys</a>

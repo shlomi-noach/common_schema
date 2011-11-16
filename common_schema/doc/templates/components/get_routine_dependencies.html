@@ -1,0 +1,84 @@
+<h3>NAME</h3>
+get_routine_dependencies(): Analyze and list the dependencies of a given routine
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+This procedure will analyze the <strong>CREATE PROCEDURE</strong> or <strong>CREATE FUNCTION</strong> 
+statement of the given routine, and provide with dependency listing: 
+the objects on which this routine depends, e.g. tables or routines.
+</p>
+<p>
+<i>get_routine_dependencies()</i> will parse the internal stored routine code, detect queries
+issued within, including calls to other routines, and will list such dependencies.
+</p>
+<p>
+The routine does not perform deep search, and will not analyze views or routines on which 
+the given routine depends.
+</p>
+<p>
+It is not, and will not be, able to parse dynamic SQL, i.e. prepared statements made from 
+string literals. 
+</p>
+<p>
+This procedure calls upon the more generic 
+<a href="get_sql_dependencies.html">get_sql_dependencies()</a> routine.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>get_routine_dependencies (
+    IN p_routine_schema VARCHAR(64) CHARSET utf8 
+,   IN p_routine_name VARCHAR(64) CHARSET utf8
+)
+DETERMINISTIC
+READS SQL DATA
+</pre></blockquote>
+</p>
+
+<p>
+  Input:
+  <ul>
+    <li><strong>p_table_schema</strong>: schema where routine is located.</li>
+    <li><strong>p_table_name</strong>: name of routine.</li>
+  </ul>
+</p>
+
+
+<h3>STRUCTURE</h3>
+<p>
+The procedure returns a result set of dependencies for this routine, in same format 
+as in <a href="get_sql_dependencies.html">get_sql_dependencies()</a>:
+  <ul>
+    <li><strong>schema_name</strong>: schema where dependency is located.</li>
+    <li><strong>object_name</strong>: name of dependency object.</li>
+    <li><strong>object_type</strong>: type of dependency object (e.g. <strong>'table'</strong>, <strong>'function'</strong> etc.).</li>
+    <li><strong>action</strong>: type of action performed on object (e.g. <strong>'select'</strong>, <strong>'call'</strong> etc.).</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Analyze <strong>sakila</strong>'s <strong>inventory_in_stock</strong> routine:
+	</p>
+	<blockquote><pre>mysql&gt; call get_routine_dependencies('sakila', 'inventory_in_stock');
++-------------+-------------+-------------+--------+
+| schema_name | object_name | object_type | action |
++-------------+-------------+-------------+--------+
+| sakila      | inventory   | table       | select |
+| sakila      | rental      | table       | select |
++-------------+-------------+-------------+--------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="get_event_dependencies.html">get_event_dependencies()</a>,
+<a href="get_sql_dependencies.html">get_sql_dependencies()</a>,
+<a href="get_view_dependencies.html">get_view_dependencies()</a>
+
+<h3>AUTHOR</h3>
+Roland Bouman

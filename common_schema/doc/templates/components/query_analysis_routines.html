@@ -1,0 +1,32 @@
+<h3>SYNOPSIS</h3>
+
+<p>
+Query analysis routines: routines to parse and analyze query text, including dependency analysis.
+<ul>
+	<li><a href="get_event_dependencies.html">get_event_dependencies()</a>: Analyze and list the dependencies of a given event.</li>
+	<li><a href="get_routine_dependencies.html">get_routine_dependencies()</a>: Analyze and list the dependencies of a given routine.</li>
+	<li><a href="get_sql_dependencies.html">get_sql_dependencies()</a>: Analyze and list the dependencies of a given query.</li>
+	<li><a href="get_view_dependencies.html">get_view_dependencies()</a>: Analyze and list the dependencies of a given view.</li>
+</ul>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p>
+These routines parse a given SQL query's text and detect its internal structure and dependencies.
+</p>
+<p>
+These are not full blown SQL parsers. At the moment the main intent is to be able to realize
+the objects on which a query depends: tables, views, routines etc. 
+</p>
+<p>
+The queries themselves can be of various types, including:
+<ul>
+	<li><strong>CREATE VIEW</strong> statements.</li>
+	<li><strong>CREATE FUNCTION/PROCEDURE</strong> statements, including stored routine code within.</li>
+	<li><strong>CREATE EVENT</strong> statements, including stored routine code within.</li>
+</ul>
+</p>
+<p>
+The idea is to be able to quickly realize a dependency graph. For example, to realize the tables/views
+a view depends on.
+</p>

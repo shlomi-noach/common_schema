@@ -1,0 +1,79 @@
+<h3>NAME</h3>
+get_view_dependencies(): Analyze and list the dependencies of a given view
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+This procedure will analyze the <strong>CREATE VIEW</strong> statement of the given view, and provide
+with dependency listing: the objects on which this view depends, e.g. tables or routines.
+</p>
+<p>
+The routine does not perform deep search, and will not analyze views or routines on which 
+the given view depends.
+</p>
+<p>
+This procedure calls upon the more generic 
+<a href="get_sql_dependencies.html">get_sql_dependencies()</a> routine.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>get_view_dependencies (
+    IN p_table_schema VARCHAR(64) CHARSET utf8
+,   IN p_table_name VARCHAR(64) CHARSET utf8
+)
+DETERMINISTIC
+READS SQL DATA
+</pre></blockquote>
+</p>
+
+<p>
+  Input:
+  <ul>
+    <li><strong>p_table_schema</strong>: schema where view is located.</li>
+    <li><strong>p_table_name</strong>: name of view.</li>
+  </ul>
+</p>
+
+
+<h3>STRUCTURE</h3>
+<p>
+The procedure returns a result set of dependencies for this view, in same format 
+as in <a href="get_sql_dependencies.html">get_sql_dependencies()</a>:
+  <ul>
+    <li><strong>schema_name</strong>: schema where dependency is located.</li>
+    <li><strong>object_name</strong>: name of dependency object.</li>
+    <li><strong>object_type</strong>: type of dependency object (e.g. <strong>'table'</strong>, <strong>'function'</strong> etc.).</li>
+    <li><strong>action</strong>: type of action performed on object (e.g. <strong>'select'</strong>, <strong>'create'</strong> etc.).</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Analyze <strong>sakila</strong>'s <strong>actor_info</strong> view, which joins several
+		tables:
+	</p>
+	<blockquote><pre>mysql&gt; call get_view_dependencies('sakila', 'actor_info');
++-------------+---------------+-------------+--------+
+| schema_name | object_name   | object_type | action |
++-------------+---------------+-------------+--------+
+| sakila      | actor         | table       | select |
+| sakila      | category      | table       | select |
+| sakila      | film          | table       | select |
+| sakila      | film_actor    | table       | select |
+| sakila      | film_category | table       | select |
++-------------+---------------+-------------+--------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="get_event_dependencies.html">get_event_dependencies()</a>,
+<a href="get_routine_dependencies.html">get_routine_dependencies()</a>,
+<a href="get_sql_dependencies.html">get_sql_dependencies()</a>
+
+<h3>AUTHOR</h3>
+Roland Bouman
