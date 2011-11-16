@@ -7,9 +7,12 @@ drop procedure if exists get_view_dependencies
 //
 
 create procedure get_view_dependencies (
-    in  p_table_schema varchar(64) charset utf8
-,   in  p_table_name varchar(64) charset utf8
+    IN p_table_schema VARCHAR(64) CHARSET utf8
+,   IN p_table_name VARCHAR(64) CHARSET utf8
 )
+DETERMINISTIC
+READS SQL DATA
+
 begin
     declare v_view_definition longtext charset utf8;
     declare exit handler for not found

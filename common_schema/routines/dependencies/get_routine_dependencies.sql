@@ -7,9 +7,12 @@ drop procedure if exists get_routine_dependencies
 //
 
 create procedure get_routine_dependencies (
-    in  p_routine_schema varchar(64) charset utf8 
-,   in  p_routine_name varchar(64) charset utf8
+    IN p_routine_schema VARCHAR(64) CHARSET utf8 
+,   IN p_routine_name VARCHAR(64) CHARSET utf8
 )
+DETERMINISTIC
+READS SQL DATA
+
 begin
     declare v_routine_definition longtext charset utf8;
     declare exit handler for not found
