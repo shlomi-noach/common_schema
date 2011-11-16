@@ -1,0 +1,1 @@
+verify $() call upon foreach(), using constants list
