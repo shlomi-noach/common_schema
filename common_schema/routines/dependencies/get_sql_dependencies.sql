@@ -206,7 +206,7 @@ my_main: begin
                     into _sql_dependencies (start, schema_name, object_name, object_type, action) 
                     values (v_from, v_schema_name, v_object_name, v_object_type, v_action);
 
-                    if v_object_type = 'table' then 
+                    if v_object_type = 'table' or v_object_type = 'view' then 
                         set v_scan_state = 'expect join';
                     else 
                         set v_scan_state = 'start';
@@ -223,7 +223,7 @@ my_main: begin
                     into _sql_dependencies (start, schema_name, object_name, object_type, action) 
                     values (v_from,v_schema_name, v_object_name, v_object_type, v_action);
                     
-                    if v_object_type = 'table' then 
+                    if v_object_type = 'table' or v_object_type = 'view' then 
                         if  (v_state = 'alpha' and v_token in ('into', 'where', 'group', 'having', 'order', 'limit'))
                         or  v_action != 'select'
                         then
