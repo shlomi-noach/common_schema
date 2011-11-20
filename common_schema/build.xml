@@ -70,16 +70,11 @@
 			<fileset dir="routines/text/" includes="*.sql" />
 			<fileset dir="routines/time/" includes="*.sql" />
 
-			<fileset dir="views/charsets/" includes="*.sql" />
-			<fileset dir="views/data_size/" includes="*.sql" />
-			<fileset dir="views/engines/" includes="*.sql" />
-			<fileset dir="views/foreign_keys/" includes="*.sql" />
-			<fileset dir="views/innodb/" includes="*.sql" />
-			<fileset dir="views/keys/" includes="*.sql" />
-			<fileset dir="views/privileges_base/" includes="*.sql" />
-			<fileset dir="views/privileges/" includes="*.sql" />
+			<fileset dir="views/schema_analysis/" includes="*.sql" />
+			<fileset dir="views/data_dimension/" includes="*.sql" />
+			<fileset dir="views/monitoring/" includes="*.sql" />
 			<fileset dir="views/process/" includes="*.sql" />
-			<fileset dir="views/status/" includes="*.sql" />
+			<fileset dir="views/security/" includes="*.sql" />
 		</concat>
 		<replace file="${build.dir}/${sql.mysql_51.output.file}" token="revision.placeholder" value="${svn.revision}"/>
 		</target>
@@ -168,7 +163,7 @@
 	</target>
 
 	<target name="doc">
-		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}">
+		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}/css">
 		</copy>
 		<foreach param="component_doc_filename" target="component_doc">
 			<path>
