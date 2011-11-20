@@ -8,3 +8,83 @@ Monitoring views: views providing with simple monitoring capabilities
 	<li><a title="global_status_diff_nonzero" href="global_status_diff_nonzero.html">global_status_diff_nonzero</a>: Status variables difference over time, only nonzero findings listed </li>
 </ul>
 </p>
+
+
+<h3>DESCRIPTION</h3>
+<p>
+It is possible to construct queries which monitor your MySQL server for changes. 
+While this provides with very basic status monitoring, it relieves one from depending on
+external tools, client connectors, operating system and otherwise package dependencies.
+</p>
+
+<h3>EXAMPLES</h3>
+
+<p>Show GLOBAL STATUS changes (analyzing a QA server):</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.global_status_diff_nonzero;
++-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+| variable_name                     | variable_value_0 | variable_value_1 | variable_value_diff | variable_value_psec | variable_value_pminute |
++-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+| aborted_clients                   | 2308192          | 2308200          |                   8 |                 0.8 |                     48 |
+| bytes_received                    | 48781508357      | 48781571162      |               62805 |              6280.5 |                 376830 |
+| bytes_sent                        | 404710036897     | 404712641950     |             2605053 |            260505.3 |               15630318 |
+| com_change_db                     | 3813988          | 3813997          |                   9 |                 0.9 |                     54 |
+| com_delete                        | 5823865          | 5823897          |                  32 |                 3.2 |                    192 |
+| com_insert                        | 50395791         | 50395868         |                  77 |                 7.7 |                    462 |
+| com_insert_select                 | 11840815         | 11840832         |                  17 |                 1.7 |                    102 |
+| com_select                        | 45527485         | 45527537         |                  52 |                 5.2 |                    312 |
+| com_set_option                    | 100093882        | 100094023        |                 141 |                14.1 |                    846 |
+| com_show_collations               | 3813977          | 3813986          |                   9 |                 0.9 |                     54 |
+| com_show_variables                | 3813980          | 3813989          |                   9 |                 0.9 |                     54 |
+| com_update                        | 5671892          | 5671897          |                   5 |                 0.5 |                     30 |
+| connections                       | 3839731          | 3839740          |                   9 |                 0.9 |                     54 |
+| created_tmp_disk_tables           | 859679           | 859681           |                   2 |                 0.2 |                     12 |
+| created_tmp_tables                | 8731648          | 8731669          |                  21 |                 2.1 |                    126 |
+| handler_commit                    | 114182717        | 114182891        |                 174 |                17.4 |                   1044 |
+| handler_delete                    | 10772896         | 10772927         |                  31 |                 3.1 |                    186 |
+| handler_read_first                | 5913266          | 5913293          |                  27 |                 2.7 |                    162 |
+| handler_read_key                  | 788386238        | 788387730        |                1492 |               149.2 |                   8952 |
+| handler_read_next                 | 255429456        | 255469852        |               40396 |              4039.6 |                 242376 |
+| handler_read_rnd                  | 410066910        | 410068623        |                1713 |               171.3 |                  10278 |
+| handler_read_rnd_next             | 2530187881       | 2530208075       |               20194 |              2019.4 |                 121164 |
+| handler_update                    | 25384145         | 25384216         |                  71 |                 7.1 |                    426 |
+| handler_write                     | 2054152644       | 2054159103       |                6459 |               645.9 |                  38754 |
+| innodb_buffer_pool_pages_data     | 30052            | 30057            |                   5 |                 0.5 |                     30 |
+| innodb_buffer_pool_pages_dirty    | 183              | 204              |                  21 |                 2.1 |                    126 |
+| innodb_buffer_pool_pages_flushed  | 38805231         | 38805438         |                 207 |                20.7 |                   1242 |
+| innodb_buffer_pool_pages_free     | 4                | 1                |                  -3 |                -0.3 |                    -18 |
+| innodb_buffer_pool_pages_misc     | 1943             | 1941             |                  -2 |                -0.2 |                    -12 |
+| innodb_buffer_pool_read_requests  | 2205096023       | 2205140951       |               44928 |              4492.8 |                 269568 |
+| innodb_buffer_pool_reads          | 9070710          | 9070712          |                   2 |                 0.2 |                     12 |
+| innodb_buffer_pool_write_requests | 1009629688       | 1009632455       |                2767 |               276.7 |                  16602 |
+| innodb_data_fsyncs                | 5691358          | 5691388          |                  30 |                   3 |                    180 |
+| innodb_data_read                  | 3709091840       | 3709104128       |               12288 |              1228.8 |                  73728 |
+| innodb_data_reads                 | 9526208          | 9526211          |                   3 |                 0.3 |                     18 |
+| innodb_data_writes                | 101457695        | 101457999        |                 304 |                30.4 |                   1824 |
+| innodb_data_written               | 1160983040       | 1165887488       |             4904448 |            490444.8 |               29426688 |
+| innodb_dblwr_pages_written        | 38805231         | 38805438         |                 207 |                20.7 |                   1242 |
+| innodb_dblwr_writes               | 610255           | 610258           |                   3 |                 0.3 |                     18 |
+| innodb_log_write_requests         | 341450412        | 341451248        |                 836 |                83.6 |                   5016 |
+| innodb_log_writes                 | 70075432         | 70075559         |                 127 |                12.7 |                    762 |
+| innodb_os_log_fsyncs              | 2336505          | 2336517          |                  12 |                 1.2 |                     72 |
+| innodb_os_log_written             | 2583788544       | 2584199168       |              410624 |             41062.4 |                2463744 |
+| innodb_pages_created              | 1152396          | 1152398          |                   2 |                 0.2 |                     12 |
+| innodb_pages_read                 | 9846270          | 9846273          |                   3 |                 0.3 |                     18 |
+| innodb_pages_written              | 38805231         | 38805438         |                 207 |                20.7 |                   1242 |
+| innodb_rows_deleted               | 10772886         | 10772917         |                  31 |                 3.1 |                    186 |
+| innodb_rows_inserted              | 35117242         | 35117332         |                  90 |                   9 |                    540 |
+| innodb_rows_read                  | 1197149081       | 1197203914       |               54833 |              5483.3 |                 328998 |
+| innodb_rows_updated               | 22474281         | 22474351         |                  70 |                   7 |                    420 |
+| key_read_requests                 | 21689837         | 21689845         |                   8 |                 0.8 |                     48 |
+| open_files                        | 7                | 5                |                  -2 |                -0.2 |                    -12 |
+| opened_files                      | 3666398          | 3666406          |                   8 |                 0.8 |                     48 |
+| questions                         | 232437302        | 232437654        |                 352 |                35.2 |                   2112 |
+| select_full_join                  | 99               | 100              |                   1 |                 0.1 |                      6 |
+| select_range                      | 753753           | 753754           |                   1 |                 0.1 |                      6 |
+| select_scan                       | 13123762         | 13123808         |                  46 |                 4.6 |                    276 |
+| sort_rows                         | 409565982        | 409567695        |                1713 |               171.3 |                  10278 |
+| sort_scan                         | 801869           | 801872           |                   3 |                 0.3 |                     18 |
+| table_locks_immediate             | 129542449        | 129542648        |                 199 |                19.9 |                   1194 |
+| threads_cached                    | 7                | 8                |                   1 |                 0.1 |                      6 |
+| threads_created                   | 838815           | 838817           |                   2 |                 0.2 |                     12 |
++-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+</pre></blockquote>

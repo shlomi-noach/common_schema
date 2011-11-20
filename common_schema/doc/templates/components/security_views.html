@@ -8,3 +8,20 @@ Security views: views providing information on grants and privileges.
 	<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a>: Generate complete accounts SHOW GRANTS FOR -like output</li>
 </ul>
 </p>
+
+<h3>DESCRIPTION</h3>
+<p>
+There are several inconsistencies and missing pieces with regard to security related information in MySQL. 
+These views compensate for: missing INFORMATION_SCHEMA routines privileges; missing SHOW GRANTS for all accounts; SQL generation for GRANT and REVOKE statements.
+</p>
+<p>
+Closely related are <a title="Security routines" href="security_routines.html">Security routines</a> and <a title="processlist_grantees" href="processlist_grantees.html">processlist_grantees</a>.
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Show grants for users called 'world_user':</p>
+<blockquote><pre>mysql&gt; SELECT sql_grants FROM common_schema.sql_show_grants WHERE user='world_user' \G
+*************************** 1. row ***************************
+sql_grants: GRANT USAGE ON *.* TO 'world_user'@'localhost' IDENTIFIED BY PASSWORD '';
+GRANT ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE ON `world`.* TO 'world_user'@'localhost';
+</pre></blockquote>

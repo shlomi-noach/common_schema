@@ -8,3 +8,47 @@ Data dimension views: informational views on general data dimentions, capaticies
 	<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a>: Present with data size measurements per schema </li>
 </ul>
 </p>
+
+
+<h3>DESCRIPTION</h3>
+<p>
+Through analysis of INFORMATION_SCHEMA, these views can provide with information on per-engine or per-schema estimated data size summary,
+or on AUTO_INCREMENT capacities.
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Show dimensions per schema:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.data_size_per_schema;
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+| TABLE_SCHEMA  | count_tables | count_views | distinct_engines | data_size | index_size | total_size | largest_table        | largest_table_size |
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+| common_schema |            1 |          27 |                1 |     28672 |      35840 |      64512 | numbers              |              64512 |
+| google_charts |            1 |           1 |                1 |     16384 |          0 |      16384 | chart_data           |              16384 |
+| mycheckpoint  |           13 |          50 |                2 |   3022602 |      88064 |    3110666 | status_variables     |            2654208 |
+| mysql         |           23 |           0 |                2 |   3259223 |    2551808 |    5811031 | time_zone_transition |            4297362 |
+| sakila        |           16 |           7 |                2 |   4297536 |    2761728 |    7059264 | rental               |            2850816 |
+| test          |            6 |           0 |                2 |     80232 |      45056 |     125288 | t                    |              49152 |
+| world         |            3 |           0 |                2 |    510355 |      28672 |     539027 | City                 |             409600 |
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+</pre></blockquote>
+
+<p>Show AUTO_INCREMENT capacity for 'sakila' database:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.auto_increment_columns WHERE TABLE_SCHEMA='sakila';
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+| TABLE_SCHEMA | TABLE_NAME | COLUMN_NAME  | DATA_TYPE | COLUMN_TYPE           | is_signed | max_value  | AUTO_INCREMENT | auto_increment_ratio |
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+| sakila       | actor      | actor_id     | smallint  | smallint(5) unsigned  |         1 |      65535 |            201 |               0.0031 |
+| sakila       | address    | address_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |            606 |               0.0092 |
+| sakila       | category   | category_id  | tinyint   | tinyint(3) unsigned   |         1 |        255 |             17 |               0.0667 |
+| sakila       | city       | city_id      | smallint  | smallint(5) unsigned  |         1 |      65535 |            601 |               0.0092 |
+| sakila       | country    | country_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |            110 |               0.0017 |
+| sakila       | customer   | customer_id  | smallint  | smallint(5) unsigned  |         1 |      65535 |            600 |               0.0092 |
+| sakila       | film       | film_id      | smallint  | smallint(5) unsigned  |         1 |      65535 |           1001 |               0.0153 |
+| sakila       | inventory  | inventory_id | mediumint | mediumint(8) unsigned |         1 |   16777215 |           4582 |               0.0003 |
+| sakila       | language   | language_id  | tinyint   | tinyint(3) unsigned   |         1 |        255 |              7 |               0.0275 |
+| sakila       | payment    | payment_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |          16050 |               0.2449 |
+| sakila       | rental     | rental_id    | int       | int(11)               |         0 | 2147483647 |          16050 |               0.0000 |
+| sakila       | staff      | staff_id     | tinyint   | tinyint(3) unsigned   |         1 |        255 |              3 |               0.0118 |
+| sakila       | store      | store_id     | tinyint   | tinyint(3) unsigned   |         1 |        255 |              3 |               0.0118 |
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+</pre></blockquote>

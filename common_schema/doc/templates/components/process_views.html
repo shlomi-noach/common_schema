@@ -10,3 +10,55 @@ Process views: informational views on processes and accounts
 	<li><a title="processlist_top" href="processlist_top.html">processlist_top</a>: Listing of active processes sorted by current query runtime, desc (longest first)</li>
 </ul>
 </p>
+
+
+<h3>DESCRIPTION</h3>
+<p>
+These views complement and enhance upon INFORMATION_SCHEMA.PROCESSLIST, and provide with such benefits as matching GRANTEEs to a process IDs, 
+getting process summaries, listing only active processes, prioritized.  
+</p>
+
+
+<h3>EXAMPLES</h3>
+<p>Show grantees for all processes:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_grantees;
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| ID     | USER       | HOST                | GRANTEE                | grantee_user | grantee_host | is_super | is_repl | sql_kill_query    | sql_kill_connection |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| 650472 | replica    | jboss00.myweb:34266 | 'replica'@'%.myweb'    | replica      | %.myweb      |        0 |       1 | KILL QUERY 650472 | KILL 650472         |
+| 692346 | openarkkit | jboss02.myweb:43740 | 'openarkkit'@'%.myweb' | openarkkit   | %.myweb      |        0 |       0 | KILL QUERY 692346 | KILL 692346         |
+| 842853 | root       | localhost           | 'root'@'localhost'     | root         | localhost    |        1 |       0 | KILL QUERY 842853 | KILL 842853         |
+| 843443 | jboss      | jboss03.myweb:40007 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843443 | KILL 843443         |
+| 843444 | jboss      | jboss03.myweb:40012 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843444 | KILL 843444         |
+| 843510 | jboss      | jboss00.myweb:49850 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843510 | KILL 843510         |
+| 844559 | jboss      | jboss01.myweb:37031 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844559 | KILL 844559         |
+| 844577 | jboss      | jboss03.myweb:38238 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844577 | KILL 844577         |
+| 844592 | jboss      | jboss02.myweb:34405 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844592 | KILL 844592         |
+| 844593 | jboss      | jboss01.myweb:37089 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844593 | KILL 844593         |
+| 844595 | jboss      | jboss04.myweb:46488 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844595 | KILL 844595         |
+| 844596 | jboss      | jboss00.myweb:41046 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844596 | KILL 844596         |
+| 844600 | jboss      | jboss01.myweb:37108 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844600 | KILL 844600         |
+| 844614 | jboss      | jboss04.myweb:46500 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844614 | KILL 844614         |
+| 844618 | jboss      | jboss02.myweb:44449 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844618 | KILL 844618         |
+| 844620 | jboss      | jboss02.myweb:44456 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844620 | KILL 844620         |
+| 844626 | jboss      | jboss04.myweb:46526 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844626 | KILL 844626         |
+| 844628 | jboss      | jboss02.myweb:44466 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844628 | KILL 844628         |
+| 844631 | jboss      | jboss03.myweb:38291 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844631 | KILL 844631         |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+</pre></blockquote>
+
+<p>Show all active processes:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_top;
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+| ID       | USER        | HOST         | DB        | COMMAND     | TIME    | STATE                                                            | INFO                                                                                                                  | TIME_MS    |
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+|  3598334 | system user |              | NULL      | Connect     | 4281883 | Waiting for master to send event                                 | NULL                                                                                                                  | 4281883102 |
+|  3598469 | replica     | sql01:51157  | NULL      | Binlog Dump | 4281878 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 4281877707 |
+| 31066726 | replica     | sql02:48924  | NULL      | Binlog Dump | 1041758 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 1041758134 |
+|  3598335 | system user |              | NULL      | Connect     |  195747 | Has read all relay log; waiting for the slave I/O thread to upda | NULL                                                                                                                  |          0 |
+| 39946702 | store       | app03:46795  | datastore | Query       |       0 | Writing to net                                                   | SELECT * FROM store_location                                                                                          |         27 |
+| 39946693 | store       | app05:51090  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 5  |         54 |
+| 39946692 | store       | sql01:47849  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 34 |        350 |
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+</pre></blockquote>
+
