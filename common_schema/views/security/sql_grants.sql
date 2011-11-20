@@ -1,3 +1,15 @@
+
+DROP TABLE IF EXISTS `routine_privileges`;
+CREATE TABLE IF NOT EXISTS `routine_privileges` (
+  `GRANTEE` varchar(81),
+  `ROUTINE_CATALOG` binary(0),
+  `ROUTINE_SCHEMA` char(64),
+  `ROUTINE_NAME` char(64),
+  `ROUTINE_TYPE` enum('FUNCTION','PROCEDURE'),
+  `PRIVILEGE_TYPE` varchar(27),
+  `IS_GRANTABLE` varchar(3)
+) ENGINE=MyISAM;
+
 -- 
 -- (Internal use): privileges set on columns   
 -- 

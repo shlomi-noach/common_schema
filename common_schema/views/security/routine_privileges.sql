@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS `routine_privileges`;
+
 -- 
 -- INFORMATION_SCHEMA-like privileges on routines    
 -- 
