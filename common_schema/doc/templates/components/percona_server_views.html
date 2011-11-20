@@ -1,0 +1,16 @@
+<h3>SYNOPSIS</h3>
+
+<p>
+Percona server views: views enhancing INFORMATION_SCHEMA tables available in Percona Server. 
+<ul>
+	<li><a title="innodb_index_rows" href="innodb_index_rows.html">innodb_index_rows</a>: number of row cardinality per keys per columns in InnoDB tables</li>
+	<li><a title="innodb_index_stats" href="innodb_index_stats.html">innodb_index_stats</a>: estimated InnoDB depth & split factor of key's B+ Tree</li>
+</ul>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p>
+These views rely on the INNODB_INDEX_STATS feature to be enabled. At current, due to incompatible changes in
+Percona Server 5.5.8-20.0, views work only on earlier versions. This is subject to change.
+</p>
+
