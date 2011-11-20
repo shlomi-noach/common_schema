@@ -1,17 +1,17 @@
 <p><i>common_schema</i> distribution file is a SQL source file.  To install it, you should execute it on your MySQL server.</p>
 
 <p>There are many ways to import a SQL file into MySQL, listed below. 
-Make sure to execute them as a privileged user, e.g. 'root', as installation involves creation of schema, tables, views &amp; routines. </p>
+<strong>Make sure</strong> to execute them as a privileged user, e.g. <strong>'root'@'localhost'</strong>, as installation involves creation of schema, tables, views &amp; routines. </p>
 
 <p>There are several <i>common_schema</i> distribution options, depending on your MySQL server version. Consult the <a href="download">download page</a></p>
 <ul>
-	<li>Within MySQL, issue:
+	<li>Within MySQL, issue (replace <i>"common_schema_distribution_file"</i> with actual file name):
 		<br/>
-		<blockquote><pre>mysql&gt; SOURCE '/path/to/file.sql';</pre></blockquote>
+		<blockquote><pre>mysql&gt; SOURCE '/path/to/common_schema_distribution_file.sql';</pre></blockquote>
 	</li>
 	<li>From shell, execute:
 		<br/>
-		<blockquote><pre>bash$ mysql < /path/to/file.sql</pre></blockquote>
+		<blockquote><pre>bash$ mysql < /path/to/common_schema_distribution_file.sql</pre></blockquote>
 	</li>
 	<li>Use your favorite MySQL GUI editor, copy+paste file content, execute.</li>
 </ul>
