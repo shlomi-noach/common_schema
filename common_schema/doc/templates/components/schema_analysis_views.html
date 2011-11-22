@@ -14,3 +14,77 @@ Schema analysis views: a collection of views, analyzing schema design, listing d
 	<li><a title="text_columns" href="text_columns.html">text_columns</a>: List textual columns character sets & collations </li>
 </ul>
 </p>
+
+<h3>DESCRIPTION</h3>
+<p>Views in this category perform various schema analysis operations or offer SQL generation code cased on 
+schema analysis.
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Detect duplicate keys on sakila.actor:</p>
+<blockquote><pre>mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX `actor_id_idx` (`actor_id`);
+mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX `last_and_first_names_idx` (`last_name`, `first_name`);
+mysql&gt; ALTER TABLE `sakila`.`film_actor` ADD UNIQUE KEY `film_and_actor_ids_idx` (`film_id`, `actor_id`);
+
+mysql&gt; SELECT * FROM common_schema.redundant_keys \G
+*************************** 1. row ***************************
+              table_schema: sakila
+                table_name: actor
+      redundant_index_name: idx_actor_last_name
+   redundant_index_columns: last_name
+redundant_index_non_unique: 1
+       dominant_index_name: last_and_first_names_idx
+    dominant_index_columns: last_name,first_name
+ dominant_index_non_unique: 1
+            subpart_exists: 0
+            sql_drop_index: ALTER TABLE `sakila`.`actor` DROP INDEX `idx_actor_last_name`
+*************************** 2. row ***************************
+              table_schema: sakila
+                table_name: actor
+      redundant_index_name: actor_id_idx
+   redundant_index_columns: actor_id
+redundant_index_non_unique: 1
+       dominant_index_name: PRIMARY
+    dominant_index_columns: actor_id
+ dominant_index_non_unique: 0
+            subpart_exists: 0
+            sql_drop_index: ALTER TABLE `sakila`.`actor` DROP INDEX `actor_id_idx`
+*************************** 3. row ***************************
+              table_schema: sakila
+                table_name: film_actor
+      redundant_index_name: idx_fk_film_id
+   redundant_index_columns: film_id
+redundant_index_non_unique: 1
+       dominant_index_name: film_and_actor_ids_idx
+    dominant_index_columns: film_id,actor_id
+ dominant_index_non_unique: 0
+            subpart_exists: 0
+            sql_drop_index: ALTER TABLE `sakila`.`film_actor` DROP INDEX `idx_fk_film_id`
+</pre></blockquote>
+
+
+<p>Show recommended candidate keys for tables in <strong>sakila</strong></p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.candidate_keys_recommended WHERE TABLE_SCHEMA='sakila';
++--------------+---------------+------------------------+--------------+------------+--------------+
+| table_schema | table_name    | recommended_index_name | has_nullable | is_primary | column_names |
++--------------+---------------+------------------------+--------------+------------+--------------+
+| sakila       | actor         | PRIMARY                |            0 |          1 | actor_id     |
+| sakila       | address       | PRIMARY                |            0 |          1 | address_id   |
+| sakila       | category      | PRIMARY                |            0 |          1 | category_id  |
+| sakila       | city          | PRIMARY                |            0 |          1 | city_id      |
+| sakila       | country       | PRIMARY                |            0 |          1 | country_id   |
+| sakila       | customer      | PRIMARY                |            0 |          1 | customer_id  |
+| sakila       | film          | PRIMARY                |            0 |          1 | film_id      |
+| sakila       | film_actor    | PRIMARY                |            0 |          1 | actor_id     |
+| sakila       | film_category | PRIMARY                |            0 |          1 | film_id      |
+| sakila       | film_text     | PRIMARY                |            0 |          1 | film_id      |
+| sakila       | inventory     | PRIMARY                |            0 |          1 | inventory_id |
+| sakila       | language      | PRIMARY                |            0 |          1 | language_id  |
+| sakila       | payment       | PRIMARY                |            0 |          1 | payment_id   |
+| sakila       | rental        | PRIMARY                |            0 |          1 | rental_id    |
+| sakila       | staff         | PRIMARY                |            0 |          1 | staff_id     |
+| sakila       | store         | PRIMARY                |            0 |          1 | store_id     |
++--------------+---------------+------------------------+--------------+------------+--------------+
+</pre></blockquote>
+
+

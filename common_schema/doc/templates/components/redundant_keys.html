@@ -135,7 +135,7 @@ mysql&gt; DESC common_schema.redundant_keys;
 </ul>
 
 <h3>EXAMPLES</h3>
-<p>Show foreign keys create/drop statements for `sakila`.`film_actor` (depends on `film` and `actor` tables)</p>
+<p>Detect duplicate keys on sakila.actor:</p>
 <blockquote><pre>mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX `actor_id_idx` (`actor_id`);
 
 mysql&gt; ALTER TABLE `sakila`.`actor` ADD INDEX `last_and_first_names_idx` (`last_name`, `first_name`);
