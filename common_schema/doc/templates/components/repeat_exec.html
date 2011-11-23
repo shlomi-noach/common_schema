@@ -38,8 +38,8 @@ Queries may be of varying types (DML, DDL, other commands). See <a href="exec.ht
     	<strong>stop_condition</strong> is met, no more sleeping is performed. 
     </li>
     <li><strong>execute_queries</strong>: one or more queries to execute per loop iteration.
-    	<br/>If more than one query specified, all queries <i>including last</i> must terminate with
-    	a semicolon (<strong>;</strong>)
+    	<br/>Queries are separated by semicolons (<strong>;</strong>). See <a href="exec.html">exec()</a> for 
+    	details.
     </li>
     <li><strong>stop_condition</strong>: the condition by which the loop terminates. Can be in one
     	of several forms and formats:

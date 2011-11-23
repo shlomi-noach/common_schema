@@ -39,13 +39,13 @@ Since it relies on <i>exec_single()</i>, it respects the same input configuratio
   <ul>
     <li><strong>execute_queries</strong>: one or more queries to execute.
     	<ul>
-    		<li>If one single query is provided, this procedure behaves just as <i>exec_single()</i>. 
-    		  There is no need to terminate query by semicolon. A semicolon (";") may appear within query 
-    		  (e.g. in quoted text).
+    		<li>Queries must be separated by a semicolon (";").
     		</li>
-    		<li>If multiple queries are provided, they <strong>must</strong> be separated by semicolons (";"). 
-    		The last query <strong>must end</strong> with a semicolon. A semicolon must not appear within
-    		query (this last restriction is to be alleviated in future versions).
+    		<li>Last (or single) query may optionally be terminated by a semicolon, but it does not have to.
+    		</li>
+    		<li>A semicolon may appear within quoted strings in queries.
+    		</li>
+    		<li>Empty queries are discarded silently.
     		</li>
     	</ul>
     </li>
