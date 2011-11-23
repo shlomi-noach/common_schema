@@ -1,9 +1,8 @@
 --
 -- Executes a given query or semicolon delimited list of queries
 -- Input to this procedure is either:
--- - A single query (no limitation on query)
--- - A list of queries, separated by semicolon (;) and ending with a semicolon. 
---   Queries must not include semicolon (e.g. embedded within a string)
+-- - A single query 
+-- - A list of queries, separated by semicolon (;), possibly ending with a semicolon. 
 --
 -- This procedure calls upon exec_single(), which means it will:
 -- - skip empty queries (whitespace only)
@@ -29,24 +28,17 @@ COMMENT ''
 begin
   declare num_query_tokens, queries_loop_counter TINYINT UNSIGNED DEFAULT 0;
   declare single_query TEXT CHARSET utf8; 
+  declare internal_token VARCHAR(32) CHARSET utf8 DEFAULT '[\0_cs_::;::\0]';
   
-  set execute_queries := trim_wspace(execute_queries);
-  if RIGHT(execute_queries, 1) = ';' then
-    -- There are multiple statements
-    -- The semicolon ';' is assumed to split queries. It must not appear within a query
-    set num_query_tokens := get_num_tokens(execute_queries, ';');
-    set queries_loop_counter := 0;
-    while queries_loop_counter < num_query_tokens do
-      set single_query := split_token(execute_queries, ';', queries_loop_counter + 1);
-      call exec_single(single_query);
-      set queries_loop_counter := queries_loop_counter + 1;
-    end while;    
-  else
-    -- There is a single statement.
-    -- We don't even attempt a trivial split, because we now allow a semicolon ';' to appear within the text.
-    call exec_single(execute_queries);
-  end if;
+  -- There may be multiple statements
+  set execute_queries := _retokenized_queries(execute_queries);
+  set num_query_tokens := get_num_tokens(execute_queries, internal_token);
+  set queries_loop_counter := 0;
+  while queries_loop_counter < num_query_tokens do
+    set single_query := split_token(execute_queries, internal_token, queries_loop_counter + 1);
+    call exec_single(single_query);
+    set queries_loop_counter := queries_loop_counter + 1;
+  end while;    
 end $$
-
 
 DELIMITER ;
