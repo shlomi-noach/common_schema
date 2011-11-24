@@ -8,9 +8,11 @@ drop procedure if exists get_sql_dependencies
 //
 
 create procedure get_sql_dependencies(
-    in  p_sql               text charset utf8
-,   in  p_default_schema    varchar(64) charset utf8
+    IN p_sql               TEXT charset utf8
+,   IN p_default_schema    VARCHAR(64) charset utf8
 )
+DETERMINISTIC
+
 my_main: begin
     declare v_from, v_old_from int unsigned;
     declare v_token text charset utf8;
