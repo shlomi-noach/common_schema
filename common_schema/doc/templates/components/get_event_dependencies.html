@@ -1,22 +1,22 @@
 <h3>NAME</h3>
-get_routine_dependencies(): Analyze and list the dependencies of a given routine (BETA)
+get_event_dependencies(): Analyze and list the dependencies of a given event (BETA)
 
 <h3>TYPE</h3>
 Procedure
 
 <h3>DESCRIPTION</h3>
 <p>
-This procedure will analyze the <strong>CREATE PROCEDURE</strong> or <strong>CREATE FUNCTION</strong> 
-statement of the given routine, and provide with dependency listing: 
-the objects on which this routine depends, e.g. tables or routines.
+This procedure will analyze the <strong>CREATE EVENT</strong>  
+statement of the given event, and provide with dependency listing: 
+the objects on which this event depends, e.g. tables or routines.
 </p>
 <p>
-<i>get_routine_dependencies()</i> will parse the internal stored routine code, detect queries
+<i>get_event_dependencies()</i> will parse the internal event's stored routine code, detect queries
 issued within, including calls to other routines, and will list such dependencies.
 </p>
 <p>
 The routine does not perform deep search, and will not analyze views or routines on which 
-the given routine depends.
+the given event depends.
 </p>
 <p>
 It is not, and will not be, able to parse dynamic SQL, i.e. prepared statements made from 
@@ -30,7 +30,7 @@ This procedure calls upon the more generic
 
 <h3>SYNOPSIS</h3>
 <p>
-<blockquote><pre>get_routine_dependencies (
+<blockquote><pre>get_event_dependencies (
     IN p_routine_schema VARCHAR(64) CHARSET utf8 
 ,   IN p_routine_name VARCHAR(64) CHARSET utf8
 )
@@ -42,15 +42,15 @@ READS SQL DATA
 <p>
   Input:
   <ul>
-    <li><strong>p_table_schema</strong>: schema where routine is located.</li>
-    <li><strong>p_table_name</strong>: name of routine.</li>
+    <li><strong>p_table_schema</strong>: schema where event is located.</li>
+    <li><strong>p_table_name</strong>: name of event.</li>
   </ul>
 </p>
 
 
 <h3>STRUCTURE</h3>
 <p>
-The procedure returns a result set of dependencies for this routine, in same format 
+The procedure returns a result set of dependencies for this event, in same format 
 as in <a href="get_sql_dependencies.html">get_sql_dependencies()</a>:
   <ul>
     <li><strong>schema_name</strong>: schema where dependency is located.</li>
@@ -62,22 +62,32 @@ as in <a href="get_sql_dependencies.html">get_sql_dependencies()</a>:
 
 <h3>EXAMPLES</h3>
 	<p>
-		Analyze <strong>sakila</strong>'s <strong>inventory_in_stock</strong> routine:
+		Analyze an event on <strong>sakila</strong>:
 	</p>
-	<blockquote><pre>mysql&gt; call get_routine_dependencies('sakila', 'inventory_in_stock');
+	<blockquote><pre>
+mysql&gt; CREATE EVENT
+  sakila.purge_history
+ON SCHEDULE
+  EVERY 1 DAY
+ON COMPLETION PRESERVE
+ENABLE
+DO
+  DELETE FROM sakila.rental WHERE rental_date < DATE(NOW() - INTERVAL 5 YEAR);
+	
+mysql&gt; call common_schema.get_event_dependencies('sakila', 'purge_history');
 +-------------+-------------+-------------+--------+
 | schema_name | object_name | object_type | action |
 +-------------+-------------+-------------+--------+
-| sakila      | inventory   | table       | select |
-| sakila      | rental      | table       | select |
+| sakila      | rental      | table       | delete |
 +-------------+-------------+-------------+--------+
+
 </pre></blockquote>
 
 <h3>ENVIRONMENT</h3>
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
-<a href="get_event_dependencies.html">get_event_dependencies()</a>,
+<a href="get_routine_dependencies.html">get_routine_dependencies()</a>,
 <a href="get_sql_dependencies.html">get_sql_dependencies()</a>,
 <a href="get_view_dependencies.html">get_view_dependencies()</a>
 

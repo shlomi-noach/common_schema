@@ -19,6 +19,16 @@ reads the file from the server machine. It does not require the <i>mysql</i> com
 Invoker of this procedure must have the FILE privilege, as well as any other privilege required for
 executing the commands in the input file.
 </p>
+<p>
+File size cannot be arbitrarily large. At current, a <strong>64K</strong> is a hard limit on the contents of the file.
+Due to internal mechanism, the limit turns lower than <strong>64K</strong>, depending on number and length of queries.
+</p>
+<p>
+Statements are assumed to be separated be semicolons (";"). <i>exec_file()</i> does not interpret DELIMITER commands. 
+</p>
+<p>
+As a general recommendation, you should not use this routine to import dumps, nor should you attempt to ready very large files. 
+</p>
 
 <h3>SYNOPSIS</h3>
 <p>

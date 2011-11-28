@@ -1,0 +1,84 @@
+<h3>NAME</h3>
+get_sql_dependencies(): Analyze and list the dependencies of a given query (BETA)
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+This procedure will analyze the given query, and provide with dependency listing: 
+the objects on which this query depends, e.g. tables, routines, views etc.
+</p>
+<p>
+<i>get_sql_dependencies()</i> will parse the query's text to detect such objects.
+It will not validate their existence or correctness. It will not perform deep search in
+order to further find dependencies of those objects.
+</p>
+<p>
+Thus, this routines does not actually perform any SQL operations, other than create and use internal
+temporary structures. 
+It will not access INFORMATION_SCHEMA nor any other metadata.
+</p>
+<p>
+It is not, and will not be, able to parse dynamic SQL, i.e. prepared statements made from 
+string literals. 
+</p>
+<p>
+This procedure serves as the basis to other analysis routines.
+</p>
+<p>This code is in BETA stage.</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>get_sql_dependencies(
+    IN p_sql               TEXT charset utf8
+,   IN p_default_schema    VARCHAR(64) charset utf8
+)
+DETERMINISTIC
+</pre></blockquote>
+</p>
+
+<p>
+  Input:
+  <ul>
+    <li><strong>p_sql</strong>: query to analyze</li>
+    <li><strong>p_default_schema</strong>: schema context to assume for query</li>
+  </ul>
+</p>
+
+
+<h3>STRUCTURE</h3>
+<p>
+The procedure returns a result set of dependencies for this routine:
+  <ul>
+    <li><strong>schema_name</strong>: schema where dependency is located.</li>
+    <li><strong>object_name</strong>: name of dependency object.</li>
+    <li><strong>object_type</strong>: type of dependency object (e.g. <strong>'table'</strong>, <strong>'function'</strong> etc.).</li>
+    <li><strong>action</strong>: type of action performed on object (e.g. <strong>'select'</strong>, <strong>'call'</strong> etc.).</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Analyze a <strong>CREATE VIEW</strong> query:
+	</p>
+	<blockquote><pre>mysql&gt; call get_sql_dependencies('CREATE VIEW sakila.simple_actor AS SELECT actor_id, first_name FROM sakila.actor', 'sakila');
+
++-------------+--------------+-------------+--------+
+| schema_name | object_name  | object_type | action |
++-------------+--------------+-------------+--------+
+| sakila      | actor        | table       | select |
+| sakila      | simple_actor | view        | create |
++-------------+--------------+-------------+--------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="get_event_dependencies.html">get_event_dependencies()</a>,
+<a href="get_routine_dependencies.html">get_routine_dependencies()</a>,
+<a href="get_view_dependencies.html">get_view_dependencies()</a>
+
+<h3>AUTHOR</h3>
+Roland Bouman
