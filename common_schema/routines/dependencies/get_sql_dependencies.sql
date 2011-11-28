@@ -60,6 +60,7 @@ my_main: begin
         if @debug_get_sql_dependencies then
             select v_scan_state, v_from, v_token, v_state;
         end if;
+
         case v_scan_state
             when 'start' then
                 set v_schema_name = p_default_schema, v_object_name = null, v_object_type = null, v_definer = null;
@@ -74,7 +75,12 @@ my_main: begin
                 end if;
             when 'select' then
                 set v_scan_state = 'expect from';
+                set v_action = 'select';
             when 'insert' then
+                set v_scan_state = 'expect table';
+            when 'update' then
+                set v_scan_state = 'expect table';
+            when 'delete' then
                 set v_scan_state = 'expect table';
             when 'expect from' then
                 if v_state = 'alpha' and v_token = 'from' then
@@ -106,7 +112,7 @@ my_main: begin
                 end if;
             when 'create' then
                 if v_state = 'alpha' then
-                    if v_token in ('database', 'event', 'function', 'procedure', 'schema', 'server', 'table', 'tablespace', 'view') then
+					if v_token in ('database', 'event', 'function', 'procedure', 'schema', 'server', 'table', 'tablespace', 'view') then
                         set v_object_type = v_token
                         ,   v_scan_state = 'expect identifier1';
                     end if;
