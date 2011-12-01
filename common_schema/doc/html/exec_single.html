@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>exec_single: common_schema documentation</title>
+	<meta name="description" content="exec_single: common_schema" />
+	<meta name="keywords" content="exec_single: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="exec_single.html">exec_single</a></h2>	
+<h3>NAME</h3>
+exec_single(): Executes a given query.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+Given a query, this procedure executes it. Essentially, is uses dynamic SQL to invoke
+the query.
+</p>
+<p>
+Query may be of any valid type:
+<ul>
+	<li>DML (e.g. INSERT, UPDATE, ...)</li>
+	<li>DDL (e.g. CREATE, ALTER, ...)</li>
+	<li>Other (e.g. KILL, SHOW, ...)</li>
+</ul>
+Refer to the <a href="http://dev.mysql.com/doc/refman/5.1/en/sql-syntax-prepared-statements.html">MySQL Manual</a> 
+for complete listing of valid statements.
+</p>
+<p>
+The procedure is used as the underlying execution mechanism for other <i>common_schema</i> routines.
+It's main advantage is that it accepts input configuration (see following). 
+Users will often not use this routine directly.
+</p>
+<p>
+	Invoker of this procedure must have the privileges required for execution of given query.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>exec_single(IN execute_query TEXT CHARSET utf8) 
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>execute_query</strong>: a single query to execute. This can be DML, DDL or any other valid MySQL command.
+      The procedure will not execute nor change anything when this input is empty (blank space).
+      The query may be terminated by a semicolon, but does not have to. A semicolon may appear within query 
+      (e.g. in quoted text).
+    </li>
+  </ul>
+  Input config:
+  <ul>
+    <li><strong>@common_schema_dryrun</strong>: when <strong>1</strong>, query is not executed, but rather printed.</li>
+    <li><strong>@common_schema_verbose</strong>: when <strong>1</strong>, query is verbosed.</li>
+  </ul>
+  Output:
+  <ul>
+    <li>Whatever output the query may have.</li>
+    <li><strong>@common_schema_rowcount</strong>: number of rows affected by execution.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Use <i>exec_single()</i> to create a table:
+	</p>
+	<blockquote><pre>mysql&gt; SHOW TABLES FROM world;
++-----------------+
+| Tables_in_world |
++-----------------+
+| City            |
+| Country         |
+| CountryLanguage |
++-----------------+
+
+mysql&gt; CALL exec_single('CREATE TABLE world.Region (id INT)');
+
+mysql&gt; SHOW TABLES FROM world;
++-----------------+
+| Tables_in_world |
++-----------------+
+| City            |
+| Country         |
+| CountryLanguage |
+| Region          |
++-----------------+
+</pre></blockquote>
+
+	<p>
+		Do an insert, get resulting number of affected rows:
+	</p>
+	<blockquote><pre>mysql&gt; CALL exec_single('INSERT INTO world.Region VALUES (1),(2),(3),(4),(5)');
+	
+mysql&gt; SELECT @common_schema_rowcount;
++-------------------------+
+| @common_schema_rowcount |
++-------------------------+
+|                       5 |
++-------------------------+
+</pre></blockquote>
+
+	<p>
+		Do a dry run: do not actually execute statement, just print out your intentions:
+	</p>
+	<blockquote><pre>mysql&gt; SET @common_schema_dryrun := 1;
+	
+mysql&gt; CALL exec_single('DELETE FROM world.Region WHERE id < 3');
++---------------------------------------+
+| exec_single: @common_schema_dryrun    |
++---------------------------------------+
+| DELETE FROM world.Region WHERE id < 3 |
++---------------------------------------+
+
+mysql&gt; SELECT COUNT(*) FROM world.Region;
++----------+
+| COUNT(*) |
++----------+
+|        5 |
++----------+
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="eval.html">eval()</a>,
+<a href="exec.html">exec()</a>,
+<a href="foreach.html">foreach()</a>,
+<a href="repeat_exec.html">repeat_exec()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>TABLES</h3>
+					<ul>
+						<li><a title="numbers" href="numbers.html">numbers</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

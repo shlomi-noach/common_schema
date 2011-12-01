@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>data_dimension_views: common_schema documentation</title>
+	<meta name="description" content="data_dimension_views: common_schema" />
+	<meta name="keywords" content="data_dimension_views: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="data_dimension_views.html">data_dimension_views</a></h2>	
+<h3>SYNOPSIS</h3>
+
+<p>
+Data dimension views: informational views on general data dimentions, capaticies and limitations.
+<ul>
+	<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a>: List AUTO_INCREMENT columns and their capacity</li>
+	<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a>: Present with data size measurements per storage engine</li>
+	<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a>: Present with data size measurements per schema </li>
+</ul>
+</p>
+
+
+<h3>DESCRIPTION</h3>
+<p>
+Through analysis of INFORMATION_SCHEMA, these views can provide with information on per-engine or per-schema estimated data size summary,
+or on AUTO_INCREMENT capacities.
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Show dimensions per schema:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.data_size_per_schema;
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+| TABLE_SCHEMA  | count_tables | count_views | distinct_engines | data_size | index_size | total_size | largest_table        | largest_table_size |
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+| common_schema |            1 |          27 |                1 |     28672 |      35840 |      64512 | numbers              |              64512 |
+| google_charts |            1 |           1 |                1 |     16384 |          0 |      16384 | chart_data           |              16384 |
+| mycheckpoint  |           13 |          50 |                2 |   3022602 |      88064 |    3110666 | status_variables     |            2654208 |
+| mysql         |           23 |           0 |                2 |   3259223 |    2551808 |    5811031 | time_zone_transition |            4297362 |
+| sakila        |           16 |           7 |                2 |   4297536 |    2761728 |    7059264 | rental               |            2850816 |
+| test          |            6 |           0 |                2 |     80232 |      45056 |     125288 | t                    |              49152 |
+| world         |            3 |           0 |                2 |    510355 |      28672 |     539027 | City                 |             409600 |
++---------------+--------------+-------------+------------------+-----------+------------+------------+----------------------+--------------------+
+</pre></blockquote>
+
+<p>Show AUTO_INCREMENT capacity for 'sakila' database:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.auto_increment_columns WHERE TABLE_SCHEMA='sakila';
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+| TABLE_SCHEMA | TABLE_NAME | COLUMN_NAME  | DATA_TYPE | COLUMN_TYPE           | is_signed | max_value  | AUTO_INCREMENT | auto_increment_ratio |
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+| sakila       | actor      | actor_id     | smallint  | smallint(5) unsigned  |         1 |      65535 |            201 |               0.0031 |
+| sakila       | address    | address_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |            606 |               0.0092 |
+| sakila       | category   | category_id  | tinyint   | tinyint(3) unsigned   |         1 |        255 |             17 |               0.0667 |
+| sakila       | city       | city_id      | smallint  | smallint(5) unsigned  |         1 |      65535 |            601 |               0.0092 |
+| sakila       | country    | country_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |            110 |               0.0017 |
+| sakila       | customer   | customer_id  | smallint  | smallint(5) unsigned  |         1 |      65535 |            600 |               0.0092 |
+| sakila       | film       | film_id      | smallint  | smallint(5) unsigned  |         1 |      65535 |           1001 |               0.0153 |
+| sakila       | inventory  | inventory_id | mediumint | mediumint(8) unsigned |         1 |   16777215 |           4582 |               0.0003 |
+| sakila       | language   | language_id  | tinyint   | tinyint(3) unsigned   |         1 |        255 |              7 |               0.0275 |
+| sakila       | payment    | payment_id   | smallint  | smallint(5) unsigned  |         1 |      65535 |          16050 |               0.2449 |
+| sakila       | rental     | rental_id    | int       | int(11)               |         0 | 2147483647 |          16050 |               0.0000 |
+| sakila       | staff      | staff_id     | tinyint   | tinyint(3) unsigned   |         1 |        255 |              3 |               0.0118 |
+| sakila       | store      | store_id     | tinyint   | tinyint(3) unsigned   |         1 |        255 |              3 |               0.0118 |
++--------------+------------+--------------+-----------+-----------------------+-----------+------------+----------------+----------------------+
+</pre></blockquote>
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>TABLES</h3>
+					<ul>
+						<li><a title="numbers" href="numbers.html">numbers</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>crc64: common_schema documentation</title>
+	<meta name="description" content="crc64: common_schema" />
+	<meta name="keywords" content="crc64: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema documentation</h1>
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="crc64.html">crc64</a></h2>	
+<h3>NAME</h3>
+crc64(): Return a 64 bit CRC of given input, as unsigned big integer.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function complements MySQL's crc32() function,	which results with poor distribution
+	on large number of values.
+	The <i>crc64()</i> algorithm relies on <strong>MD5</strong> as underlying mechanism. 
+</p>
+<p>
+  While input <strong>data</strong> is textual, any type can be passed in, due to SQL's implicit casting nature.
+</p>
+<p>
+	This code is based on the idea presented in the book
+	<i>High Performance MySQL, 2nd Edition</i>, By Baron Schwartz et al., published by O'REILLY
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>crc64(data LONGTEXT CHARSET utf8) 
+  RETURNS BIGINT UNSIGNED</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>data</strong>: data to run CRC on. This can be textual, numeric, temporal, or any other type
+      that can be implicitly converted to <strong>TEXT</strong>.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Calculate 64 bit CRC for some text:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT common_schema.crc64('mysql') AS crc64;
++---------------------+
+| crc64               |
++---------------------+
+| 9350511318824990686 |
++---------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>TABLES</h3>
+					<ul>
+						<li><a title="numbers" href="numbers.html">numbers</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>
