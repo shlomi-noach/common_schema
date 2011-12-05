@@ -1,0 +1,1 @@
+verify valid spaced names and values

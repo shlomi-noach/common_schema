@@ -32,6 +32,9 @@ begin
   if LEFT(txt, 1) = '\"' AND RIGHT(txt, 1) = '\"' then
     return SUBSTRING(txt, 2, CHAR_LENGTH(txt) - 2);
   end if;
+  if LEFT(txt, 1) = '`' AND RIGHT(txt, 1) = '`' then
+    return SUBSTRING(txt, 2, CHAR_LENGTH(txt) - 2);
+  end if;
   return txt;
 end $$
 
