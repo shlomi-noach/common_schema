@@ -252,18 +252,20 @@ begin
 	  --
       -- input is constant tokens (e.g. 'read green blue'), space or comma delimited
       --
-      declare _foreach_iterate_tokens TEXT CHARSET utf8 DEFAULT REPLACE(unwrap(collection), ',', ' ');
-      declare _foreach_num_tokens INT UNSIGNED DEFAULT get_num_tokens(_foreach_iterate_tokens, ' ');
+      declare _foreach_iterate_tokens TEXT CHARSET utf8 DEFAULT '';
+      declare _foreach_num_tokens INT UNSIGNED DEFAULT 0;
       declare _foreach_token TEXT CHARSET utf8;
       declare _foreach_row_number INT UNSIGNED DEFAULT 1;
       
+      set _foreach_iterate_tokens := _retokenized_text(unwrap(collection), ' ,', '"''`', TRUE, 'skip');
+      set _foreach_num_tokens := get_num_tokens(_foreach_iterate_tokens, @common_schema_retokenized_delimiter);
+      
       set iteration_number := 1;
       constant_tokens_loop: while iteration_number <= _foreach_num_tokens do
-        set _foreach_token := split_token(_foreach_iterate_tokens, ' ', iteration_number);
+        set _foreach_token := split_token(_foreach_iterate_tokens, @common_schema_retokenized_delimiter, iteration_number);
+        set _foreach_token := unquote(_foreach_token);
         set iteration_number := iteration_number + 1;
-        if CHAR_LENGTH(_foreach_token) = 0 then
-          iterate constant_tokens_loop;
-        end if;
+
         set @_foreach_exec_query := execute_queries;
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${1}', _foreach_token);
         set @_foreach_exec_query := REPLACE(@_foreach_exec_query, '${NR}', _foreach_row_number);

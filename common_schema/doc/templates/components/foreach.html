@@ -50,7 +50,9 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 		<br/>The place holders <strong>${1}, ${2}</strong> indicate the iterated values.
 	</li>
 	<li><strong>A constants set</strong>: a predefined set of constant values, e.g. <strong>'{red, green, blue}'</strong>.
-		<br/>Constants are separated by either spaces or commas (or both).
+		<br/>Constants are separated by either spaces or commas (or both). 
+		<br/>Constants can be quoted so as to allow spaces or commas within constant value. Quotes themselves are discarded.
+		<br/>Empty constants are discarded.
 		<br/>The place holder <strong>${1}</strong> indicates the current constant value.
 	</li>
 	<li><strong>'schema'</strong>: this is the collection of available schemata (e.g. as with <strong>SHOW DATABASES</strong>).
@@ -93,7 +95,7 @@ Following is a brief sample of valid collection input:
 	<tr><td>SELECT query</td><td>'SELECT id, name FROM INFORMATION_SCHEMA.PROCESSLIST WHERE time &gt; 20'</td></tr>
 	<tr><td>Numbers range</td><td>'1970:2038'</td></tr>
 	<tr><td>Two dimensional numbers range</td><td>'0:23,0:59'</td></tr>
-	<tr><td>Constants set</td><td>'{USA, GB, FRA, IT, JP}'</td></tr>
+	<tr><td>Constants set</td><td>'{USA, "GREAT BRITAIN", FRA, IT, JP}'</td></tr>
 	<tr><td>'schema'</td><td>'schema'</td></tr>
 	<tr><td>'schema like <i>expr</i>'</td><td>'schema like customer_%'</td></tr>
 	<tr><td>'schema ~ <i>/regexp/</i>'</td><td>'schema ~ /^customer_[0-9]+$/</td></tr>
