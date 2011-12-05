@@ -26,16 +26,15 @@ SQL SECURITY INVOKER
 COMMENT ''
 
 begin
-  declare num_query_tokens, queries_loop_counter TINYINT UNSIGNED DEFAULT 0;
+  declare num_query_tokens, queries_loop_counter INT UNSIGNED DEFAULT 0;
   declare single_query TEXT CHARSET utf8; 
-  declare internal_token VARCHAR(32) CHARSET utf8 DEFAULT '[\0_cs_::;::\0]';
   
   -- There may be multiple statements
   set execute_queries := _retokenized_queries(execute_queries);
-  set num_query_tokens := get_num_tokens(execute_queries, internal_token);
+  set num_query_tokens := get_num_tokens(execute_queries, @common_schema_retokenized_delimiter);
   set queries_loop_counter := 0;
   while queries_loop_counter < num_query_tokens do
-    set single_query := split_token(execute_queries, internal_token, queries_loop_counter + 1);
+    set single_query := split_token(execute_queries, @common_schema_retokenized_delimiter, queries_loop_counter + 1);
     call exec_single(single_query);
     set queries_loop_counter := queries_loop_counter + 1;
   end while;    

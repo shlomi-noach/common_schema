@@ -1,0 +1,1 @@
+verify no error on invalid empty non-trimmed tokens

@@ -1,0 +1,1 @@
+error on invalid empty tokens
