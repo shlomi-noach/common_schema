@@ -14,7 +14,7 @@ SQL SECURITY INVOKER
 COMMENT 'Retokenizes input queries with special token'
 
 begin
-  declare quoting_characters VARCHAR(5) CHARSET ascii DEFAULT '`\'';
+  declare quoting_characters VARCHAR(5) CHARSET ascii DEFAULT '`''';
 
   if not find_in_set('ANSI_QUOTES', @@sql_mode) then
     set quoting_characters := CONCAT(quoting_characters, '"');

@@ -26,7 +26,7 @@ begin
     return NULL;
   end if;
   -- parse options into key:value pairs
-  set options := _retokenized_text(unwrap(options), ',', '\'"`', TRUE, 'error');
+  set options := _retokenized_text(unwrap(options), ',', '"''`', TRUE, 'error');
   set options_delimiter := @common_schema_retokenized_delimiter;
   
   set key_name := unquote(key_name);
@@ -36,7 +36,7 @@ begin
   while options_counter <= num_options do
     -- per option, parse key:value pair into key, value
     set current_option := split_token(options, options_delimiter, options_counter);
-    set current_option = _retokenized_text(current_option, ':', '\'"`', TRUE, 'error');
+    set current_option = _retokenized_text(current_option, ':', '"''`', TRUE, 'error');
 
     set current_option_delimiter := @common_schema_retokenized_delimiter;
     if (get_num_tokens(current_option, current_option_delimiter) != 2) then
