@@ -258,7 +258,7 @@ begin
       declare _foreach_row_number INT UNSIGNED DEFAULT 1;
       
       set _foreach_iterate_tokens := _retokenized_text(unwrap(collection), ' ,', '"''`', TRUE, 'skip');
-      set _foreach_num_tokens := get_num_tokens(_foreach_iterate_tokens, @common_schema_retokenized_delimiter);
+      set _foreach_num_tokens := @common_schema_retokenized_count;
       
       set iteration_number := 1;
       constant_tokens_loop: while iteration_number <= _foreach_num_tokens do

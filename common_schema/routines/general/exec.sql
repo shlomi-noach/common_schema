@@ -31,7 +31,7 @@ begin
   
   -- There may be multiple statements
   set execute_queries := _retokenized_queries(execute_queries);
-  set num_query_tokens := get_num_tokens(execute_queries, @common_schema_retokenized_delimiter);
+  set num_query_tokens := @common_schema_retokenized_count;
   set queries_loop_counter := 0;
   while queries_loop_counter < num_query_tokens do
     set single_query := split_token(execute_queries, @common_schema_retokenized_delimiter, queries_loop_counter + 1);

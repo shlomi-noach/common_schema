@@ -25,13 +25,13 @@ begin
   if not options RLIKE '^{.*}$' then
     return NULL;
   end if;
+  
+  set key_name := unquote(key_name);
+
   -- parse options into key:value pairs
   set options := _retokenized_text(unwrap(options), ',', '"''`', TRUE, 'error');
   set options_delimiter := @common_schema_retokenized_delimiter;
-  
-  set key_name := unquote(key_name);
-  
-  set num_options := get_num_tokens(options, options_delimiter);
+  set num_options := @common_schema_retokenized_count;
   set options_counter := 1;
   while options_counter <= num_options do
     -- per option, parse key:value pair into key, value
@@ -39,7 +39,7 @@ begin
     set current_option = _retokenized_text(current_option, ':', '"''`', TRUE, 'error');
 
     set current_option_delimiter := @common_schema_retokenized_delimiter;
-    if (get_num_tokens(current_option, current_option_delimiter) != 2) then
+    if (@common_schema_retokenized_count != 2) then
       return NULL;
     end if;
     set current_key := split_token(current_option, current_option_delimiter, 1);

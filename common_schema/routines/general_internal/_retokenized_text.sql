@@ -4,7 +4,10 @@
 -- - new delimiter is known to be non-existent in original text
 -- - quoted text is not tokenized (quoting characters are given)
 --
--- The function returns a retokenized text, and sets the @common_schema_retokenized_delimiter
+-- The function:
+-- - returns a retokenized text
+-- - sets the @common_schema_retokenized_delimiter to the new delimiter
+-- - sets the @common_schema_retokenized_count to number of tokens
 -- variable to note the new delimiter.
 -- Tokenizing result text by this delimiter is safe, and no further tests for quotes are required.
 --
@@ -51,6 +54,7 @@ begin
   
   -- Resetting result delimiter; In case of error we want this to be an indicator
   set @common_schema_retokenized_delimiter := NULL;
+  set @common_schema_retokenized_count := NULL;
 
   -- Detect a prefix of delimiter_template which can serve as a delimiter in the retokenized text,
   -- i.e. find a shortest delimiter which does not appear in the input text at all (hence can serve as
@@ -114,7 +118,9 @@ begin
         if CHAR_LENGTH(result_text) > 0 then
           set result_text := CONCAT(result_text, internal_delimiter);
         end if;
+        -- Finally, we note down the token:
         set result_text := CONCAT(result_text, current_token);
+        set @common_schema_retokenized_count := 1 + IFNULL(@common_schema_retokenized_count, 0);
       end if;
       set token_start_pos := current_pos + 1;
     end if;
