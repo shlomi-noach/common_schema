@@ -1,6 +1,7 @@
 -- 
--- Assume the given text is a list of queries, seperated by semicolons. This function replaces
--- semicolons with internal tokens, exteremely unlikely to appear in a normal text.
+-- Assume the given text is a list of queries: 
+-- This function calls upon _retokenized_text to parse the queries based on a semicolor
+-- delimiter and quoting characters as dictated by sql_mode server variable.
 -- The function recognizes semicolons which may appear within quoted text, and ignores them.
 --
 
