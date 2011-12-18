@@ -64,32 +64,44 @@ do
 		
 		# execute test code
 		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA --silent --raw < test.sql > ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE}
-		if [ $? -ne 0 ] ; then
-		  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed on test.sql"
-		  exit 1
+		if [ $? -eq 0 ] ; then
+			# check test results
+			if [ -f error_expected.txt ] ; then
+			  # error is expected. How come no error?
+			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed on test.sql; expected error, found none"
+			  exit 1
+			fi
+			if [ -f expected.txt ] ; then
+				# There is an "expected.txt" file: results must match that file
+				diff expected.txt ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE} > ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}
+				if [ $? -ne 0 ] ; then
+				  echo "** Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed: unexpected output."
+				  echo "**   Output:   ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE}"
+				  echo "**   Expected: $(pwd)/expected.txt"
+				  echo "**   Diff:     ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}"
+				  
+				  exit 1
+				fi
+			else
+				# No explicit "expected.txt" result.
+				# By default, we expect "1"
+				TEST_RESULT=$(cat ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE})
+				if [ "$TEST_RESULT" != "1" ] ; then
+				  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed: got $TEST_RESULT"
+				  exit 1
+				fi
+	  		fi
+		else
+		  # Test executes with error
+		  if [ -f error_expected.txt ] ; then
+		      # error is expected
+		  	  :
+		  else
+			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed on test.sql"
+			  exit 1
+		  fi
 		fi
 
-		# check test results
-		if [ -f expected.txt ] ; then
-			# There is an "expected.txt" file: results must match that file
-			diff expected.txt ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE} > ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}
-			if [ $? -ne 0 ] ; then
-			  echo "** Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed: unexpected output."
-			  echo "**   Output:   ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE}"
-			  echo "**   Expected: $(pwd)/expected.txt"
-			  echo "**   Diff:     ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}"
-			  
-			  exit 1
-			fi
-		else
-			# No explicit "expected.txt" result.
-			# By default, we expect "1"
-			TEST_RESULT=$(cat ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE})
-			if [ "$TEST_RESULT" != "1" ] ; then
-			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed: got $TEST_RESULT"
-			  exit 1
-			fi
-		fi
 		# post test code (typically cleanup)
 		if [ -f post.sql ] ; then
 			mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
