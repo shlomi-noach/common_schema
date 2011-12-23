@@ -1,0 +1,72 @@
+<h3>NAME</h3>
+throw(): Disrupt execution with error
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+Issues an error at the point of invocation, providing with an error message.
+</p>
+
+<p>
+This is done by invoking an invalid command on the server. The result of such invocation will
+break execution of calling code. If this routine is invoked from another routine, the entire
+call stack is aborted. If this routine is called during a transaction, the transaction aborts
+and rolls back.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>throw(error_message VARCHAR(1024) CHARSET utf8)
+  NO SQL</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>error_message</strong>: a message to be displayed within error statement.</li>
+  </ul>
+</p>
+<p>
+  Output:
+  <ul>
+    <li><strong>@common_schema_error</strong>: The procedure sets this variable to the error_message supplied.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Invoke <i>throw()</i> directly:
+	</p>
+	<blockquote><pre>mysql&gt; call throw('Unknown variable type');
+ERROR 1146 (42S02): Table 'error.Unknown variable type' doesn't exist
+
+mysql&gt; SELECT @common_schema_error;
++-----------------------+
+| @common_schema_error  |
++-----------------------+
+| Unknown variable type |
++-----------------------+
+</pre></blockquote>
+
+	<p>
+		Invoke a syntactically invalid script; the <a href="run.html">run()</a> routine
+		and subroutines validate script syntax and call upon <i>throw()</i>:
+	</p>
+	<blockquote><pre>mysql&gt; call run('{set @x := 3; ; ; }');
+ERROR 1103 (42000): Incorrect table name 'QueryScript error: [Empty statement not allowed. Use {} instead] at 16: "; ; }"'
+
+mysql&gt; SELECT @common_schema_error;
++---------------------------------------------------------------------------------+
+| @common_schema_error                                                            |
++---------------------------------------------------------------------------------+
+| QueryScript error: [Empty statement not allowed. Use {} instead] at 16: "; ; }" |
++---------------------------------------------------------------------------------+
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach

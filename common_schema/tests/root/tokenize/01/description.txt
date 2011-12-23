@@ -1,1 +1,1 @@
-tokenize space delimited text
+throw an error; expect error

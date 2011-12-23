@@ -1,1 +1,1 @@
-CALL tokenize('the quick brown fox jumps', ' ');
+call throw('error intentional');
