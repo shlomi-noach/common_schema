@@ -1,0 +1,1 @@
+call throw('error intentional');
