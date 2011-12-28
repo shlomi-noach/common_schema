@@ -13,6 +13,7 @@ export TESTS_ROOT_PATH=${INITIAL_PATH}/root
 
 export TEST_OUTPUT_PATH=/tmp
 export TEST_OUTPUT_FILE=common_schema_test_output.txt
+export TEST_ERROR_FILE=common_schema_test_error.txt
 export DIFF_OUTPUT_FILE=common_schema_test_diff.txt
 
 let num_tests=0
@@ -63,7 +64,7 @@ do
 		fi
 		
 		# execute test code
-		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA --silent --raw < test.sql > ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE}
+		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA --silent --raw < test.sql > ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE} 2> ${TEST_OUTPUT_PATH}/${TEST_ERROR_FILE}
 		if [ $? -eq 0 ] ; then
 			# check test results
 			if [ -f error_expected.txt ] ; then
@@ -98,6 +99,7 @@ do
 		  	  :
 		  else
 			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed on test.sql"
+			  echo "** Error: " $(cat ${TEST_OUTPUT_PATH}/${TEST_ERROR_FILE})
 			  exit 1
 		  fi
 		fi
