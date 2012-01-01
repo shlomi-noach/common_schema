@@ -1,0 +1,1 @@
+create empty array, expect NULL concatenation

@@ -1,0 +1,1 @@
+create an empty array, expect no errors
