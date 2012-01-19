@@ -1,0 +1,1 @@
+Verify two invocations make for different values
