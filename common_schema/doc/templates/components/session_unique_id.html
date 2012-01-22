@@ -1,0 +1,56 @@
+<h3>NAME</h3>
+session_unique_id(): Return a unique unsigned integer for this session
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function returns unique values per session. That is, any two calls to this function from within the same session,
+	result with different, unique values.
+</p>
+<p>
+  The function utilizes the fact that a session is managed serially (it it generally unsafe and undesired to issue concurrent
+  queries on same connection). Therefore, it is known that any two calls on this function are essentially serialized within
+  the session
+</p>
+<p>
+	Current implementation of this function is to return incrementing unsigned integer values. However, the user should not
+	rely on this behavior, and should not assume consecutive results on consecutive calls.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>session_unique_id()
+  RETURNS INT UNSIGNED</pre></blockquote>
+</p>
+<p>
+  Output:
+  <ul>
+    <li>A unique value within current session.
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Get unique values:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT session_unique_id(), session_unique_id();
++---------------------+---------------------+
+| session_unique_id() | session_unique_id() |
++---------------------+---------------------+
+|                   1 |                   2 |
++---------------------+---------------------+
+1 row in set (0.02 sec)
+
+mysql&gt; SELECT session_unique_id();
++---------------------+
+| session_unique_id() |
++---------------------+
+|                   3 |
++---------------------+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach

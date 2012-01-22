@@ -1,0 +1,75 @@
+<h3>NAME</h3>
+query_runtime(): Number of seconds this query has been running for so far.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function returns the number of seconds elapsed since this query's execution begun. If query is executing from within
+	a stored routine, the function returns the number of seconds elapsed since routine began executing.
+</p>
+<p>
+  The function relies on the the behavior of <a href="http://dev.mysql.com/doc/refman/5.1/en/date-and-time-functions.html#function_now">NOW()</a>.
+</p>
+<p>
+	On servers supporting subsecond time resolution, <i>query_runtime()</i> returns with a floating point value.
+	On servers with single second resolution this results with a truncated integer.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>query_runtime()
+  RETURNS DOUBLE </pre></blockquote>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Show query runtime and query laptime for a long running query:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT Id, Name, sleep(0.3) AS s, SYSDATE(), query_runtime(), query_laptime() from world.City limit 30;
++----+-------------------+---+---------------------+-----------------+-----------------+
+| Id | Name              | s | SYSDATE()           | query_runtime() | query_laptime() |
++----+-------------------+---+---------------------+-----------------+-----------------+
+|  1 | Kabul             | 0 | 2012-01-22 12:25:41 |               1 |               1 |
+|  2 | Qandahar          | 0 | 2012-01-22 12:25:41 |               1 |               0 |
+|  3 | Herat             | 0 | 2012-01-22 12:25:41 |               1 |               0 |
+|  4 | Mazar-e-Sharif    | 0 | 2012-01-22 12:25:41 |               1 |               0 |
+|  5 | Amsterdam         | 0 | 2012-01-22 12:25:42 |               2 |               1 |
+|  6 | Rotterdam         | 0 | 2012-01-22 12:25:42 |               2 |               0 |
+|  7 | Haag              | 0 | 2012-01-22 12:25:42 |               2 |               0 |
+|  8 | Utrecht           | 0 | 2012-01-22 12:25:43 |               3 |               1 |
+|  9 | Eindhoven         | 0 | 2012-01-22 12:25:43 |               3 |               0 |
+| 10 | Tilburg           | 0 | 2012-01-22 12:25:43 |               3 |               0 |
+| 11 | Groningen         | 0 | 2012-01-22 12:25:44 |               4 |               1 |
+| 12 | Breda             | 0 | 2012-01-22 12:25:44 |               4 |               0 |
+| 13 | Apeldoorn         | 0 | 2012-01-22 12:25:44 |               4 |               0 |
+| 14 | Nijmegen          | 0 | 2012-01-22 12:25:44 |               4 |               0 |
+| 15 | Enschede          | 0 | 2012-01-22 12:25:45 |               5 |               1 |
+| 16 | Haarlem           | 0 | 2012-01-22 12:25:45 |               5 |               0 |
+| 17 | Almere            | 0 | 2012-01-22 12:25:45 |               5 |               0 |
+| 18 | Arnhem            | 0 | 2012-01-22 12:25:46 |               6 |               1 |
+| 19 | Zaanstad          | 0 | 2012-01-22 12:25:46 |               6 |               0 |
+| 20 | ´s-Hertogenbosch  | 0 | 2012-01-22 12:25:46 |               6 |               0 |
+| 21 | Amersfoort        | 0 | 2012-01-22 12:25:47 |               7 |               1 |
+| 22 | Maastricht        | 0 | 2012-01-22 12:25:47 |               7 |               0 |
+| 23 | Dordrecht         | 0 | 2012-01-22 12:25:47 |               7 |               0 |
+| 24 | Leiden            | 0 | 2012-01-22 12:25:47 |               7 |               0 |
+| 25 | Haarlemmermeer    | 0 | 2012-01-22 12:25:48 |               8 |               1 |
+| 26 | Zoetermeer        | 0 | 2012-01-22 12:25:48 |               8 |               0 |
+| 27 | Emmen             | 0 | 2012-01-22 12:25:48 |               8 |               0 |
+| 28 | Zwolle            | 0 | 2012-01-22 12:25:49 |               9 |               1 |
+| 29 | Ede               | 0 | 2012-01-22 12:25:49 |               9 |               0 |
+| 30 | Delft             | 0 | 2012-01-22 12:25:49 |               9 |               0 |
++----+-------------------+---+---------------------+-----------------+-----------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+
+<h3>SEE ALSO</h3>
+<a href="query_laptime.html">query_laptime()</a>,
+<a href="throttle.html">throttle()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

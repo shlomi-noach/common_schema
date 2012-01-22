@@ -1,0 +1,46 @@
+<h3>NAME</h3>
+this_query(): Returns the current query executed by this thread.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function returns the text of query which is now executing under the
+	current process.
+</p>
+<p>
+	Essentially, it is the very same query which invoked this function. That it,
+	the call to <i>this_query()</i> is expected to be found within the result's text.
+</p>
+<p>
+	The function is provided as ground for future query/text analysis routines
+	which would be able to modify query behavior according to query's text.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>this_query()
+  RETURNS LONGTEXT CHARSET utf8</pre></blockquote>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		The most simplistic form:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT this_query();
++---------------------+
+| this_query()        |
++---------------------+
+| SELECT this_query() |
++---------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+
+<h3>SEE ALSO</h3>
+<a href="execution_routines.html">Execution & flow control</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
