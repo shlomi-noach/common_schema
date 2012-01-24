@@ -1,0 +1,56 @@
+<h3>NAME</h3>
+slave_hosts: listing of hosts replicating from current server
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>slave_hosts</i> lists host names where slaves of this server are located. The view utilizes 
+<a href="processlist_repl.html">processlist_repl</a> and looks for connections issued by replicating slaves.
+</p>
+
+<p>
+No information is provided on the ports on which replicating slaves listen on.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.slave_hosts;
++-------+-------------+------+-----+---------+-------+
+| Field | Type        | Null | Key | Default | Extra |
++-------+-------------+------+-----+---------+-------+
+| host  | varchar(64) | NO   |     |         |       |
++-------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>host</strong>: host name or IP address of replicating slave, as it appears on <strong>PROCESSLIST</strong>, without port number</li>
+	</ul>
+</p>
+<h3>EXAMPLES</h3>
+<p>Show slave hosts on a master machine:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.slave_hosts;
++-----------------+
+| host            |
++-----------------+
+| sql00.mydomain  |
+| sql02.mydomain  |
++-----------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="match_grantee.html">match_grantee()</a>,
+<a href="processlist_per_userhost.html">processlist_per_userhost</a>,
+<a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_summary.html">processlist_summary</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

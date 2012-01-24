@@ -1,0 +1,56 @@
+<h3>NAME</h3>
+metadata: Information about the <i>common_schema</i> project.
+<h3>TYPE</h3>
+Table
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>metadata</i> is a two-columns table, in key-value format, which lists some
+internal and general information on the project.
+</p>
+
+<p>
+Information includes distribution version, repository, license and author info.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.metadata;
++-----------------+---------------+------+-----+---------+-------+
+| Field           | Type          | Null | Key | Default | Extra |
++-----------------+---------------+------+-----+---------+-------+
+| attribute_name  | varchar(32)   | NO   | PRI | NULL    |       |
+| attribute_value | varchar(2048) | NO   |     | NULL    |       |
++-----------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this table:</p>
+<ul>
+	<li><strong>attribute_name</strong>: metadata key</li>
+	<li><strong>attribute_value</strong>: metadata value</li>
+</ul>
+
+
+<h3>EXAMPLES</h3>
+<p>Get repository information:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM metadata WHERE attribute_name like '%repository%';
++-------------------------+-------------------------------------------------+
+| attribute_name          | attribute_value                                 |
++-------------------------+-------------------------------------------------+
+| project_repository      | https://common-schema.googlecode.com/svn/trunk/ |
+| project_repository_type | svn                                             |
++-------------------------+-------------------------------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="help.html">help()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
