@@ -15,6 +15,7 @@
 	<property name="dist.dir" value="dist" />
 	<property name="tests.dir" value="tests" />
 	<property name="tmp.dir" value="ant-tmp" />
+	<property name="sql.help.output.file" value="base_help.sql" />
 	<property name="sql.mysql_51.output.file" value="common_schema_mysql_51.sql" />
 	<property name="sql.innodb_plugin.output.file" value="common_schema_innodb_plugin.sql" />
 	<property name="sql.percona_server.output.file" value="common_schema_percona_server.sql" />
@@ -62,7 +63,7 @@
 	</target>
 
 
-	<target name="build_all" depends="revnumber">
+	<target name="build_all" depends="revnumber, doc_sql">
 		<mkdir dir="${build.dir}" />
 		<concat destfile="${build.dir}/base_${sql.mysql_51.output.file}">
 			<fileset dir="tables/" includes="*.sql" />
@@ -73,14 +74,18 @@
 			<fileset dir="routines/meta/" includes="*.sql" />
 			<fileset dir="routines/privileges/" includes="*.sql" />
 			<fileset dir="routines/process/" includes="*.sql" />
+			<fileset dir="routines/script/" includes="*.sql" />
+			<fileset dir="routines/script/array" includes="*.sql" />
 			<fileset dir="routines/text/" includes="*.sql" />
 			<fileset dir="routines/time/" includes="*.sql" />
 			
+			<!--
 			<fileset dir="autocache/tables/" includes="*.sql" />
 			<fileset dir="autocache/routines/" includes="*.sql" />
 			<fileset dir="autocache/views_internal/" includes="*.sql" />
 			<fileset dir="autocache/views/" includes="*.sql" />
-
+			-->
+			
 			<fileset dir="views/schema_analysis/" includes="*.sql" />
 			<fileset dir="views/data_dimension/" includes="*.sql" />
 			<fileset dir="views/monitoring/" includes="*.sql" />
@@ -89,7 +94,9 @@
 		</concat>
 		<replace file="${build.dir}/base_${sql.mysql_51.output.file}" token="revision.placeholder" value="${svn.revision}"/>
 		<concat destfile="${build.dir}/base_${sql.innodb_plugin.output.file}">
+			<!--
 			<fileset dir="routines/innodb_plugin/" includes="*.sql" />
+			-->
 			<fileset dir="views/innodb_plugin/" includes="*.sql" />
 		</concat>
 		<concat destfile="${build.dir}/base_${sql.percona_server.output.file}">
@@ -102,6 +109,7 @@
 		<concat destfile="${build.dir}/${sql.mysql_51.output.file}">
 			<fileset file="main_head.sql" />
 			<fileset file="${build.dir}/base_${sql.mysql_51.output.file}" />
+			<fileset file="${build.dir}/${sql.help.output.file}" />
 			<fileset file="main_tail.sql" />
 		</concat>
 	</target>
@@ -111,6 +119,7 @@
 			<fileset file="main_head.sql" />
 			<fileset file="${build.dir}/base_${sql.mysql_51.output.file}" />
 			<fileset file="${build.dir}/base_${sql.innodb_plugin.output.file}" />
+			<fileset file="${build.dir}/${sql.help.output.file}" />
 			<fileset file="main_tail.sql" />		
 		</concat>
 	</target>
@@ -121,6 +130,7 @@
 			<fileset file="${build.dir}/base_${sql.mysql_51.output.file}" />
 			<fileset file="${build.dir}/base_${sql.innodb_plugin.output.file}" />
 			<fileset file="${build.dir}/base_${sql.percona_server.output.file}" />
+			<fileset file="${build.dir}/${sql.help.output.file}" />
 			<fileset file="main_tail.sql" />		
 		</concat>
 	</target>
@@ -214,15 +224,6 @@
 				</fileset>
 			</path>
 		</foreach>
-		<!--
-		<foreach param="routine_group_path" target="routinesdoc">
-			<path>
-				<dirset dir="${doc.templates.dir}/routines">
-			    	<include name="*"/>
-				</dirset>
-			</path>
-		</foreach>
-		-->
 	</target>
 	<target name="component_doc">
 		<basename property="doc_basename" file="${component_doc_filename}" />
@@ -262,8 +263,13 @@
 	
 	<target name="doc_sql">
 		<mkdir dir="${tmp.dir}" />
-		<foreach param="component_doc_filename" target="component_doc_sql">
+		<mkdir dir="${build.dir}" />
+		<delete file="${build.dir}/${sql.help.output.file}" />
+		<foreach param="page_doc_filename" target="page_doc_sql">
 			<path>
+				<fileset dir="${doc.templates.dir}/general">
+					<include name="*.html" />
+				</fileset>
 				<fileset dir="${doc.templates.dir}/components">
 					<include name="*.html" />
 				</fileset>
@@ -271,10 +277,10 @@
 		</foreach>
 		<delete dir="${tmp.dir}" />
 	</target>
-	<target name="component_doc_sql">
-		<basename property="doc_basename" file="${component_doc_filename}" />
-		<basename property="component_name" file="${component_doc_filename}" suffix=".html" />
-		<echo message="Generating documentation for ${component_name} component" />
+	<target name="page_doc_sql">
+		<basename property="doc_basename" file="${page_doc_filename}" />
+		<basename property="page_doc_name" file="${page_doc_filename}" suffix=".html" />
+		<echo message="Generating documentation for ${page_doc_name} page" />
 		<exec executable="html2text">
 			<arg value="-ascii"/>
 			<arg value="-width"/>
@@ -283,14 +289,14 @@
 			<arg value="pretty"/>
 			<arg value="-o"/>
 			<arg value="${tmp.dir}/${doc.sql.tmp.file}"/>
-			<arg value="${component_doc_filename}"/>
+			<arg value="${page_doc_filename}"/>
 		</exec>
 		<replace file="${tmp.dir}/${doc.sql.tmp.file}" token="\" value="\\"/>
 		<replace file="${tmp.dir}/${doc.sql.tmp.file}" token="'" value="''"/>
 		<loadfile property="doc.sql.text" srcfile="${tmp.dir}/${doc.sql.tmp.file}"></loadfile>
-		<antcall target="exec_mysql_command">
-			<param name="mysql_command" value="INSERT INTO ${mysql.database}.help VALUES ('${component_name}','${doc.sql.text}')" />
-		</antcall> 
+		<concat destfile="${build.dir}/${sql.help.output.file}" append="true">
+			INSERT INTO ${mysql.database}.help_content VALUES ('${page_doc_name}','${doc.sql.text}');
+		</concat>
 	</target>
 
 	<target name="test">
@@ -304,6 +310,7 @@
 	</target>
 	
 	<target name="__test__">
+		<echo>${abc}</echo>
 		<loadfile property="f.c" srcfile="/tmp/crc64.sql">
 		</loadfile>
 		<echo>prop: ${f.c}</echo>
