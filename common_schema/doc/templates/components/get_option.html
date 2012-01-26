@@ -1,0 +1,78 @@
+<h3>NAME</h3>
+get_option(): Extract value from options dictionary based on key
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	<i>get_option()</i> accepts a simple dictionary and a key, and extract the value which
+	maps to give nkey within the dictionary.
+</p>
+<p>
+	The dictionary is similar in format to Python's dictionary or to JavaScript's shallow 
+	JSON object.
+	For example, consider the following:
+	<blockquote><pre>{name: "Wallace", num_children: 0, "pet": Gromit}</pre></blockquote>
+	In the above there are three entries, each with key and value. Either key or value
+	can be quoted, but mostly do not have to be. Quotes are essential when the characters 
+	"," or ";" appear within name or value.
+</p>
+<p>
+	Everything is considered to be a string, even if a number is provided. Key and value may
+	consist of any character, and neither are limited to alphanumeric values. They may
+	contain spaces, though these are best used within quotes.
+</p>
+<p>
+	The dictionary cannot have sub-dictionaries. Any such values are treated as text.
+</p>
+<p>
+	There may be multiple entries for the same key, in which case <i>get_option()</i>
+	returns the <i>first</i> one defined. When a key does not exist the function returns <strong>NULL</strong>.
+	The value <strong>NULL</strong>, when not quoted, is interpreted as the SQL <strong>NULL</strong> value.
+</p>
+<p>
+	Upon error (e.g. incorrect dictionary definition) the function returns <strong>NULL</strong>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>get_option(options TEXT CHARSET utf8, key_name VARCHAR(255) CHARSET utf8) 
+  RETURNS TEXT CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>options</strong>: a dictionary, in Python-style format (see examples following)
+	</li>
+    <li><strong>key_name</strong>: entry to look for within the dictionary.
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Get an existing value:</p>
+<blockquote><pre>mysql&gt; SELECT get_option('{name: "Wallace", num_children: 0, "pet": Gromit}', 'pet') AS result;
++--------+
+| result |
++--------+
+| Gromit |
++--------+
+</pre></blockquote>
+
+<p>Attempt to read an unmapped value:</p>
+<blockquote><pre>mysql&gt; SELECT get_option('{name: "Wallace", num_children: 0, "pet": Gromit}', 'wife') AS result;
++--------+
+| result |
++--------+
+| NULL   |
++--------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="split_token.html">split_token()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

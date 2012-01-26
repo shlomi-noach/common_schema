@@ -4,6 +4,7 @@
 Text routines: string operations
 <ul>
 	<li><a href="get_num_tokens.html">get_num_tokens()</a>: Return number of tokens in delimited text.</li>
+	<li><a href="get_option.html">get_option()</a>: Extract value from options dictionary based on key.</li>
 	<li><a href="like_to_rlike.html">like_to_rlike()</a>: Convert a LIKE expression to an RLIKE (REGEXP) expression.</li>
 	<li><a href="mysql_qualify.html">mysql_qualify()</a>: Return a qualified MySQL object name.</li>
 	<li><a href="replace_all.html">replace_all()</a>: Replaces characters in a given text with a given replace-text.</li>
@@ -34,4 +35,15 @@ Text routines: string operations
 +---------+
 |    7200 |
 +---------+
+</pre></blockquote>
+
+	<p>
+		Extract value from dictionary:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT get_option('{width: 100, height: 180, color: #ffa030}', 'height') AS result;
++--------+
+| result |
++--------+
+| 180    |
++--------+
 </pre></blockquote>

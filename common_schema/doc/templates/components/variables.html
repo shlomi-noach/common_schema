@@ -1,0 +1,57 @@
+<h3>SYNOPSIS</h3>
+
+<p>
+User defined variables used as input to <i>common_schema</i> routines, 
+or are the output of routines.
+</p>
+<p>
+Input variables:
+<ul>
+	<li><a href="#common_schema_debug">@common_schema_verbose</a>: set verbose messages</li>
+	<li><a href="#common_schema_dryrun">@common_schema_dryrun</a>: avoid dynamic query execution</li>
+	<li><a href="#common_schema_debug">@common_schema_debug</a>: set debug mode</li>
+</ul>
+</p>
+<p>
+Output variables:
+<ul>
+	<li><a href="#common_schema_rowcount">@common_schema_rowcount</a>: number of rows affected by last dynamic query</li>
+	<li><a href="#common_schema_error">@common_schema_error</a>: latest error message</li>
+</ul>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p>
+	<strong>@common_schema_verbose</strong> and <strong>@common_schema_dryrun</strong> both serve as input to <a href="exec_single.html">exec_single()</a>,
+	which is a basic function in <i>common_schema</i> for dynamic query execution. <i>eval()</i>, <i>exec()</i>, <i>foreach()</i>, 
+	<i>repeat_exec()</i>, <i>run()</i> -- all rely on <i>exec_single()</i>, hence these two params affect all aforementioned functions.
+</p>
+<p>
+	Setting <strong>@common_schema_dryrun := 1</strong> avoids executing dynamic queries issues by <i>exec_single()</i>. This makes for
+	a way to test your code before execution.
+</p>
+<p>
+	Setting <strong>@common_schema_verbose := 1</strong> prints out executed queries, and serves as a verbose mode for your code's activity.	
+</p>
+<p>
+	Setting <strong>@common_schema_debug := 1</strong> will enable some internal debugging code. The particulars are subject to change, but you
+	may find it useful.
+</p>
+<p>
+	When issuing queries such as <strong>INSERT, DELETE, UPDATE</strong> via dynamic SQL, the <a href="http://dev.mysql.com/doc/refman/5.1/en/information-functions.html#function_row-count"><strong>ROW_COUNT()</strong></a> function does not behave as expected,
+	since the <strong>DEALLOCATE</strong> statement resets it.
+	This is why after each invocation of dynamic query via <i>exec_single()</i>, the <strong>@common_schema_rowcount</strong> variable is set so as to
+	reflect the <strong>ROW_COUNT()</strong> as read immediately after invocation. 
+</p>
+<p>
+	<strong>@common_schema_error</strong> can be set by various functionality upon error. In particular, it is set by the <a href="throw.html">throw()</a>
+	routine to the error message provided. 
+</p>
+
+
+<h3>NOTES</h3>
+<p>
+	<i>common_schema</i> utilized many more variables, internally. Internal user defined variables are named, by convention, 
+	<strong>@_common_schema_*</strong>. You should refrain from depending on the output of any such variable, nor should you modify such
+	variables. 
+</p>
