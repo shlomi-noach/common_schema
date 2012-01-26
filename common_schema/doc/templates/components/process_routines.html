@@ -1,0 +1,67 @@
+<h3>SYNOPSIS</h3>
+
+<p>
+Process routines: stored routines managing query, session and process information & workflow.
+<ul>
+	<li><a href="query_laptime.html">query_laptime()</a>: Number of seconds this query has been running for since last invocation of this function.</li>
+	<li><a href="query_runtime.html">query_runtime()</a>: Number of seconds this query has been running for so far.</li>
+	<li><a href="session_unique_id.html">session_unique_id()</a>: Returns an integer unique to this session.</li>
+	<li><a href="this_query.html">this_query()</a>: Returns the current query executed by this thread.</li>
+	<li><a href="throttle.html">throttle()</a>: Throttle current query by periodically sleeping throughout its execution.</li>
+</ul>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p>
+Process routines act on, or provide information on the current session. A MySQL connection is assigned with a unique session,
+which is isolated from other sessions in terms of temporary tables, user defined variables, process ID, credentials and some memory
+buffers. The process routines utilize some of these properties.
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Throttle a heavy weight query, doubling its total runtime by injecting
+		sleep periods:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT Id, Name, throttle(1) from my_schema.huge_table ORDER BY Population DESC;
+	</pre></blockquote>
+	
+	<p>
+		Show query runtime and query laptime for a long running query:
+	</p>
+	<blockquote><pre>mysql&gt; SELECT Id, Name, sleep(0.3) AS s, SYSDATE(), query_runtime(), query_laptime() from world.City limit 30;
++----+-------------------+---+---------------------+-----------------+-----------------+
+| Id | Name              | s | SYSDATE()           | query_runtime() | query_laptime() |
++----+-------------------+---+---------------------+-----------------+-----------------+
+|  1 | Kabul             | 0 | 2012-01-22 12:25:41 |               1 |               1 |
+|  2 | Qandahar          | 0 | 2012-01-22 12:25:41 |               1 |               0 |
+|  3 | Herat             | 0 | 2012-01-22 12:25:41 |               1 |               0 |
+|  4 | Mazar-e-Sharif    | 0 | 2012-01-22 12:25:41 |               1 |               0 |
+|  5 | Amsterdam         | 0 | 2012-01-22 12:25:42 |               2 |               1 |
+|  6 | Rotterdam         | 0 | 2012-01-22 12:25:42 |               2 |               0 |
+|  7 | Haag              | 0 | 2012-01-22 12:25:42 |               2 |               0 |
+|  8 | Utrecht           | 0 | 2012-01-22 12:25:43 |               3 |               1 |
+|  9 | Eindhoven         | 0 | 2012-01-22 12:25:43 |               3 |               0 |
+| 10 | Tilburg           | 0 | 2012-01-22 12:25:43 |               3 |               0 |
+| 11 | Groningen         | 0 | 2012-01-22 12:25:44 |               4 |               1 |
+| 12 | Breda             | 0 | 2012-01-22 12:25:44 |               4 |               0 |
+| 13 | Apeldoorn         | 0 | 2012-01-22 12:25:44 |               4 |               0 |
+| 14 | Nijmegen          | 0 | 2012-01-22 12:25:44 |               4 |               0 |
+| 15 | Enschede          | 0 | 2012-01-22 12:25:45 |               5 |               1 |
+| 16 | Haarlem           | 0 | 2012-01-22 12:25:45 |               5 |               0 |
+| 17 | Almere            | 0 | 2012-01-22 12:25:45 |               5 |               0 |
+| 18 | Arnhem            | 0 | 2012-01-22 12:25:46 |               6 |               1 |
+| 19 | Zaanstad          | 0 | 2012-01-22 12:25:46 |               6 |               0 |
+| 20 | ´s-Hertogenbosch  | 0 | 2012-01-22 12:25:46 |               6 |               0 |
+| 21 | Amersfoort        | 0 | 2012-01-22 12:25:47 |               7 |               1 |
+| 22 | Maastricht        | 0 | 2012-01-22 12:25:47 |               7 |               0 |
+| 23 | Dordrecht         | 0 | 2012-01-22 12:25:47 |               7 |               0 |
+| 24 | Leiden            | 0 | 2012-01-22 12:25:47 |               7 |               0 |
+| 25 | Haarlemmermeer    | 0 | 2012-01-22 12:25:48 |               8 |               1 |
+| 26 | Zoetermeer        | 0 | 2012-01-22 12:25:48 |               8 |               0 |
+| 27 | Emmen             | 0 | 2012-01-22 12:25:48 |               8 |               0 |
+| 28 | Zwolle            | 0 | 2012-01-22 12:25:49 |               9 |               1 |
+| 29 | Ede               | 0 | 2012-01-22 12:25:49 |               9 |               0 |
+| 30 | Delft             | 0 | 2012-01-22 12:25:49 |               9 |               0 |
++----+-------------------+---+---------------------+-----------------+-----------------+
+</pre></blockquote>
