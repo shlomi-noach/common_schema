@@ -22,16 +22,18 @@ begin
   set expression := REPLACE(expression, '()', '');
   set expression := REPLACE(expression, ';', '');
   set expression := trim_wspace(expression);
-  set expression := trim_wspace(expression);
+  set expression := REPLACE(expression, ' ', '%');
   SELECT 
     split_token(help_message, '\n', n) AS help
   FROM (
     SELECT help_message FROM (
       SELECT 1 AS order_column, help_message FROM help_content WHERE topic LIKE CONCAT('%', expression, '%')
       UNION ALL
-      SELECT 2, help_message FROM help_content WHERE help_message LIKE CONCAT('%', expression, '%')
+      SELECT 2, help_message FROM help_content WHERE LEFT(help_message, 256) LIKE CONCAT('%', expression, '%')
       UNION ALL
-      SELECT 3, CONCAT('No help topics found for "', expression, '".')
+      SELECT 3, help_message FROM help_content WHERE help_message LIKE CONCAT('%', expression, '%')
+      UNION ALL
+      SELECT 4, CONCAT('No help topics found for "', expression, '".')
     ) select_all 
     ORDER BY order_column ASC 
     LIMIT 1
