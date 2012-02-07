@@ -1,0 +1,1 @@
+declare a single local variable; expect no errors

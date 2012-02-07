@@ -1,0 +1,1 @@
+declare and access local variable in loop

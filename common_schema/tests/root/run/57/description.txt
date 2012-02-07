@@ -1,0 +1,2 @@
+error on wrong 'throttle' argument
+

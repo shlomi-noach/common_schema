@@ -1,0 +1,4 @@
+USE test_cs;
+DROP TABLE IF EXISTS test_run;
+CREATE TABLE test_run (id INT AUTO_INCREMENT PRIMARY KEY, x INT, y INT);
+

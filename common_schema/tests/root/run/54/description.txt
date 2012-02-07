@@ -1,0 +1,1 @@
+error on wrong 'throw' argument

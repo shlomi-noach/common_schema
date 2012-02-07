@@ -1,0 +1,1 @@
+expect error on input statement within loop

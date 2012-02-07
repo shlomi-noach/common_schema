@@ -1,0 +1,1 @@
+verify local variable cannot be accessed outside scope
