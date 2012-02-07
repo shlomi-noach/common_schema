@@ -1,1 +1,1 @@
-SELECT  id AS col1,  name  AS col2,  IF(population < 1000000, 'small', 'large')  AS col3, NULL as col4, NULL as col5, NULL as col6 from world.City
+SELECT id AS col1, name AS col2, IF(population < 1000000, 'small', 'large') AS col3, NULL as col4, NULL as col5, NULL as col6 from world.City

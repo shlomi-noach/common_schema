@@ -31,10 +31,10 @@ _proc_body: begin
 
   set @common_schema_rowcount := NULL;
   
-  if @common_schema_dryrun > 0 then
+  if @common_schema_dryrun IS TRUE then
     SELECT @_execute_query AS 'exec_single: @common_schema_dryrun';
   else
-    if @common_schema_verbose then
+    if @common_schema_verbose IS TRUE then
 	  SELECT @_execute_query AS 'exec_single: @common_schema_verbose';
     end if;
   

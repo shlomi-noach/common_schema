@@ -1,1 +1,1 @@
-SELECT  id AS col1,  name  AS col2,  (select IF(population < 1000000, 'small', 'large') AS size_description) AS col3,  _latin1 'boe'  AS col4, NULL as col5 from world.City
+SELECT id AS col1, name AS col2, (select IF(population < 1000000, 'small', 'large') AS size_description) AS col3, _latin1 'boe' AS col4, NULL as col5 from world.City

@@ -29,9 +29,7 @@ begin
   DROP TEMPORARY TABLE IF EXISTS _tmp_eval_queries;
   CREATE TEMPORARY TABLE _tmp_eval_queries (query TEXT CHARSET utf8);
   set @q := CONCAT('INSERT INTO _tmp_eval_queries ', sql_query);  
-  PREPARE st FROM @q;
-  EXECUTE st;
-  DEALLOCATE PREPARE st;
+  call exec_single(@q);
   
   begin	
 	declare current_query TEXT CHARSET utf8 DEFAULT NULL;
