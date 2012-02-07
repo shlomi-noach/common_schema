@@ -1,5 +1,5 @@
 -- 
--- 
+-- Extract value from options dictionary based on key
 -- 
 
 DELIMITER $$
