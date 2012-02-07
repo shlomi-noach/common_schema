@@ -44,7 +44,7 @@ my_main: begin
     
     my_loop: repeat 
         set v_old_from = v_from;
-        call _get_sql_token(p_sql, v_from, v_level, v_token, v_state);
+        call _get_sql_token(p_sql, v_from, v_level, v_token, FALSE, v_state);
         set v_token = v_token collate utf8_general_ci;
         if v_state in ('whitespace', 'single line comment', 'multi line comment') then
             iterate my_loop;

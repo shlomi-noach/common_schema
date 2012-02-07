@@ -11,6 +11,7 @@ create procedure _get_sql_token(
 ,   inout   p_from      int unsigned
 ,   inout   p_level     int
 ,   out     p_token     text charset utf8
+,   in      allow_script_tokens int
 -- ,   inout   p_state     varchar(64)charset utf8
 ,   inout   p_state     enum(
                             'alpha'
@@ -33,6 +34,7 @@ create procedure _get_sql_token(
                         ,   'greater than'
                         ,   'greater than or equals'
                         ,   'integer'
+                        ,   'left braces'
                         ,   'left parenthesis'
                         ,   'left shift'
                         ,   'less than'
@@ -47,6 +49,7 @@ create procedure _get_sql_token(
                         ,   'or'
                         ,   'plus'
                         ,   'quoted identifier'
+                        ,   'right braces'
                         ,   'right parenthesis'
                         ,   'right shift'
                         ,   'single line comment'
@@ -55,6 +58,8 @@ create procedure _get_sql_token(
                         ,   'string'
                         ,   'system variable'
                         ,   'user-defined variable'
+                        ,   'query_script variable'
+                        ,	'expanded query_script variable'
                         ,   'whitespace'
                         ,   'not'
                         )               
@@ -77,6 +82,9 @@ begin
         set p_level = 0;
     end if;
     if p_state = 'right parenthesis' then
+        set p_level = p_level - 1;
+    end if;
+    if p_state = 'right braces' and allow_script_tokens then
         set p_level = p_level - 1;
     end if;
     set v_from = p_from;
@@ -116,6 +124,8 @@ begin
                         else
                             set p_state = 'user-defined variable';
                         end if;
+                    when v_char = '$' and allow_script_tokens then
+                        set p_state = 'query_script variable';
                     when v_char = '.' then
                         if substr(p_text, v_from + 1, 1) between '0' and '9' then
                             set p_state = 'decimal', v_from = v_from + 1;
@@ -187,9 +197,18 @@ begin
                     when v_char = ':' then 
                         if v_lookahead = '=' then
                             set p_state = 'assign', v_from = v_from + 2;
+                            leave my_loop;
+                        elseif v_lookahead = '$' and allow_script_tokens then
+                            set p_state = 'expanded query_script variable';
                         else
                             set p_state = 'colon', v_from = v_from + 1;
+                            leave my_loop;
                         end if;
+                    when v_char = '{' and allow_script_tokens then 
+                        set p_state = 'left braces', v_from = v_from + 1, p_level = p_level + 1;
+                        leave my_loop;
+                    when v_char = '}' and allow_script_tokens then 
+                        set p_state = 'right braces', v_from = v_from + 1;
                         leave my_loop;
                     when v_char = '(' then 
                         set p_state = 'left parenthesis', v_from = v_from + 1, p_level = p_level + 1;
@@ -327,9 +346,25 @@ begin
             when 'user-defined variable' then
                 if v_char in (';', ',', ' ', '\t', '\n', '\r', '!', '~', '^', '%', '>', '<', ':', '=', '+', '-', '&', '*', '|', '(', ')') then
                     leave my_loop;
+                elseif allow_script_tokens and v_char in ('{', '}') then
+                    leave my_loop;
+                end if;
+            when 'query_script variable' then
+                if v_char in (';', ',', ' ', '\t', '\n', '\r', '!', '~', '^', '%', '>', '<', ':', '=', '+', '-', '&', '*', '|', '(', ')') then
+                    leave my_loop;
+                elseif allow_script_tokens and v_char in ('{', '}', '.') then
+                    leave my_loop;
+                end if;
+            when 'expanded query_script variable' then
+                if v_char in (';', ',', ' ', '\t', '\n', '\r', '!', '~', '^', '%', '>', '<', ':', '=', '+', '-', '&', '*', '|', '(', ')') then
+                    leave my_loop;
+                elseif allow_script_tokens and v_char in ('{', '}', '.') then
+                    leave my_loop;
                 end if;
             when 'system variable' then
                 if v_char in (';', ',', ' ', '\t', '\n', '\r', '!', '~', '^', '%', '>', '<', ':', '=', '+', '-', '&', '*', '|', '(', ')') then
+                    leave my_loop;
+                elseif allow_script_tokens and v_char in ('{', '}') then
                     leave my_loop;
                 end if;
             else
