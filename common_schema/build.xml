@@ -207,17 +207,17 @@
 		</exec>
 	</target>
 
-	<target name="doc">
+	<target name="doc" depends="revnumber">
 		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}/css">
 		</copy>
-		<foreach param="component_doc_filename" target="component_doc">
+		<foreach param="component_doc_filename" target="component_doc" inheritall="true">
 			<path>
 				<fileset dir="${doc.templates.dir}/components">
 					<include name="*.html" />
 				</fileset>
 			</path>
 		</foreach>
-		<foreach param="generaldoc_filename" target="generaldoc">
+		<foreach param="generaldoc_filename" target="generaldoc" inheritall="true">
 			<path>
 				<fileset dir="${doc.templates.dir}/general">
 					<include name="*.html" />
@@ -234,6 +234,7 @@
 		</concat>
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${component_name}" />
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${component_name}" />
+		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>		
 	</target>
 	<target name="generaldoc">
 		<basename property="doc_basename" file="${generaldoc_filename}" />
@@ -244,21 +245,7 @@
 		</concat>
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${docname}" />
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${docname}" />
-	</target>
-	<target name="routinesdoc">
-		<basename property="routine_group_name" file="${routine_group_path}" />
-		<propertyregex property="routine_group_name.spaced" input="${routine_group_name}" regexp="_" replace=" ">
-		</propertyregex>
-		<echo message="Generating documentation for ${routine_group_name}" />
-		<concat destfile="${doc.html.dir}/${routine_group_name}.html">
-			<filelist dir="${doc.templates.dir}" files="head.html.template" />
-			<fileset dir="${doc.templates.dir}/routines/${routine_group_name}">
-			</fileset>
-			<filelist dir="${doc.templates.dir}/routines" files="routine.tail.html.template" />
-			<filelist dir="${doc.templates.dir}" files="tail.html.template" />
-		</concat>
-		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagetitle" value="${routine_group_name.spaced}" />
-		<replace file="${doc.html.dir}/${routine_group_name}.html" token="pagename" value="${routine_group_name.spaced}" />
+		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>		
 	</target>
 	
 	<target name="doc_sql">
