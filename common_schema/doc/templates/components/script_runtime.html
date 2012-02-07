@@ -1,0 +1,46 @@
+<h3>NAME</h3>
+script_runtime(): return number of seconds elapsed since script execution began.
+
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+This function returns the number of seconds elapsed since current 
+<a href="query_script.html">QueryScript</a> execution was launched.
+</p>
+<p>
+It only makes sense to call this function from within a script (otherwise results are
+undefined).
+<p>
+<i>script_runtime()</i> returns a <strong>DOUBLE</strong> value, to support MySQL versions
+with subsecond resolution. Versions not supporting subsecond resolution (e.g. standard
+MySQL <strong>5.1</strong>) will return with round values, which have an error margin of
+one second.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>script_runtime()
+  RETURNS DOUBLE </pre></blockquote>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		For <strong>30</strong> seconds, issue random queries against some table:
+	</p>
+	<blockquote><pre>while (script_runtime() < 30)
+{
+  SELECT * FROM my_table WHERE id = RAND() * 100000;
+}
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="query_script.html">QueryScript</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

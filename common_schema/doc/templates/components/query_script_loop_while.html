@@ -1,0 +1,76 @@
+
+<p>
+QueryScript Flow Control: <strong>loop-while</strong> statement
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>loop
+  statement;
+while (expression);
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>loop-while</i> is a flow control looping structure. It makes for a condition test based on
+a given <a href="query_script_expressions.html">expression</a>. 
+</p>
+<p>
+As opposed to <a href="query_script_while.html">while</a>, <i>loop-while</i> tests the 
+expression <i>after</i> each statement execution. As result, the loop iterates at least once. 
+</p>
+<p>
+The <i>loop-while</i> loop terminates in the following cases:
+<ul>
+	<li>The <i>expression</i> does not hold true</li>
+	<li>A <a href="query_script_break.html">break</a> statement is executed inside the loop (but not inside a nested loop)</li>
+	<li>A <a href="query_script_return.html">return</a> statement is executed inside the loop</li>
+	<li>An uncaught error is raised (at the moment all errors are by default uncaught unless handled in user code)</li>
+</ul>
+Of course, any error terminates the entire script execution, including any loops. 
+</p>
+<p>
+Empty statements are not allowed in QueryScript. However, empty blocks are, and the 
+<i>loop-while</i> clause may be followed by an empty block.
+</p>
+
+
+<h3>EXAMPLES</h3>
+<p>
+Generate Fibonacci sequence:
+<blockquote><pre>
+var $n1, $n2, $n3, $seq;
+set $n1 := 1, $n2 := 0, $n3 := NULL;
+set $seq := '';
+
+loop
+{
+  set $n3 := $n1 + $n2;
+  set $n1 := $n2;
+  set $n2 := $n3;
+  set $seq := CONCAT($seq, $n3, ', ');
+}
+while ($n3 < 100);
+
+SELECT $seq AS fibonacci_numbers;
+
++---------------------------------------------+
+| fibonacci_numbers                           |
++---------------------------------------------+
+| 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144,  |
++---------------------------------------------+
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_if_else.html">if-else</a>,
+<a href="query_script_while.html">while</a>,
+<a href="query_script_foreach.html">foreach</a>,
+<a href="query_script_expressions.html">expressions</a>,
+<a href="query_script_break.html">break</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

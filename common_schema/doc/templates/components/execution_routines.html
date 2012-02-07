@@ -7,17 +7,25 @@ Execution routines: stored routines managing dynamic query execution, iteration 
 	<li><a href="exec.html">exec()</a>: Executes a given query or semicolon delimited list of queries.</li>
 	<li><a href="exec_file.html">exec_file()</a>:Executes queries from given file, residing on server./li>
 	<li><a href="exec_single.html">exec_single()</a>: Executes a given query.</li>
-	<li><a href="foreach.html">foreach()</a> aka <a href="foreach.html">$()</a>: Invoke queries on each element of given collection.</li>
+	<li><a href="foreach.html">foreach()</a> aka <a href="foreach.html">$()</a>: Invoke script on each element of given collection.</li>
 	<li><a href="repeat_exec.html">repeat_exec()</a>: Repeatedly executes given query or queries until some condition holds.</li>
+	<li><a href="run.html">run()</a>: run a QueryScript code provided as text.</li>
+	<li><a href="run_file.html">run_file()</a>: run a QueryScript code from file.</li>
+	<li><a href="script_runtime.html">script_runtime()</a>: number of seconds elapsed since script execution began.</li>
+	<li><a href="throw.html">throw()</a>: Disrupt execution with error.</li>
 </ul>
 </p>
 
 <h3>DESCRIPTION</h3>
 <p>
-These featured routines allow for semi-scripting capabilities in MySQL. Looping through collections,
+These featured routines allow for scripting & semi-scripting capabilities in MySQL. Looping through collections,
 row sets, numbers, tables; repeating tasks until a given condition hold, or dynamically evaluating
 queries. The execution routines simplify a DBA's maintenance work by providing with a simpler,
 cleaner and more familiar syntax.
+</p>
+<p>
+The <i>run()</i> and <i>run_file()</i> routines execute <a href="query_script.html">QueryScript</a> code. 
+The rest of the routines make for lower level, semi-scripting execution.
 </p>
 <p>
 The majority of operations in these routines use dynamic queries, based on prepared statements.

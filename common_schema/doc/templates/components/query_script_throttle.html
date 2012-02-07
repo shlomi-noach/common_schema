@@ -1,0 +1,88 @@
+
+<p>
+<strong>throttle</strong>: regulate execution of script by sleep-suspend
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>
+while (expression)
+{
+  statement;
+  throttle &lt;number&gt;;
+}
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>throttle</i> is a QueryScript <a href="query_script_statements.html">statement</a> which,
+when invoked, may suspend execution by invoking 
+<a href="http://dev.mysql.com/doc/refman/5.1/en/miscellaneous-functions.html#function_sleep">SLEEP()</a>.
+</p>
+<i>throttle</i> takes a number as a parameter, which is the ratio of throttling. The number can be an integer
+or a floating point, and it is interpreted as follows:
+<ul>
+	<li><strong>0 or less</strong>: no throttling is done. It makes no sense to provide such values</li>
+	<li><strong>x, a positive number</strong>: assuming an unthrottled operation would take <strong>s</strong> seconds to run,
+		a throttled operation is expected to run <strong>s*(1 + x)</strong> seconds.</li>
+</ul>
+</p>
+<p>
+Consider the following code as example:
+<blockquote><pre>
+while (delete from world.City limit 10)
+{
+  throttle 1;
+}
+</pre></blockquote>
+The above deletes all rows from a table, 10 rows at a time. The throttle value of <strong>1</strong> means doubling the runtime:
+if the original deletion loop would take <strong>7</strong> seconds to complete, the <i>throttle</i> statements adds one measure to that, resulting
+with <strong>14</strong> seconds.
+</p>
+
+<p>
+A <i>throttle</i> value of <strong>2</strong> would make the code run <strong>3</strong> times as long it it would without throttling.
+A <i>throttle</i> value of <strong>0.3</strong> would make the code run <strong>1.3</strong> times as long it it would without throttling.
+</p>
+
+<p>
+Combined with loop iteration, throttling makes for heavy duty query put less load on the system. That is, CPU or disk resources, which
+may be extensively used during normal query or queries iteration, are given breathing space during throttle suspension period.
+Throttling makes for a longer total runtime, while making pauses in between operations. Throttling is also a useful technique in avoiding
+replication lag: standard MySQL replication (5.1, 5.5) is single threaded. Throttling allows the slave to execute other queries, interleaved
+with script statements.  
+</p>
+<p>
+While this statement is valid anywhere throughout the script, it mostly makes sense when executed from within a loop, such that
+the iterations of the loop are being throttled.</p>
+<p>
+
+<h3>EXAMPLES</h3>
+
+<p>
+Duplicate a table: copy rows in small chunks, throttle:
+<blockquote><pre>
+create table world.City2 like world.City;
+while (true)
+{
+  select max(id) from world.City2 into @max_id;
+  if (insert into world.City2 select * from world.City where id > IFNULL(@max_id, 0) order by id asc limit 10)
+  {
+    /* OK! Rows are being copied! */
+  }
+  else
+    break;
+  throttle 2;
+}
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_execution.html">Execution</a>,
+<a href="query_script_flow_control.html">Flow control</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

@@ -1,0 +1,91 @@
+
+<p>
+QueryScript Flow Control: <strong>if-else</strong> statement
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>if (expression)
+  statement;
+[else
+  statement;]
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>if-else</i> is a flow control branching structure. It makes for a condition test based on
+a given <a href="query_script_expressions.html">expression</a>. 
+</p>
+<p>
+When the <i>expression</i> holds true, the statement (or block of statements) following the <i>if</i> statement are executed.
+The <i>else</i> clause is optional, and it's statement(s) are executed when the <i>expression</i> does not hold true.
+</p>
+<p>
+There is no built-in <i>elseif</i> clause. However, a chained <i>if-else if-else</i> statement is valid.
+</p>
+<p>
+Empty statements are not allowed in QueryScript. However, empty blocks are, and a <i>if</i> or <i>else</i> clause may use an empty block statement.
+</p>
+
+
+<h3>EXAMPLES</h3>
+<p>
+Simple <i>if-else</i> condition:
+<blockquote><pre>
+set @x := 17;
+if (@x mod 2 = 0)
+  SELECT 'even' AS answer;
+else
+  SELECT 'odd' AS answer;
+</pre></blockquote>
+</p>
+
+<p>
+<strong>DELETE</strong> statement as <i>expression</i>:
+<blockquote><pre>
+set @country := 'USA';
+if (DELETE FROM world.Country WHERE Code = @country)
+{
+  -- We don't have foreign keys on these tables; do a manual drill down:
+  DELETE FROM world.City WHERE CountryCode = @country;
+  DELETE FROM world.CountryLanguage WHERE CountryCode = @country;
+}
+</pre></blockquote>
+</p>
+
+
+<p>
+Using <i>if</i> to <a href="query_script_break.html">break</a> out of a <a href="query_script_while.html">while</a> loop: 
+<blockquote><pre>
+CREATE TEMPORARY TABLE test.numbers (n INT UNSIGNED NOT NULL PRIMARY KEY);
+INSERT INTO test.numbers (n) VALUES (17);
+
+set @n := 0;
+while (@n < 20)
+{
+  if (INSERT IGNORE INTO test.numbers (n) VALUES (@n))
+  {
+  }
+  else
+  {
+    break;
+  }
+  set @n := @n + 1;
+}
+SELECT @n AS inserted_up_to_this_value;
+
++---------------------------+
+| inserted_up_to_this_value |
++---------------------------+
+|                        17 |
++---------------------------+
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_while.html">while</a>,
+<a href="query_script_expressions.html">expressions</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

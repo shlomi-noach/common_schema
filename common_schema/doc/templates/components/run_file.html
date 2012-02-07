@@ -1,0 +1,44 @@
+<h3>NAME</h3>
+run_file(): Executes a QueryScript from file.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+This procedure accepts a server-side file name, containing a 
+<a href="query_script.html">QueryScript</a> text, and invokes the script.
+</p>
+<p>
+<i>run_file()</i> is a convenience method. It merely refers to <a href="run.html">run()</a>
+with content of indicated file.
+</p>
+<p>
+	Invoker of this procedure must have the privileges required for execution of queries in the script.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>run_file(IN query_script_file_name TEXT)
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input: name of text file containing <a href="query_script.html">QueryScript</a> code.
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Execute script from file:
+	</p>
+	<blockquote><pre>mysql&gt; call run_file('/mount/scripts/maintain.qs');
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="query_script.html">Query Script</a>,
+<a href="run.html">run()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

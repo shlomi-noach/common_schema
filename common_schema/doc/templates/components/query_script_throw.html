@@ -1,0 +1,70 @@
+
+<p>
+<strong>throw</strong>: throw an exception
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>
+statement;
+if (expression)
+  throw 'message';
+statement;
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>throw</i> is a QueryScript <a href="query_script_statements.html">statement</a> which,
+when invoked, raises an error.
+</p>
+<p>
+At this point, there is no mechanism in QueryScript to catch an error. Therefore,
+the result of raising an error is the termination of the script's execution. If
+an active transaction is in place, it is rolled back.  
+</p>
+<p>
+<i>throw</i> takes a text parameter, which is the error message. 
+It is stored in the <a href="variables.html#common_schema_error">@common_schema_error</a> variable.
+</p>
+<p>
+Since <a href="http://dev.mysql.com/doc/refman/5.5/en/signal.html"><strong>SIGNAL</strong></a>
+is only introduced in MySQL 5.5, current implementation of <i>throw</i> uses a dirty trick to raise an error,
+in the form of attempting to <strong>SELECT</strong> from a non-existent table.
+The result is a rather obscure error message, noting that some table does not exist. The name of the 
+non-existing table is actually the error message. 
+
+</p>
+
+<h3>EXAMPLES</h3>
+
+<p>
+Throw, get the error message:
+<blockquote><pre>
+set @x := 3;
+while (@x > 0)
+{
+  set @x := @x - 1;
+  if (@x = 1)
+    throw 'x is too low!';
+}
+
+ERROR 1146 (42S02): Table 'error.'x is too low!'' doesn't exist
+
+mysql&gt; select @common_schema_error;
++----------------------+
+| @common_schema_error |
++----------------------+
+| 'x is too low!'      |
++----------------------+
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_flow_control.html">Flow control</a>,
+<a href="query_script_return.html">return</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

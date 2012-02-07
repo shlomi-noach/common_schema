@@ -1,0 +1,99 @@
+
+<p>
+<strong>input</strong>: declaration and assignment of QueryScript local variables by externally provided values
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>input $variable1 [, $variable2 ...];
+if ($variable1 = 'x')
+{
+  statement;
+}
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>input</i> is a QueryScript <a href="query_script_statements.html">statement</a> which declares
+<a href="query_script_variables.html">local variables</a>, and assigns them values as given from an
+external source.
+</p>
+<p>
+The <i>input</i> statement is only expected to appears once, if at all, within a script.
+It must not appear within a loop. The variables declared by <i>input</i> are local variables
+as any other variable, and the same rules apply for them as for all local variables. 
+</p>
+
+<p>
+<i>input</i> makes for an interface between external routines and QueryScript. A routines which
+wishes to invoke a script based on some values, passes pre-defined values via MySQL user defined
+variables, and these are assigned to the <i>input</i> local variables.
+</p>
+
+<p>
+In particular, when an <i>input</i> statement is encountered, the following MySQL user defined
+variables are looked at:
+<ul>
+	<li><strong>@_query_script_input_col1</strong>, assigned to 1st declared variable.</li>
+	<li><strong>@_query_script_input_col2</strong>, assigned to 2nd declared variable.</li>
+	<li>...</li>
+	<li><strong>@_query_script_input_col9</strong>, assigned to 9th declared variable.</li>
+</ul>
+While syntactically permitted, it makes no sense to declare more than <strong>9</strong> input
+variables, as nothing will map to any variable exceeding the 9th.
+</p>
+
+<p>
+To illustrate, consider:
+<blockquote><pre>
+input $a, $b, $c;
+</pre></blockquote>
+<br/><strong>$a</strong> will be assigned the value of <strong>@_query_script_input_col1</strong>.
+<br/><strong>$b</strong> will be assigned the value of <strong>@_query_script_input_col2</strong>.
+<br/><strong>$c</strong> will be assigned the value of <strong>@_query_script_input_col3</strong>.
+<br/>The values of <strong>@_query_script_input_col[4..9]</strong> remain unread.
+</p>
+
+<p>
+A routine which in fact sends input data to QueryScript is <a href="foreach.html">foreach()</a> 
+(not to be confused with QueryScript's own <a href="query_script_foreach.html">foreach</a> flow
+control looping device). In the following example:
+<blockquote><pre>
+mysql&gt; call foreach('{USA, FRA, CAN}', '
+  input $country;
+  DELETE FROM world.City WHERE CountryCode = $country;
+');
+</pre></blockquote>
+<i>foreach</i> sets <strong>@_query_script_input_col1</strong> to the iterating 
+value of 'USA', 'FRA', 'CAN', each in turn, and calls upon the script which assigns the value
+onto the <strong>$country</strong> variable.
+</p>
+
+<p>
+For completeness, the above example is very simple, so as to illustrate the workings of <i>input</i>.
+The following two code fragments perform the same operation as the above:
+<blockquote><pre>
+mysql&gt; call foreach('{USA, FRA, CAN}', 'DELETE FROM world.City WHERE CountryCode = ''${1}''');
+</pre></blockquote>
+Or, via QueryScript only:
+<blockquote><pre>
+foreach($country: {USA, FRA, CAN})
+{
+  DELETE FROM world.City WHERE CountryCode = $country;
+}
+</pre></blockquote>
+
+<p>
+Developers who wish to integrate QueryScript execution into their code are able to do so
+by providing the aforementioned user defined variables and by using <i>input</i>.
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_var.html">var</a>,
+<a href="query_script_variables.html">Variables</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

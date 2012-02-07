@@ -1,0 +1,63 @@
+
+<p>
+<strong>return</strong>: quit script execution
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>
+statement;
+statement;
+if (expression)
+  return;
+statement;
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>return</i> is a QueryScript <a href="query_script_statements.html">statement</a> which,
+when invoked, aborts execution of script.
+</p>
+<p>
+<i>return</i> takes no parameters and does not provide with a value. It merely stops execution of running script at point of invocation.
+</p>
+
+
+<h3>EXAMPLES</h3>
+
+<p>
+Return on condition:
+<blockquote><pre>
+set @x := 3;
+while (@x > 0)
+{
+  select @x;
+  set @x := @x - 1;
+  if (@x = 1)
+    return;
+}
+select 'will never get here';
+
++------+
+| @x   |
++------+
+|    3 |
++------+
+
++------+
+| @x   |
++------+
+|    2 |
++------+
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_flow_control.html">Flow control</a>,
+<a href="query_script_break.html">break</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

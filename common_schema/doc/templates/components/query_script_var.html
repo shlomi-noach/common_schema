@@ -1,0 +1,62 @@
+
+<p>
+<strong>var</strong>: declaration of QueryScript local variables
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>var $variable1 [, $variable2 ...];
+while(expression)
+{
+  var $variable3 [, $variable4 ...];
+}
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>var</i> is a QueryScript <a href="query_script_statements.html">statement</a> which declares
+<a href="query_script_variables.html">local variables</a>.
+</p>
+<p>
+<i>var</i> can appear anywhere within a script: within loops, <i>if-else</i> clauses, in general
+scope or in sub statement blocks. 
+</p>
+
+<p>
+Variables declared by <i>var</i> are only visible at the scope in which they're declared.
+A local variable is known to be <strong>NULL</strong> at point of declaration, and is cleared
+once out of scope (being reassigned as <strong>NULL</strong>).
+</p>
+
+<p>
+<i>var</i> accepts one or more variables. It is an error to re-declare a local variable within
+a script, regardless of scope.
+</p>
+
+
+<h3>EXAMPLES</h3>
+<p>
+  Declare variabels at different levels:
+<blockquote><pre>
+var $a, $b;
+set $a := 4, $b := 17;
+var $c;
+set $c := $a;
+while ($c > 0)
+{
+  var $d;
+  set $d := $c - 1;
+  set $c := $c - 1;
+}
+set $b := $c;
+</pre></blockquote>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_variables.html">Variables</a>,
+<a href="query_script_input.html">input</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

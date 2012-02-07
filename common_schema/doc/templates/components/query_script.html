@@ -1,0 +1,56 @@
+
+<h3>QueryScript is a scripting language for SQL</h3>
+
+<p>
+<a href="http://www.queryscript.com"><strong>QueryScript</strong></a> is a programming language aimed for SQL scripting, 
+seamlessly combining scripting power such as flow control & variables with standard SQL statements
+or RDBMS-specific commands.   
+</p>
+<strong>common_schema</strong> implements QueryScript for MySQL: it provides the execution mechanism for QueryScript code 
+(see <a href="query_script_execution.html">Execution</a>).
+</p>
+
+<p>
+What does QueryScript look like? Here are a couple examples:
+<blockquote><pre>
+while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
+{
+  throttle 2;
+}
+</pre></blockquote>
+<blockquote><pre>
+foreach($table, $schema, $engine: table in sakila)
+{
+  if ($engine = 'InnoDB')
+    ALTER TABLE :$schema.:$table ENGINE=InnoDB ROW_FORMAT=Compact;
+}
+</pre></blockquote>
+</p>
+<p>
+With <strong>QueryScript</strong> one can:
+<ul>
+	<li>Use familiar syntax to solve common DBA maintenance problems</li>
+	<li>Loop through number sequences, constants, tables, schemata</li>
+	<li>Easily iterate query results, providing cursor-like functionality with clean syntax</li>
+	<li>Use conditional statements and statement blocks</li>
+	<li>Create and use variables</li>
+	<li>Expand variables in-place, turning them to constants in queries where variables are not allowed</li>
+</ul>
+</p>
+<p>
+QueryScript programs execute from <i>within the server</i>.
+As opposed to scripts written with Perl, Python or PHP,
+QueryScript code does not need to specify connections, logins nor passwords. 
+There is no connector to install and use, there is no driver setup. There are no plugins. 
+</p>
+
+
+<h3>SEE ALSO</h3>
+<a href="run.html">run()</a>,
+<a href="query_script_execution.html">Execution</a>,
+<a href="query_script_statements.html">Statements</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

@@ -1,0 +1,138 @@
+
+<p>
+<strong>break</strong>: quit loop execution
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>while (expression)
+{
+  if (expression)
+    break;
+}
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>break</i> is a QueryScript <a href="query_script_statements.html">statement</a> which,
+when invoked, aborts execution of current loop. 
+</p>
+<p>
+<i>break</i> is typically used in an <a href="query_script_if_else.html">if-else</a> statement,
+but does not necessarily has to.
+</p>
+<p>
+The <i>break</i> statements quits iteration of the closest wrapping loop, but not any above it.
+</p>
+<p>
+The following loops are all affected by <i>break</i>:
+<a href="query_script_while.html">while</a>,
+<a href="query_script_loop_while.html">loop-while</a>,
+<a href="query_script_foreach.html">foreach</a>.
+
+</p>
+
+
+<h3>EXAMPLES</h3>
+
+<p>
+Break on condition:
+<blockquote><pre>set @x := 7;
+while (@x > 0)
+{
+  set @x := @x - 1;
+  if (@x = 3)
+    break;
+}
+select @x;
+
++------+
+| @x   |
++------+
+|    3 |
++------+
+</pre></blockquote>
+</p>
+
+<p>
+An immediate break:
+<blockquote><pre>set @x := 7;
+while (true)
+{
+  set @x := @x - 1;
+  break;
+}
+select @x;
+
++------+
+| @x   |
++------+
+|    6 |
++------+
+</pre></blockquote>
+</p>
+
+
+<p>
+Break from inner loop; outer loop unaffected
+<blockquote><pre>set @x := 3;
+while (@x > 0)
+{
+  set @x := @x - 1;
+  set @y := 3;
+  while (@y > 0)
+  {
+    set @y := @y -1;
+    if (@y < @x)
+      break;
+    select @x, @y;
+  }
+}
+
++------+------+
+| @x   | @y   |
++------+------+
+|    2 |    2 |
++------+------+
+
++------+------+
+| @x   | @y   |
++------+------+
+|    1 |    2 |
++------+------+
+
++------+------+
+| @x   | @y   |
++------+------+
+|    1 |    1 |
++------+------+
+
++------+------+
+| @x   | @y   |
++------+------+
+|    0 |    2 |
++------+------+
+
++------+------+
+| @x   | @y   |
++------+------+
+|    0 |    1 |
++------+------+
+
++------+------+
+| @x   | @y   |
++------+------+
+|    0 |    0 |
++------+------+
+</pre></blockquote>
+</p>
+
+
+<h3>SEE ALSO</h3>
+<a href="query_script_flow_control.html">Flow control</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

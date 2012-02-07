@@ -1,28 +1,37 @@
 <h3>NAME</h3>
-foreach(): Invoke queries on each element of given collection. <strong>$()</strong> is a synonym of this routine.
+foreach(): Invoke a script on each element of given collection. <strong>$()</strong> is a synonym of this routine.
 
 <h3>TYPE</h3>
 Procedure
 
 <h3>DESCRIPTION</h3>
 <p>
-This procedure accepts collections of varying types, including result sets, and invoke queries
-per collection element.
+This procedure accepts collections of varying types, including result sets, and invokes a
+<a href="query_script.html">QueryScript</a> code per element.
 </p>
 <p>
-Queries are dynamic in that they may (and often do) relate to the specific value of the
-collection element. This is achieved by using <i>place holders</i> in the query, in similar
-approach to that of regular expressions or the <i>awk</i> language. 
-Different collection types make for different types of place holders, as listed below.
+The script can be as simple as a query, a set of queries, or a complex code.
+</p>
+<p>The <i>foreach()</i> routine differs from the <a href="query_script_foreach.html">foreach</a> flow control structure in QueryScript, though
+they both use similar syntax and share some use cases. Read <a href="query_script_foreach.html#notes">here</a> on the differences between the two.</p>
+<p>
+<i>foreach()</i> passes on information about iterated values onto the script in two ways:
+<ul>
+	<li>Using <i>place holders</i> (e.g. <strong>${1}, ${2}</strong> etc.)
+		<br/>In this approach the script's text is manipulated such that placeholder occurrences are
+		replaced with iterated values. This is a simple text search & replace approach, is very flexible,
+		and allows for a lot of META tweaks.
+		<br/>See following tables and examples for more on placeholders.
+	</li>
+	<li>Using <a href="query_script_input.html">input</a> variables:
+		<br/>Variables are passed on to the script as input variables. These are dynamic variables, on which
+		the genral rules for user defined variables apply.
+	</li>
+</ul> 
 </p>
 <p>
-<i>foreach()</i> makes for a clean, script-like syntax, for many administrative tasks which are 
-otherwise achieved using interaction between shell scripts and the mysql command line client.
 <i>foreach()</i> acts on server side only, and does not require shell access nor the <i>mysql</i>
 command line client, although it may be spawned from within the <i>mysql</i> client.
-</p>
-
-<p>The queries invoked per element may also be referred to as <i>callbacks</i>.
 </p>
 
 <p>
@@ -31,7 +40,8 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 <ul>
 	<li><strong>A SELECT query</strong>: any <strong>SELECT</strong> statement makes for a collection,
 		which is the result set of the query.
-		<br/>Any SELECT query is valid, with any result set. However, only first <strong>9</strong> 
+		<br/>The query must specify result columns. That is, a <strong>SELECT *</strong> query is not valid.
+		<br/>Otherwise any SELECT query is valid, with any result set. However, only first <strong>9</strong> 
 		columns in the result set can be used as place holders for the callback queries.
 		<br/>Each row in the result set is an element. 
 		<br/>The queries are allowed to act upon the table(s) being iterated, i.e. one can execute a 
@@ -69,6 +79,8 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 		given schema.
 		<br/>The place holder <strong>${1}</strong> indicates the current table. <strong>${table}</strong> is a synonym for <strong>${1}</strong>.		
 		<br/>The place holder <strong>${2}</strong> indicates the schema. <strong>${schema}</strong> is a synonym for <strong>${2}</strong>.		
+		<br/>The place holder <strong>${3}</strong> indicates the storage engine. <strong>${engine}</strong> is a synonym for <strong>${3}</strong>.		
+		<br/>The place holder <strong>${4}</strong> indicates the CREATE_OPTIONS <strong>${create_options}</strong> is a synonym for <strong>${4}</strong>.		
 	</li>
 	<li><strong>'table like <i>expr</i>'</strong>: all tables whose names match the given <strong>LIKE</strong> expression. These can be tables
 		from different databases/schemata.
@@ -76,6 +88,8 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 		a single schema at a time. This reduces locks and table cache entries, while potentially taking longer to complete.
 		<br/>The place holder <strong>${1}</strong> indicates the current table. <strong>${table}</strong> is a synonym for <strong>${1}</strong>.		
 		<br/>The place holder <strong>${2}</strong> indicates the schema for current table. <strong>${schema}</strong> is a synonym for <strong>${2}</strong>.		
+		<br/>The place holder <strong>${3}</strong> indicates the storage engine. <strong>${engine}</strong> is a synonym for <strong>${3}</strong>.		
+		<br/>The place holder <strong>${4}</strong> indicates the CREATE_OPTIONS <strong>${create_options}</strong> is a synonym for <strong>${4}</strong>.		
 	</li>
 	<li><strong>'table ~ <i>/regexp/</i>'</strong>: all tables whose names match the given regular expression. These can be tables
 		from different databases/schemata.
@@ -83,6 +97,8 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 		a single schema at a time. This reduces locks and table cache entries, while potentially taking longer to complete.
 		<br/>The place holder <strong>${1}</strong> indicates the current table. <strong>${table}</strong> is a synonym for <strong>${1}</strong>.		
 		<br/>The place holder <strong>${2}</strong> indicates the schema for current table. <strong>${schema}</strong> is a synonym for <strong>${2}</strong>.		
+		<br/>The place holder <strong>${3}</strong> indicates the storage engine. <strong>${engine}</strong> is a synonym for <strong>${3}</strong>.		
+		<br/>The place holder <strong>${4}</strong> indicates the CREATE_OPTIONS <strong>${create_options}</strong> is a synonym for <strong>${4}</strong>.		
 	</li>
 </ul>
 Any other type of input raises an error.
@@ -116,9 +132,9 @@ The following table summarizes the types of collections and the valid place hold
 	<tr><td>'schema'</td><td>${1} or ${schema}, ${NR}</td></tr>
 	<tr><td>'schema like <i>expr</i>'</td><td>${1} or ${schema}, ${NR}</td></tr>
 	<tr><td>'schema ~ <i>/regexp/</i>'</td><td>${1} or ${schema}, ${NR}</td></tr>
-	<tr><td>'table in <i>schema_name</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${NR}</td></tr>
-	<tr><td>'table like <i>expr</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${NR}</td></tr>
-	<tr><td>'table ~ <i>/regexp/</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${NR}</td></tr>
+	<tr><td>'table in <i>schema_name</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${3} or ${engine}, ${4} or ${create_options}, ${NR}</td></tr>
+	<tr><td>'table like <i>expr</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${3} or ${engine}, ${4} or ${create_options}, ${NR}</td></tr>
+	<tr><td>'table ~ <i>/regexp/</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${3} or ${engine}, ${4} or ${create_options}, ${NR}</td></tr>
 </table>
 <strong>${NR}</strong> is accepted in all collections, and returns the iteration index, <strong>1</strong> based. That is,
 the first element in a collection has <strong>1</strong> for <strong>${NR}</strong>, the seconds has <strong>2</strong>, etc.

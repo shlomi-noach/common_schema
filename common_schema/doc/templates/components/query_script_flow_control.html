@@ -1,0 +1,51 @@
+<h3>SYNOPSIS</h3>
+
+<p>
+QueryScript Flow Control: conditional execution via looping & branching.
+</p>
+<p> 
+QueryScript supports the following flow control structures: 
+<ul>
+	<li><a href="query_script_if_else.html">if-else</a>: conditional branching</li>
+	<li><a href="query_script_foreach.html">foreach</a>: iterating collections</li>
+	<li><a href="query_script_while.html">while</a>: looping</li>
+	<li><a href="query_script_loop_while.html">loop-while</a>: looping</li>
+</ul>
+</p>
+<p> 
+And the following flow control statements : 
+<ul>
+	<li><a href="query_script_break.html">break</a>: leave executing loop</li>
+	<li><a href="query_script_return.html">return</a>: quit script execution</li>
+</ul>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p>
+The flow control structures are similar in nature to those of other common programming language.
+Flow control works by evaluation an <a href="query_script_expressions.html">expression</a>.
+The truth value of the expression determines whether code will branch, loop, break, etc.
+</p>
+
+<h3>EXAMPLES</h3>
+<p>
+Rebuild partitions for all NDB tables:
+<blockquote><pre>
+foreach($table, $schema, $engine: table like '%')
+  if ($engine = 'ndbcluster')
+    ALTER ONLINE TABLE :$schema.:$table REORGANIZE PARTITION;
+</pre></blockquote>
+</p>
+
+<p>
+Throttle deletion of rows:
+<blockquote><pre>
+while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
+{
+  -- We remove 10 rows at a time, and throttle by waiting in between 
+  -- deletions twice the amount of time executed on deletion.
+  throttle 2;
+}
+</pre></blockquote>
+</p>
+		

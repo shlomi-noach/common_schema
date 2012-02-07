@@ -1,0 +1,133 @@
+
+<p>
+QueryScript Statements: operations on data, schema or flow.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>statement;
+{
+    statement;
+    statement;
+}
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>Statements</i> are actions to be taken. QueryScript supports statements of the following types:
+<ul>
+	<li>SQL statements: the usual DML (SELECT, INSERT, ...), DML (CREATE, ALTER, ...) and
+		other various commands (KILL, GRANT, ...)
+	</li>
+	<li>Script statements: statements which affect flow and behavior of script</li>
+	<li>Statement blocks</li>
+</ul>
+</p>
+<p>
+<h4>SQL statements</h4>
+<p>
+Most SQL statements which are accepted by MySQL are also accepted by QueryScript.
+These include INSERT, UPDATE, DELETE, SELECT, CREATE, DROP, ALTER, SET, FLUSH, and more.
+</p>
+<p>
+Among the SQL statements which are in particular <i>not allowed</i> within QueryScript are:
+<ul>
+	<li>Dynamic SQL statements (PREPARE, EXECUTE, DEALLOCATE)</li>
+	<li>Plugin statements (INSTALL, UNINSTALL)</li>
+	<li>Stored routines statements (DECLARE, LOOP, ...), for which QueryScript provides substitutes.</li>
+</ul> 
+Any SQL statement which is not allowed to be executed via dynamic SQL cannot be executed via
+QueryScript.
+</p>
+<p>
+Execution of a SQL statement modifies the <strong>@query_script_rowcount</strong> variable. The value 
+held by this variable is the value of <a href="http://dev.mysql.com/doc/refman/5.1/en/information-functions.html#function_row-count"><strong>ROW_COUNT()</strong></a>
+resulting from the statement. 
+</p>
+
+<h4>QueryScript statements</h4>
+<p>
+QueryScript adds and recognizes the following statements: 
+<ul>
+	<li><a href="query_script_input.html">input</a></li>
+	<li><a href="query_script_throttle.html">throttle</a></li>
+	<li><a href="query_script_throw.html">throw</a></li>
+	<li><a href="query_script_var.html">var</a></li>
+</ul>
+And the following flow control statements : 
+<ul>
+	<li><a href="query_script_break.html">break</a></li>
+	<li><a href="query_script_return.html">return</a></li>
+</ul>
+</p>
+
+
+<h4>Statement blocks</h4>
+<p>
+  Statements can be grouped into blocks by using the curly braces, as follows:
+<blockquote><pre>
+{
+    statement;
+    statement;
+}
+</pre></blockquote>
+The entire block is considered to be a statement, and is valid for use in flow control
+structures, such as <a href="query_script_foreach.html">foreach</a>,
+ <a href="query_script_if_else.html">if-else</a>,
+<a href="query_script_while.html">while</a>,
+<a href="query_script_loop_while.html">loop-while</a>.
+</p>
+
+
+<h4>Statement delimiters</h4>
+<p>
+QueryScript statements are terminates by a semicolon (<strong>;</strong>"). The last query in a block or script can optionally <i>not</i> be terminated by the semicolon. 
+Thus, the following are valid scripts:
+<blockquote><pre>
+    statement
+</pre></blockquote>
+<blockquote><pre>
+    statement;
+</pre></blockquote>
+<blockquote><pre>
+{
+    statement;
+    statement
+}
+</pre></blockquote>
+A block statement (<strong>{...}</strong>) is not terminated by a delimiter.
+There is no way to change the delimiter. In particular, QueryScript does <i>not</i> recognize the <i>DELIMITER</i> statement. 
+</p>
+
+<h4>Comments</h4>
+<p>
+Comments are allowed within QueryScript, as follows:
+<ul>
+	<li>Multi line comments are recognized by <strong>/* ... */</strong></li>
+	<li>Single line comments are recognized by <strong>-- </strong>. Note that there is a space after the two dashes.</li>
+</ul>
+See following:
+<blockquote><pre>
+    set @x := 3;
+    if (@x < 5 /* This is a comment */)
+    {
+      -- A single line comment
+      select 'x is small';
+    }
+    else
+    {
+      /* Another comment, this
+         time multiline */
+      select 'x is large';
+    }
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_expressions.html">expressions</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

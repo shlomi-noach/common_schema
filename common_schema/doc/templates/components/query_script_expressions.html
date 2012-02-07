@@ -1,0 +1,140 @@
+
+<p>
+QueryScript Expressions: conditional truth values
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>while(expression)
+{
+  if (expression)
+    statement;
+}
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>Expressions</i> are truth valued clauses. QueryScript accepts any valid SQL expression,
+and adds additional particular cases. 
+</p>
+<p>
+Expressions are used by flow control structures: <a href="query_script_if_else.html">if-else</a>,
+<a href="query_script_while.html">while</a>,
+<a href="query_script_loop_while.html">loop-while</a>.
+</p>
+<p>
+<h4>Standard SQL expressions</h4>
+<p>
+Any expression on which <strong>SELECT <i>expression</i> IS TRUE</strong> can be used as
+a QueryScript expression. The following are examples of valid expressions:
+<ul>
+	<li>TRUE</li>
+	<li>NULL</li>
+	<li>0</li>
+	<li>4 &lt; 5</li>
+	<li>@x &lt; 5</li>
+	<li>(@x = 5) OR (COALESCE(@y, @z) BETWEEN 10 AND 20)</li>
+	<li>@n IN (SELECT name FROM world.City)</li>
+	<li>SELECT COUNT(*) > 100 FROM world.Country WHERE Continent='Africa'</li>
+</ul>
+</p>
+
+<h4>QueryScript valid expressions</h4>
+<p>
+In addition to any standard SQL expression, QueryScript also acknowledges the following 
+statements as valid expressions:
+<ul>
+	<li>INSERT [IGNORE]</li>
+	<li>INSERT .. ON DUPLICATE KEY UPDATE</li>
+	<li>UPDATE [IGNORE]</li>
+	<li>DELETE [IGNORE]</li>
+	<li>REPLACE</li>
+</ul>
+An expression in the above form is considered to hold a <strong>TRUE</strong> value, when the
+number of rows affected by the DML query is non-zero. In particular, the value of
+<a href="http://dev.mysql.com/doc/refman/5.1/en/information-functions.html#function_row-count"><strong>ROW_COUNT()</strong></a>
+is examined.
+</p>
+
+<p>
+For example, consider the following:
+<blockquote><pre>
+mysql&gt; DELETE FROM world.Country WHERE Continent='flatlandia'
+Query OK, 0 rows affected (0.00 sec)
+</pre></blockquote>
+The above query does not actually delete any row; hence its truth value is <strong>FALSE</strong>.
+</p>
+
+<p>
+Notes:
+<ul>
+	<li>A standard <strong>INSERT</strong> makes no sense to use, since it will either succeed (resolving to <strong>TRUE</strong>)
+		or completely fail, aborting the evaluation. It only makes sense to use <strong>INSERT IGNORE</strong> or 
+		<strong>INSERT .. ON DUPLICATE KEY UPDATE</strong>.</li>
+	<li><strong>REPLACE</strong> always succeeds, and so will always resolve to <strong>TRUE</strong>. It is included for completeness.</li>
+</ul>
+</p>
+
+<p>
+</p>
+
+
+<h3>EXAMPLES</h3>
+<p>
+<strong>DELETE</strong> statement as <i>expression</i>; delete all 'Asia' records in small chunks:
+<blockquote><pre>
+while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
+{
+  do sleep(1);
+}
+</pre></blockquote>
+</p>
+
+<p>
+<strong>SELECT</strong> and <strong>INSERT</strong> statements as <i>expressions</i>:
+<blockquote><pre>
+if (SELECT COUNT(*) > 0 FROM world.Country WHERE Continent = 'Atlantis')
+{ 
+  INSERT INTO weird_logs VALUES ('Have found countries in Atlantis');
+  if (DELETE FROM world.Country WHERE Continent = 'Atlantis')
+    INSERT INTO weird_logs VALUES ('And now they''re gone');
+}
+</pre></blockquote>
+</p>
+
+<p>
+Simple arithmetic expression: generate Fibonacci sequence:
+<blockquote><pre>
+var $n1, $n2, $n3, $seq;
+set $n1 := 1, $n2 := 0, $n3 := NULL;
+set $seq := '';
+
+loop
+{
+  set $n3 := $n1 + $n2;
+  set $n1 := $n2;
+  set $n2 := $n3;
+  set $seq := CONCAT($seq, $n3, ', ');
+}
+while ($n3 < 100);
+
+SELECT $seq AS fibonacci_numbers;
+
++---------------------------------------------+
+| fibonacci_numbers                           |
++---------------------------------------------+
+| 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144,  |
++---------------------------------------------+
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_if_else.html">if-else</a>,
+<a href="query_script_while.html">while</a>,
+<a href="query_script_loop_while.html">loop-while</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

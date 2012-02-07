@@ -1,0 +1,87 @@
+<h3>NAME</h3>
+run(): Executes a QueryScript.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+This procedure accepts a <a href="query_script.html">QueryScript</a> text, and invokes the script.
+</p>
+<p>
+<i>run()</i> is the main entry point for QueryScript.</p>
+<p>
+<i>run()</i> will first scan the code for script syntax errors. Any such error aborts operation. Only when satisfied,
+is the code executed. Hence, although a QueryScript code is interpreted, syntax errors are intercepted before any 
+code executes. It should be noted that SQL syntax errors are not examined, only script syntax error. Read more on
+<a href="query_script_execution.html">Execution</a>.
+</p>
+<p>
+Failure of execution or interpretation is prompted to the user. The <strong>@common_schema_error</strong> variables is
+set with the relevant error message.
+</p>
+<p>
+	Invoker of this procedure must have the privileges required for execution of queries in the script.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>run(IN query_script text)
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input: a <a href="query_script.html">QueryScript</a> text.
+</p>
+<p>
+Invocation of <i>run()</i> is likely to generate many warnings. These should be ignored, and are part of the
+general workflow (e.g. removing some temporary tables if they exist).
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Execute an inlined script:
+	</p>
+	<blockquote><pre>mysql&gt; call run("
+  foreach($x : 1:8)
+  {
+    CREATE DATABASE shard_:$x;
+  }
+  SHOW DATABASES LIKE 'shard_%';
+");
+
++--------------------+
+| Database (shard_%) |
++--------------------+
+| shard_1            |
+| shard_2            |
+| shard_3            |
+| shard_4            |
+| shard_5            |
+| shard_6            |
+| shard_7            |
+| shard_8            |
++--------------------+
+</pre></blockquote>
+The above assumes no <a href="http://dev.mysql.com/doc/refman/5.1/en/server-sql-mode.html#sqlmode_ansi_quotes"><strong>ANSI_QUOTES</strong></a> 
+in <strong>sql_mode</strong>.
+
+	<p>
+		Run script stored in user defined text variable. Repeatedly execute random queries until 5pm:
+	</p>
+	<blockquote><pre>mysql&gt; SET @script := "
+while (TIME(SYSDATE()) < '17:00:00')
+  SELECT * FROM world.City WHERE id = 1 + FLOOR((RAND()*4079));
+";
+mysql&gt; call run(@script);
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="query_script.html">Query Script</a>,
+<a href="run_file.html">run_file()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
