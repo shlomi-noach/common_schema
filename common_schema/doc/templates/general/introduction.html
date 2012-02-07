@@ -8,7 +8,7 @@ and client scripts, allowing the DBA to be independent of operating system, inst
 </p>
 <p>
 It is a self contained <i>schema</i>, compatible with all MySQL >= 5.1 servers. Installed by importing the schema
-into the server. There is no need to configure nor compile. No special plugins are required, and no changes to your configuration.
+into the server, there is no need to configure nor compile. No special plugins are required, and no changes to your configuration.
 </p>
 
 <p>
@@ -19,16 +19,24 @@ into the server. There is no need to configure nor compile. No special plugins a
 
 <p>Here's a quick peek at some of <i>common_schema</i>'s capabilities:</p>
 
-<h4>Query scripting</h4>
+<h4>Query scripting & execution</h4>
 
-<blockquote><pre>
-call foreach("SELECT id FROM INFORMATION_SCHEMA.PROCESSLIST WHERE user = 'analytics'",
-       'KILL QUERY ${1}');
+		<p>
+		Run <a href="query_script.html">QueryScript</a> code:
+		</p>
+		<blockquote><pre>
+foreach($table, $schema, $engine: table in sakila)
+  if ($engine = 'InnoDB')
+    ALTER TABLE :$schema.:$table ENGINE=InnoDB ROW_FORMAT=Compressed KEY_BLOCK_SIZE=8;
 </pre></blockquote>
 
+<p>Throttle queries:</p>
 <blockquote><pre>
-call $('table in sakila', 'ALTER TABLE sakila.${table} ROW_FORMAT=COMPACT');
-</pre></blockquote>
+SELECT Id, Name, throttle(1) 
+  FROM world.City 
+  ORDER BY Population DESC;
+...</pre></blockquote>
+
 
 <h4>Schema analysis</h4>
 
