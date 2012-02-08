@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema documentation</h1>
+			<h1>common_schema</h1> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -57,27 +57,39 @@ mysql&gt; DESC common_schema.processlist_grantees;
 | ID                  | bigint(4)     | NO   |     | 0       |       |
 | USER                | varchar(16)   | NO   |     |         |       |
 | HOST                | varchar(64)   | NO   |     |         |       |
+| DB                  | varchar(64)   | YES  |     | NULL    |       |
+| COMMAND             | varchar(16)   | NO   |     |         |       |
+| TIME                | int(7)        | NO   |     | 0       |       |
+| STATE               | varchar(64)   | YES  |     | NULL    |       |
+| INFO                | longtext      | YES  |     | NULL    |       |
 | GRANTEE             | varchar(81)   | YES  |     |         |       |
 | grantee_user        | char(16)      | YES  |     |         |       |
 | grantee_host        | char(60)      | YES  |     |         |       |
 | is_super            | decimal(23,0) | YES  |     | NULL    |       |
 | is_repl             | int(1)        | NO   |     | 0       |       |
 | is_current          | int(1)        | NO   |     | 0       |       |
-| sql_kill_query      | varbinary(31) | YES  |     | NULL    |       |
-| sql_kill_connection | varbinary(25) | YES  |     | NULL    |       |
+| sql_kill_query      | varbinary(31) | NO   |     |         |       |
+| sql_kill_connection | varbinary(25) | NO   |     |         |       |
 +---------------------+---------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
 
 <p>
-Rows of this view map directly to rows in <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a>.</p>
+Rows of this view map directly to rows in <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a>.
+This view extends <strong>PROCESSLIST</strong> by including all existing columns, and adding some of its own. 
+</p>
 
 <p>Columns of this view:
 	<ul>
 		<li><strong>ID</strong>: process ID, as in PROCESSLIST</li>
 		<li><strong>USER</strong>: name of connected user, as in PROCESSLIST</li>
 		<li><strong>HOST</strong>: connection's host + port, as in PROCESSLIST</li>
+		<li><strong>DB</strong>: connection's current schema, as in PROCESSLIST</li>
+		<li><strong>COMMAND</strong>: connection's command, as in PROCESSLIST</li>
+		<li><strong>TIME</strong>: current command runtime in seconds, as in PROCESSLIST</li>
+		<li><strong>STATE</strong>: connection's state, as in PROCESSLIST</li>
+		<li><strong>INFO</strong>: command info, as in PROCESSLIST</li>
 		<li><strong>GRANTEE</strong>: account which is calculated by <a href="privileges_functions.html#match_grantee">match_grantee()</a> to match this process.</li>
 		<li><strong>grantee_user</strong>: <i>user</i> part of the <strong>GRANTEE</strong>.</li>
 		<li><strong>grantee_host</strong>: <i>host</i> part of the <strong>GRANTEE</strong>. This does not include port specification.</li>
@@ -90,7 +102,10 @@ Rows of this view map directly to rows in <a href="http://dev.mysql.com/doc/refm
 </p>
 <h3>EXAMPLES</h3>
 <p>Show grantees for all processes:</p>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_grantees;
+<blockquote><pre>mysql&gt; SELECT ID, USER, HOST, GRANTEE, grantee_user, grantee_host, 
+    is_super, is_repl, sql_kill_query, sql_kill_connection 
+  FROM 
+    common_schema.processlist_grantees;
 +--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
 | ID     | USER       | HOST                | GRANTEE                | grantee_user | grantee_host | is_super | is_repl | sql_kill_query    | sql_kill_connection |
 +--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
@@ -119,7 +134,7 @@ Rows of this view map directly to rows in <a href="http://dev.mysql.com/doc/refm
 All <strong>jboss</strong> users are connected from <i>jboss??.myweb</i> servers, and are matched to the <strong>'jboss'@'%.myweb'</strong> account.</p>
 
 <h3>ENVIRONMENT</h3>
-MySQL 5.1 or newer. Percona Server yields a different schema.
+MySQL 5.1 or newer.
 
 <h3>SEE ALSO</h3>
 <a href="match_grantee.html">match_grantee()</a>,
@@ -135,15 +150,26 @@ Shlomi Noach
 				<div id="menu">
 					<ul>
 						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
 						<li><a title="Download" href="download.html">Download</a></li>
 						<li><a title="Install" href="install.html">Install</a></li>
 						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
 					</ul>						
 					<h3>ROUTINES</h3>
 					<ul>
 						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -158,9 +184,15 @@ Shlomi Noach
 						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
 						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
 					</ul>						
-					<h3>TABLES</h3>
+					<h3>DATA</h3>
 					<ul>
-						<li><a title="numbers" href="numbers.html">numbers</a></li>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
 					</ul>						
 				</div>
 			</div>	

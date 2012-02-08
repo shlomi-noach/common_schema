@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema documentation</h1>
+			<h1>common_schema</h1> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -26,17 +26,25 @@ Execution routines: stored routines managing dynamic query execution, iteration 
 	<li><a href="exec.html">exec()</a>: Executes a given query or semicolon delimited list of queries.</li>
 	<li><a href="exec_file.html">exec_file()</a>:Executes queries from given file, residing on server./li>
 	<li><a href="exec_single.html">exec_single()</a>: Executes a given query.</li>
-	<li><a href="foreach.html">foreach()</a> aka <a href="foreach.html">$()</a>: Invoke queries on each element of given collection.</li>
+	<li><a href="foreach.html">foreach()</a> aka <a href="foreach.html">$()</a>: Invoke script on each element of given collection.</li>
 	<li><a href="repeat_exec.html">repeat_exec()</a>: Repeatedly executes given query or queries until some condition holds.</li>
+	<li><a href="run.html">run()</a>: run a QueryScript code provided as text.</li>
+	<li><a href="run_file.html">run_file()</a>: run a QueryScript code from file.</li>
+	<li><a href="script_runtime.html">script_runtime()</a>: number of seconds elapsed since script execution began.</li>
+	<li><a href="throw.html">throw()</a>: Disrupt execution with error.</li>
 </ul>
 </p>
 
 <h3>DESCRIPTION</h3>
 <p>
-These featured routines allow for semi-scripting capabilities in MySQL. Looping through collections,
+These featured routines allow for scripting & semi-scripting capabilities in MySQL. Looping through collections,
 row sets, numbers, tables; repeating tasks until a given condition hold, or dynamically evaluating
 queries. The execution routines simplify a DBA's maintenance work by providing with a simpler,
 cleaner and more familiar syntax.
+</p>
+<p>
+The <i>run()</i> and <i>run_file()</i> routines execute <a href="query_script.html">QueryScript</a> code. 
+The rest of the routines make for lower level, semi-scripting execution.
 </p>
 <p>
 The majority of operations in these routines use dynamic queries, based on prepared statements.
@@ -73,15 +81,26 @@ you would usually want to avoid killing replication processes, SUPER processes a
 				<div id="menu">
 					<ul>
 						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
 						<li><a title="Download" href="download.html">Download</a></li>
 						<li><a title="Install" href="install.html">Install</a></li>
 						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
 					</ul>						
 					<h3>ROUTINES</h3>
 					<ul>
 						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -96,9 +115,15 @@ you would usually want to avoid killing replication processes, SUPER processes a
 						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
 						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
 					</ul>						
-					<h3>TABLES</h3>
+					<h3>DATA</h3>
 					<ul>
-						<li><a title="numbers" href="numbers.html">numbers</a></li>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
 					</ul>						
 				</div>
 			</div>	

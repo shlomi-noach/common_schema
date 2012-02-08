@@ -11,37 +11,46 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema documentation</h1>
+			<h1>common_schema</h1> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
 				<h2><a href="foreach.html">foreach</a></h2>	
 <h3>NAME</h3>
-foreach(): Invoke queries on each element of given collection. <strong>$()</strong> is a synonym of this routine.
+foreach(): Invoke a script on each element of given collection. <strong>$()</strong> is a synonym of this routine.
 
 <h3>TYPE</h3>
 Procedure
 
 <h3>DESCRIPTION</h3>
 <p>
-This procedure accepts collections of varying types, including result sets, and invoke queries
-per collection element.
+This procedure accepts collections of varying types, including result sets, and invokes a
+<a href="query_script.html">QueryScript</a> code per element.
 </p>
 <p>
-Queries are dynamic in that they may (and often do) relate to the specific value of the
-collection element. This is achieved by using <i>place holders</i> in the query, in similar
-approach to that of regular expressions or the <i>awk</i> language. 
-Different collection types make for different types of place holders, as listed below.
+The script can be as simple as a query, a set of queries, or a complex code.
+</p>
+<p>The <i>foreach()</i> routine differs from the <a href="query_script_foreach.html">foreach</a> flow control structure in QueryScript, though
+they both use similar syntax and share some use cases. Read <a href="query_script_foreach.html#notes">here</a> on the differences between the two.</p>
+<p>
+<i>foreach()</i> passes on information about iterated values onto the script in two ways:
+<ul>
+	<li>Using <i>place holders</i> (e.g. <strong>${1}, ${2}</strong> etc.)
+		<br/>In this approach the script's text is manipulated such that placeholder occurrences are
+		replaced with iterated values. This is a simple text search & replace approach, is very flexible,
+		and allows for a lot of META tweaks.
+		<br/>See following tables and examples for more on placeholders.
+	</li>
+	<li>Using <a href="query_script_input.html">input</a> variables:
+		<br/>Variables are passed on to the script as input variables. These are dynamic variables, on which
+		the genral rules for user defined variables apply.
+	</li>
+</ul> 
 </p>
 <p>
-<i>foreach()</i> makes for a clean, script-like syntax, for many administrative tasks which are 
-otherwise achieved using interaction between shell scripts and the mysql command line client.
 <i>foreach()</i> acts on server side only, and does not require shell access nor the <i>mysql</i>
 command line client, although it may be spawned from within the <i>mysql</i> client.
-</p>
-
-<p>The queries invoked per element may also be referred to as <i>callbacks</i>.
 </p>
 
 <p>
@@ -50,7 +59,8 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 <ul>
 	<li><strong>A SELECT query</strong>: any <strong>SELECT</strong> statement makes for a collection,
 		which is the result set of the query.
-		<br/>Any SELECT query is valid, with any result set. However, only first <strong>9</strong> 
+		<br/>The query must specify result columns. That is, a <strong>SELECT *</strong> query is not valid.
+		<br/>Otherwise any SELECT query is valid, with any result set. However, only first <strong>9</strong> 
 		columns in the result set can be used as place holders for the callback queries.
 		<br/>Each row in the result set is an element. 
 		<br/>The queries are allowed to act upon the table(s) being iterated, i.e. one can execute a 
@@ -69,7 +79,9 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 		<br/>The place holders <strong>${1}, ${2}</strong> indicate the iterated values.
 	</li>
 	<li><strong>A constants set</strong>: a predefined set of constant values, e.g. <strong>'{red, green, blue}'</strong>.
-		<br/>Constants are separated by either spaces or commas (or both).
+		<br/>Constants are separated by either spaces or commas (or both). 
+		<br/>Constants can be quoted so as to allow spaces or commas within constant value. Quotes themselves are discarded.
+		<br/>Empty constants are discarded.
 		<br/>The place holder <strong>${1}</strong> indicates the current constant value.
 	</li>
 	<li><strong>'schema'</strong>: this is the collection of available schemata (e.g. as with <strong>SHOW DATABASES</strong>).
@@ -86,6 +98,8 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 		given schema.
 		<br/>The place holder <strong>${1}</strong> indicates the current table. <strong>${table}</strong> is a synonym for <strong>${1}</strong>.		
 		<br/>The place holder <strong>${2}</strong> indicates the schema. <strong>${schema}</strong> is a synonym for <strong>${2}</strong>.		
+		<br/>The place holder <strong>${3}</strong> indicates the storage engine. <strong>${engine}</strong> is a synonym for <strong>${3}</strong>.		
+		<br/>The place holder <strong>${4}</strong> indicates the CREATE_OPTIONS <strong>${create_options}</strong> is a synonym for <strong>${4}</strong>.		
 	</li>
 	<li><strong>'table like <i>expr</i>'</strong>: all tables whose names match the given <strong>LIKE</strong> expression. These can be tables
 		from different databases/schemata.
@@ -93,6 +107,8 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 		a single schema at a time. This reduces locks and table cache entries, while potentially taking longer to complete.
 		<br/>The place holder <strong>${1}</strong> indicates the current table. <strong>${table}</strong> is a synonym for <strong>${1}</strong>.		
 		<br/>The place holder <strong>${2}</strong> indicates the schema for current table. <strong>${schema}</strong> is a synonym for <strong>${2}</strong>.		
+		<br/>The place holder <strong>${3}</strong> indicates the storage engine. <strong>${engine}</strong> is a synonym for <strong>${3}</strong>.		
+		<br/>The place holder <strong>${4}</strong> indicates the CREATE_OPTIONS <strong>${create_options}</strong> is a synonym for <strong>${4}</strong>.		
 	</li>
 	<li><strong>'table ~ <i>/regexp/</i>'</strong>: all tables whose names match the given regular expression. These can be tables
 		from different databases/schemata.
@@ -100,6 +116,8 @@ pattern. The following collections are recognized (also see EXAMPLES section bel
 		a single schema at a time. This reduces locks and table cache entries, while potentially taking longer to complete.
 		<br/>The place holder <strong>${1}</strong> indicates the current table. <strong>${table}</strong> is a synonym for <strong>${1}</strong>.		
 		<br/>The place holder <strong>${2}</strong> indicates the schema for current table. <strong>${schema}</strong> is a synonym for <strong>${2}</strong>.		
+		<br/>The place holder <strong>${3}</strong> indicates the storage engine. <strong>${engine}</strong> is a synonym for <strong>${3}</strong>.		
+		<br/>The place holder <strong>${4}</strong> indicates the CREATE_OPTIONS <strong>${create_options}</strong> is a synonym for <strong>${4}</strong>.		
 	</li>
 </ul>
 Any other type of input raises an error.
@@ -112,7 +130,7 @@ Following is a brief sample of valid collection input:
 	<tr><td>SELECT query</td><td>'SELECT id, name FROM INFORMATION_SCHEMA.PROCESSLIST WHERE time &gt; 20'</td></tr>
 	<tr><td>Numbers range</td><td>'1970:2038'</td></tr>
 	<tr><td>Two dimensional numbers range</td><td>'0:23,0:59'</td></tr>
-	<tr><td>Constants set</td><td>'{USA, GB, FRA, IT, JP}'</td></tr>
+	<tr><td>Constants set</td><td>'{USA, "GREAT BRITAIN", FRA, IT, JP}'</td></tr>
 	<tr><td>'schema'</td><td>'schema'</td></tr>
 	<tr><td>'schema like <i>expr</i>'</td><td>'schema like customer_%'</td></tr>
 	<tr><td>'schema ~ <i>/regexp/</i>'</td><td>'schema ~ /^customer_[0-9]+$/</td></tr>
@@ -133,9 +151,9 @@ The following table summarizes the types of collections and the valid place hold
 	<tr><td>'schema'</td><td>${1} or ${schema}, ${NR}</td></tr>
 	<tr><td>'schema like <i>expr</i>'</td><td>${1} or ${schema}, ${NR}</td></tr>
 	<tr><td>'schema ~ <i>/regexp/</i>'</td><td>${1} or ${schema}, ${NR}</td></tr>
-	<tr><td>'table in <i>schema_name</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${NR}</td></tr>
-	<tr><td>'table like <i>expr</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${NR}</td></tr>
-	<tr><td>'table ~ <i>/regexp/</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${NR}</td></tr>
+	<tr><td>'table in <i>schema_name</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${3} or ${engine}, ${4} or ${create_options}, ${NR}</td></tr>
+	<tr><td>'table like <i>expr</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${3} or ${engine}, ${4} or ${create_options}, ${NR}</td></tr>
+	<tr><td>'table ~ <i>/regexp/</i>'</td><td>${1} or ${table), ${2} or ${schema}, ${3} or ${engine}, ${4} or ${create_options}, ${NR}</td></tr>
 </table>
 <strong>${NR}</strong> is accepted in all collections, and returns the iteration index, <strong>1</strong> based. That is,
 the first element in a collection has <strong>1</strong> for <strong>${NR}</strong>, the seconds has <strong>2</strong>, etc.
@@ -348,15 +366,26 @@ Shlomi Noach, Roland Bouman
 				<div id="menu">
 					<ul>
 						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
 						<li><a title="Download" href="download.html">Download</a></li>
 						<li><a title="Install" href="install.html">Install</a></li>
 						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
 					</ul>						
 					<h3>ROUTINES</h3>
 					<ul>
 						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -371,9 +400,15 @@ Shlomi Noach, Roland Bouman
 						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
 						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
 					</ul>						
-					<h3>TABLES</h3>
+					<h3>DATA</h3>
 					<ul>
-						<li><a title="numbers" href="numbers.html">numbers</a></li>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
 					</ul>						
 				</div>
 			</div>	

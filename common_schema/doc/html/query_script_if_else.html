@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>query_script_if_else: common_schema documentation</title>
+	<meta name="description" content="query_script_if_else: common_schema" />
+	<meta name="keywords" content="query_script_if_else: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="query_script_if_else.html">query_script_if_else</a></h2>	
+
+<p>
+QueryScript Flow Control: <strong>if-else</strong> statement
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>if (expression)
+  statement;
+[else
+  statement;]
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>if-else</i> is a flow control branching structure. It makes for a condition test based on
+a given <a href="query_script_expressions.html">expression</a>. 
+</p>
+<p>
+When the <i>expression</i> holds true, the statement (or block of statements) following the <i>if</i> statement are executed.
+The <i>else</i> clause is optional, and it's statement(s) are executed when the <i>expression</i> does not hold true.
+</p>
+<p>
+There is no built-in <i>elseif</i> clause. However, a chained <i>if-else if-else</i> statement is valid.
+</p>
+<p>
+Empty statements are not allowed in QueryScript. However, empty blocks are, and a <i>if</i> or <i>else</i> clause may use an empty block statement.
+</p>
+
+
+<h3>EXAMPLES</h3>
+<p>
+Simple <i>if-else</i> condition:
+<blockquote><pre>
+set @x := 17;
+if (@x mod 2 = 0)
+  SELECT 'even' AS answer;
+else
+  SELECT 'odd' AS answer;
+</pre></blockquote>
+</p>
+
+<p>
+<strong>DELETE</strong> statement as <i>expression</i>:
+<blockquote><pre>
+set @country := 'USA';
+if (DELETE FROM world.Country WHERE Code = @country)
+{
+  -- We don't have foreign keys on these tables; do a manual drill down:
+  DELETE FROM world.City WHERE CountryCode = @country;
+  DELETE FROM world.CountryLanguage WHERE CountryCode = @country;
+}
+</pre></blockquote>
+</p>
+
+
+<p>
+Using <i>if</i> to <a href="query_script_break.html">break</a> out of a <a href="query_script_while.html">while</a> loop: 
+<blockquote><pre>
+CREATE TEMPORARY TABLE test.numbers (n INT UNSIGNED NOT NULL PRIMARY KEY);
+INSERT INTO test.numbers (n) VALUES (17);
+
+set @n := 0;
+while (@n < 20)
+{
+  if (INSERT IGNORE INTO test.numbers (n) VALUES (@n))
+  {
+  }
+  else
+  {
+    break;
+  }
+  set @n := @n + 1;
+}
+SELECT @n AS inserted_up_to_this_value;
+
++---------------------------+
+| inserted_up_to_this_value |
++---------------------------+
+|                        17 |
++---------------------------+
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_while.html">while</a>,
+<a href="query_script_expressions.html">expressions</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>help: common_schema documentation</title>
+	<meta name="description" content="help: common_schema" />
+	<meta name="keywords" content="help: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="help.html">help</a></h2>	
+<h3>NAME</h3>
+help(): search and read <i>common_schema</i> documentation.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	<i>help()</i> is a meta routine allowing access to documentation from within
+	<i>common_schema</i> itself.	
+</p>
+<p>
+	The documentation, including, for example, this very page, is embedded within
+	<i>common_schema</i>'s tables, such that it can be searched and read using
+	standard SQL queries.
+</p>
+<p>
+	<i>help()</i> accepts a search term, and presents a single documentation page
+	which best fits the term. The term may appear within the documentation's title
+	or description. It could be the name or part of name of one of 
+	<i>common_schema</i>'s components (routines, views, ...), or it could be any
+	keyword appearing within the documentation.
+</p>
+<p>
+	The output is MySQL-friendly, in that it breaks the documentation into rows of
+	text, thereby presenting the result in a nicely formatted table.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>help(expression TINYTEXT CHARSET utf8)</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>expression</strong>: a search term to be looked for.
+    	<br/>The term could be a full or partial word. The search is 
+    	case insensitive.
+    	<br/>Regular expression search is not supported.
+    </li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Find help on a search term:
+	</p>
+	<blockquote><pre>mysql&gt; call help('match');
++-------------------------------------------------------------------------------+
+| help                                                                          |
++-------------------------------------------------------------------------------+
+|                                                                               |
+| NAME                                                                          |
+|                                                                               |
+| match_grantee(): Match an existing account based on user+host.                |
+|                                                                               |
+| TYPE                                                                          |
+|                                                                               |
+| Function                                                                      |
+|                                                                               |
+| DESCRIPTION                                                                   |
+|                                                                               |
+| MySQL does not provide with identification of logged in accounts. It only     |
+| provides with user + host:port combination within processlist. Alas, these do |
+| not directly map to accounts, as MySQL lists the host:port from which the     |
+| connection is made, but not the (possibly wildcard) user or host.             |
+| This function matches a user+host combination against the known accounts,     |
+| using the same matching method as the MySQL server, to detect the account     |
+| which MySQL identifies as the one matching. It is similar in essence to       |
+| CURRENT_USER(), only it works for all sessions, not just for the current      |
+| session.                                                                      |
+|                                                                               |
+| SYNOPSIS                                                                      |
+|                                                                               |
+|                                                                               |
+|                                                                               |
+|        match_grantee(connection_user char(16) CHARSET utf8,                   |
+|        connection_host char(70) CHARSET utf8)                                 |
+|          RETURNS VARCHAR(100) CHARSET utf8                                    |
+|                                                                               |
+|                                                                               |
+| Input:                                                                        |
+|                                                                               |
+| * connection_user: user login (e.g. as specified by PROCESSLIST)              |
+| * connection_host: login host. May optionally specify port number (e.g.       |
+|   webhost:12345), which is discarded by the function. This is to support      |
+|   immediate input from as specified by PROCESSLIST.                           |
+|                                                                               |
+|                                                                               |
+| EXAMPLES                                                                      |
+|                                                                               |
+| Find an account matching the given use+host combination:                      |
+|                                                                               |
+|                                                                               |
+|        mysql> SELECT match_grantee('apps', '192.128.0.1:12345') AS            |
+|        grantee;                                                               |
+|        +------------+                                                         |
+|        | grantee    |                                                         |
+|        +------------+                                                         |
+|        | 'apps'@'%' |                                                         |
+|        +------------+                                                         |
+|                                                                               |
+|                                                                               |
+|                                                                               |
+| ENVIRONMENT                                                                   |
+|                                                                               |
+| MySQL 5.1 or newer                                                            |
+|                                                                               |
+| SEE ALSO                                                                      |
+|                                                                               |
+| processlist_grantees                                                          |
+|                                                                               |
+| AUTHOR                                                                        |
+|                                                                               |
+| Shlomi Noach                                                                  |
+|                                                                               |
++-------------------------------------------------------------------------------+
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="metadata.html">metadata</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>
