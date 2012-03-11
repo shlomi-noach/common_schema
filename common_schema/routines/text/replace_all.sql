@@ -23,7 +23,7 @@ COMMENT 'Replace any char in from_characters with to_str '
 begin
   declare counter SMALLINT UNSIGNED DEFAULT 1;
 
-  while counter <= CHAR_LENGTH(txt) do
+  while counter <= CHAR_LENGTH(from_characters) do
     set txt := REPLACE(txt, SUBSTRING(from_characters, counter, 1), to_str);
     set counter := counter + 1;
   end while;
