@@ -1,0 +1,1 @@
+create array from empty tokens; expect empty array

@@ -1,0 +1,1 @@
+get from an unknown array, expect null

@@ -1,0 +1,1 @@
+get multiple existing elements from multiple arrays

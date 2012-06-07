@@ -1,0 +1,1 @@
+drop nonexistent array, expect no errors

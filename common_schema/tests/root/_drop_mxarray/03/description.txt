@@ -1,0 +1,1 @@
+verify existing elements no longer exist after dropping array

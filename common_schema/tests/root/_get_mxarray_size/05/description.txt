@@ -1,0 +1,1 @@
+check array size for multiple arrays

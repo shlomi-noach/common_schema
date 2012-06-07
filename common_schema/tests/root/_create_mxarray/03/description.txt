@@ -1,0 +1,1 @@
+create multiple arrays, expect zero elements in all
