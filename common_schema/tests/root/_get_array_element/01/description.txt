@@ -1,1 +1,0 @@
-set array element, get it back

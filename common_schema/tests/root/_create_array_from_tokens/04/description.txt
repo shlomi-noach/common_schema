@@ -1,1 +1,0 @@
-create array from tokenized text

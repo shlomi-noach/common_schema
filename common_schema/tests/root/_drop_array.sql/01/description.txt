@@ -1,1 +1,0 @@
-drop a non existing array

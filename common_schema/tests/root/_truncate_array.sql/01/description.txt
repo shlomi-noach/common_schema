@@ -1,1 +1,0 @@
-truncate an empty array, expect no elements

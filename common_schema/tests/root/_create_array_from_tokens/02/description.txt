@@ -1,1 +1,0 @@
-create array from NULL tokens; expect empty array

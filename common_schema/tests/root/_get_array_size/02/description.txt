@@ -1,1 +1,0 @@
-size for non-empty array
