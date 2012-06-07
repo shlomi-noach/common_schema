@@ -16,7 +16,10 @@ no sql
 sql security invoker
 
 main_body: begin
-  return ExtractValue(@_common_schema_mx_array, CONCAT('/ma/a[@id="', array_id, '"]/e[@key="', encode_xml(array_key), '"][1]'));
+  if _mxarray_key_exists(array_id, array_key) then
+    return ExtractValue(@_common_schema_mx_array, CONCAT('/ma/a[@id="', array_id, '"]/e[@key="', encode_xml(array_key), '"][1]'));
+  end if;
+  return null;
 end;
 //
 

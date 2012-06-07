@@ -16,7 +16,7 @@ no sql
 sql security invoker
 
 main_body: begin
-  return CAST(ExtractValue(@_common_schema_mx_array, CONCAT('count(/ma/a[@id="', array_id, '"]/e)')) AS UNSIGNED);
+  return CAST(IFNULL(ExtractValue(@_common_schema_mx_array, CONCAT('count(/ma/a[@id="', array_id, '"]/e)')), 0) AS UNSIGNED);
 end;
 //
 
