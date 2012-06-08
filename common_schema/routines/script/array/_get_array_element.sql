@@ -17,15 +17,7 @@ reads sql data
 sql security invoker
 
 main_body: begin
-  declare exec_statement text default '';
-  
-  set @_common_schema_get_array_element_value := NULL;
-  set exec_statement := CONCAT(
-    'SELECT value FROM ', _get_array_name(array_id), ' 
-       WHERE array_key = ', IFNULL(QUOTE(array_key), 'NULL'), ' INTO @_common_schema_get_array_element_value');
-
-  call exec_single(exec_statement);
-  set element := @_common_schema_get_array_element_value;  
+  select _get_mxarray_element(array_id, array_key) into element;
 end;
 //
 

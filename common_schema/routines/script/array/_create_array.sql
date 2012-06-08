@@ -15,16 +15,7 @@ modifies sql data
 sql security invoker
 
 main_body: begin
-  declare exec_statement text default '';
-  
-  set array_id := session_unique_id();
-  set exec_statement := CONCAT(
-    'CREATE TEMPORARY TABLE ', _get_array_name(array_id), '(
-       array_key varchar(127) charset utf8 PRIMARY KEY,
-       value text charset utf8
-     )'); 
-
-  call exec_single(exec_statement);
+  select _create_mxarray() into array_id;
 end;
 //
 
