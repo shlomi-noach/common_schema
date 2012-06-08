@@ -1,0 +1,50 @@
+<h3>NAME</h3>
+encode_xml(): Encode a given text for XML.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	Return the given text valid for XML, with special characters properly encoded.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>encode_xml(txt TEXT CHARSET utf8)
+  RETURNS TEXT CHARSET utf8 </pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: an arbitrary text, to be encoded
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Encode a normal text (no change expetced):</p>
+<blockquote><pre>mysql&gt; SELECT encode_xml('The quick brown fox') AS encoded;
++---------------------+
+| encoded             |
++---------------------+
+| The quick brown fox |
++---------------------+
+</pre></blockquote>
+
+<p>Encode a text with special characters:</p>
+<blockquote><pre>mysql&gt; SELECT encode_xml('3 > "2" & 4 < 5') AS encoded;
++-------------------------------------+
+| encoded                             |
++-------------------------------------+
+| 3 &amp;gt; &amp;quot;2&amp;quot; &amp;amp; 4 &amp;lt; 5 |
++-------------------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="decode_xml.html">decode_xml()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
