@@ -39,17 +39,8 @@ main_body: begin
   while variable_index <= num_variables do
     call _get_array_element(variables_array_id, variable_index, local_variable);
     set user_defined_variable_name := CONCAT('@__qs_local_var_', session_unique_id());
-
-    INSERT IGNORE INTO _qs_variables (variable_name, mapped_user_defined_variable_name, declaration_depth, declaration_id) VALUES (local_variable, user_defined_variable_name, depth, id_from);
-    if ROW_COUNT() = 0 then
-      call _throw_script_error(id_from, CONCAT('Duplicate local variable: ', local_variable));
-    end if;
-    -- since the user defined variables are unique to this session, and have unlikely names they are expected to be NULL.
-    -- Thusm we do not bother resetting them.
-
-    -- Since this is first declaration point, we modify the _sql_tokens table by replacing variables with mapped user defined variables:
-    UPDATE _sql_tokens SET token = user_defined_variable_name, state = 'user-defined variable' WHERE id > statement_id_to AND id <= id_to AND token = local_variable AND state = 'query_script variable';
-    -- Bwahaha!
+    
+    call _declare_local_variable(id_from, statement_id_to, id_to, depth, local_variable, user_defined_variable_name, TRUE);
     
     set variable_index := variable_index + 1;
   end while;
