@@ -11,13 +11,16 @@ CREATE TABLE metadata (
 ;
 
 --
--- Populate numbers table, values range [0...4095]
+-- 
 --
 INSERT 
   INTO metadata (attribute_name, attribute_value)
 VALUES
   ('author', 'Shlomi Noach'),
   ('author_url', 'http://code.openark.org/blog/shlomi-noach'),
+  ('install_success', '0'),
+  ('install_time', NOW()),
+  ('install_sql_mode', @@sql_mode),
   ('license_type', 'New BSD'),
   ('license', '
 Copyright (c) 2011 - 2012, Shlomi Noach
@@ -36,5 +39,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   ('project_home', 'http://code.google.com/p/common-schema/'),
   ('project_repository', 'https://common-schema.googlecode.com/svn/trunk/'),
   ('project_repository_type', 'svn'),
-  ('revision', 'revision.placeholder')
+  ('revision', 'revision.placeholder'),
+  ('version', '1.1')
 ;  
