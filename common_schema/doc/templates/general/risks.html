@@ -1,7 +1,7 @@
 <p>This is not the usual "It's your responsibility" stuff. Please read through.</p>
 
 <p>
-<i>common_schema</i> is a database schema. It includes routines, views and table. 
+<i>common_schema</i> is a database schema. It includes routines, views and tables. 
 The risks of using this schema are those affected by issuing queries against its views or routines.
 </p>
 
@@ -22,6 +22,8 @@ queries on such tables.
 See also: 
 <a href="http://www.xaprb.com/blog/2009/10/29/making-changes-to-many-tables-at-once/">Making changes to many tables at once</a>, 
 <a href="http://www.pythian.com/news/8633/how-to-tell-when-using-information_schema-might-crash-your-database/">How to tell when using INFORMATION_SCHEMA might crash your database</a>.
+Consider setting <strong>innodb_stats_on_metadata=0</strong> as suggested in 
+<a href="http://www.mysqlperformanceblog.com/2011/12/23/solving-information_schema-slowness/">Solving INFORMATION_SCHEMA slowness</a>.
 </p>
 
 <p>It is safer to perform such heavyweight queries on a replicating slave. A slave may actually
@@ -50,6 +52,14 @@ for monitoring a live, running server. Some of these views don't actually requir
 </ul>
 
 <p>The list above may change, or may not reflect the actual state of views & functions.</p>
+
+<p><i>common_schema</i> views which are <i>lightweight</i> are the various 
+  <a title="process" href="process_views.html">process</a>, 
+  <a title="security" href="security_views.html">security</a>, 
+  <a title="monitoring" href="monitoring_views.html">monitoring</a>, 
+  <a title="InnoDB plugin" href="innodb_plugin_views.html">InnoDB plugin</a> and 
+  <a title="Percona Server" href="percona_server_views.html">Percona Server</a> views. 
+</p>
 
 <p>Of course, just as would be able to drop your database being a super user, you could also
 use <i>common_schema</i> to execute destructive queries. Many routines support the 
