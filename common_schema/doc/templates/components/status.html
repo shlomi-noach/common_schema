@@ -1,20 +1,20 @@
 <h3>NAME</h3>
-status: General metadata/status of </i>common_schema</i>
+status: General metadata/status of <i>common_schema</i>
 <h3>TYPE</h3>
 View
 
 <h3>DESCRIPTION</h3>
 <p></p>
 
-<p><i>status</i> provides with metadata/status information on </i>common_schema</i> internals.
+<p><i>status</i> provides with metadata/status information on <i>common_schema</i> internals.
 </p>
 
 <p>
 The metadata provided by the status view can be essential for:
 <ul>
-	<li>Integrity/versioning: by knowing the exact version/revision of </i>common_schema</i></li>
+	<li>Integrity/versioning: by knowing the exact version/revision of <i>common_schema</i></li>
 	<li>Diagnostics: as an essential information in a bug report</li>
-	<li>More diagnostics: knowing the envorinment in which </i>common_schema</i> runs</li>
+	<li>More diagnostics: knowing the envorinment in which <i>common_schema</i> runs</li>
 </ul>
 </p>
 
@@ -22,41 +22,54 @@ The metadata provided by the status view can be essential for:
 
 <blockquote><pre>
 mysql&gt; desc common_schema.status;
-+------------------+----------+------+-----+---------+-------+
-| Field            | Type     | Null | Key | Default | Extra |
-+------------------+----------+------+-----+---------+-------+
-| project_name     | longtext | YES  |     | NULL    |       |
-| version          | longtext | YES  |     | NULL    |       |
-| revision         | longtext | YES  |     | NULL    |       |
-| install_time     | longtext | YES  |     | NULL    |       |
-| install_success  | longtext | YES  |     | NULL    |       |
-| install_sql_mode | longtext | YES  |     | NULL    |       |
-+------------------+----------+------+-----+---------+-------+
++-------------------------------------+----------+------+-----+---------+-------+
+| Field                               | Type     | Null | Key | Default | Extra |
++-------------------------------------+----------+------+-----+---------+-------+
+| project_name                        | longtext | YES  |     | NULL    |       |
+| version                             | longtext | YES  |     | NULL    |       |
+| revision                            | longtext | YES  |     | NULL    |       |
+| install_time                        | longtext | YES  |     | NULL    |       |
+| install_success                     | longtext | YES  |     | NULL    |       |
+| base_components_installed           | longtext | YES  |     | NULL    |       |
+| innodb_plugin_components_installed  | longtext | YES  |     | NULL    |       |
+| percona_server_components_installed | longtext | YES  |     | NULL    |       |
+| install_mysql_version               | longtext | YES  |     | NULL    |       |
+| install_sql_mode                    | longtext | YES  |     | NULL    |       |
++-------------------------------------+----------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
 
-<p>Structure of this view is identical to that of <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a> table</p>
+<p>Columns of this view:
 
-<p>On Percona Server, this additional info is included:
 	<ul>
 		<li><strong>project_name</strong>: this is the text "common_schema"</li>
 		<li><strong>version</strong>: external version number</li>
-		<li><strong>revision</strong>: internal revision number (more granular than <b>version</b>)</li>
+		<li><strong>revision</strong>: internal revision number (more granular than <strong>version</strong>)</li>
 		<li><strong>install_time</strong>: TIMESTAMP at which <i>common_schema</i> as installed</li>
-		<li><strong>install_success</strong>: boolean ,installation result. <b>"1"</b> indicates success</li>
-		<li><strong>install_sql_mode</strong>: the <b>sql_mode</b> used when creation <i>common_schema</i>.
-			This applies to stored routines even though the DBA may change the global <b>sql_mode</b>,
-			as MySQL's stored routines retain the snapshot of <b>sql_mode</b> by which they were created.</li>
+		<li><strong>install_success</strong>: boolean, installation result. <strong>"1"</strong> indicates success</li>
+		<li><strong>base_components_installed</strong>: boolean. <strong>"1"</strong> indicates that base components were installed.</li>
+		<li><strong>innodb_plugin_components_installed</strong>: boolean. <strong>"1"</strong> indicates InnoDB Plugin components were installed.</li>
+		<li><strong>percona_server_components_installed</strong>: boolean. <strong>"1"</strong> indicates Percona Server components were installed.</li>
+		<li><strong>install_mysql_version</strong>: version of MySQL at the time of <i>common_schema</i> installation.</li>
+		<li><strong>install_sql_mode</strong>: the <strong>sql_mode</strong> used when creation <i>common_schema</i>.
+			This applies to stored routines even though the DBA may change the global <strong>sql_mode</strong>,
+			as MySQL's stored routines retain the snapshot of <strong>sql_mode</strong> by which they were created.</li>
 	</ul>
 </p>
 <h3>EXAMPLES</h3>
-<blockquote><pre>mysql&gt; SELECT * FROM status;
-+---------------+---------+----------+---------------------+-----------------+------------------+
-| project_name  | version | revision | install_time        | install_success | install_sql_mode |
-+---------------+---------+----------+---------------------+-----------------+------------------+
-| common_schema | 1.1     | 233      | 2012-07-01 12:37:04 | 1               |                  |
-+---------------+---------+----------+---------------------+-----------------+------------------+
+<blockquote><pre>mysql&gt; SELECT * FROM status \G
+*************************** 1. row ***************************
+                       project_name: common_schema
+                            version: 1.1
+                           revision: 234
+                       install_time: 2012-07-03 10:48:42
+                    install_success: 1
+          base_components_installed: 1
+ innodb_plugin_components_installed: 1
+percona_server_components_installed: 0
+              install_mysql_version: 5.1.51-log
+                   install_sql_mode: 
 </pre></blockquote>
 
 <h3>ENVIRONMENT</h3>
