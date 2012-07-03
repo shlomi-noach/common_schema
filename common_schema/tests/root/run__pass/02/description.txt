@@ -1,0 +1,1 @@
+use pass statement in if-else; expect no errors
