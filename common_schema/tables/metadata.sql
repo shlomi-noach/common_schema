@@ -4,7 +4,7 @@
 DROP TABLE IF EXISTS metadata;
 
 CREATE TABLE metadata (
-  `attribute_name` VARCHAR(32) CHARSET ascii NOT NULL,
+  `attribute_name` VARCHAR(64) CHARSET ascii NOT NULL,
   `attribute_value` VARCHAR(2048) CHARSET utf8 NOT NULL,
   PRIMARY KEY (`attribute_name`)
 )
@@ -18,9 +18,13 @@ INSERT
 VALUES
   ('author', 'Shlomi Noach'),
   ('author_url', 'http://code.openark.org/blog/shlomi-noach'),
-  ('install_success', '0'),
+  ('install_success', false),
   ('install_time', NOW()),
   ('install_sql_mode', @@sql_mode),
+  ('install_mysql_version', VERSION()),
+  ('base_components_installed', false),
+  ('innodb_plugin_components_installed', false),
+  ('percona_server_components_installed', false),
   ('license_type', 'New BSD'),
   ('license', '
 Copyright (c) 2011 - 2012, Shlomi Noach
