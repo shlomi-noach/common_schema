@@ -1,0 +1,172 @@
+<h3>NAME</h3>
+query_profiling: Per query profiling info, aggregated by query states
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>query_profiling</i> presents with pretty profiling info for queries executed within the session. 
+</p>
+
+
+<p>
+	Based on the INFORMATION_SCHEMA.PROFILING table, this view aggregates data by query state, and 
+	presents with more easy to comprehend details, such as the total runtime for the various states
+	and the time ratio per state of the total query runtime. 
+</p>
+
+<p>
+	Most notable, the <strong>state_duration_pct</strong> column allows one to quickly analyze the
+	states which consumed most of a query's runtime.
+</p>
+
+<p>
+	To populate this view, one must enable profiling. This is done by:
+	<blockquote><pre>mysql&gt; SET PROFILING := 1;
+</pre></blockquote>
+</p>
+
+<p>
+	This code is based on queries presented on
+	<a href="http://www.mysqlperformanceblog.com/2012/02/20/how-to-convert-show-profiles-into-a-real-profile/">How to convert MySQL’s SHOW PROFILES into a real profile</a>
+	and in the book <i>High Performance MySQL, 3nd Edition</i>, By Baron Schwartz et al., published by O'REILLY
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.last_query_profiling;
++-------------------------+----------------+------+-----+---------+-------+
+| Field                   | Type           | Null | Key | Default | Extra |
++-------------------------+----------------+------+-----+---------+-------+
+| QUERY_ID                | int(20)        | NO   |     | 0       |       |
+| STATE                   | varchar(30)    | NO   |     |         |       |
+| state_calls             | bigint(21)     | NO   |     | 0       |       |
+| state_sum_duration      | decimal(31,6)  | YES  |     | NULL    |       |
+| state_duration_per_call | decimal(35,10) | YES  |     | NULL    |       |
+| state_duration_pct      | decimal(37,2)  | YES  |     | NULL    |       |
+| state_seqs              | longblob       | YES  |     | NULL    |       |
++-------------------------+----------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>QUERY_ID</strong>: identifier of a query, as presented on SHOW PROFILES</li>
+		<li><strong>STATE</strong>: a state in query execution</li>
+		<li><strong>state_calls</strong>: number of calls for this state in this query</li>
+		<li><strong>state_sum_duration</strong>: the total time calls to this state consumed in this query</li>
+		<li><strong>state_duration_per_call</strong>: the average time calls to this state consumed in this query</li>
+		<li><strong>state_duration_pct</strong>: the percentage of time consumed by calls to this state, of the total time consumed by this query</li>
+		<li><strong>state_seqs</strong>: sequence numbers of calls to this state</li>
+	</ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Issue a couple queries, view profiling info:
+
+<blockquote><pre>mysql&gt; SET PROFILING := 1;
+
+mysql&gt; SELECT COUNT(*) FROM sakila.nicer_but_slower_film_list INTO @dummy;
+
+mysql&gt; SELECT COUNT(*) FROM world.City INTO @dummy;
+
+mysql&gt; SELECT * FROM query_profiling;
++----------+----------------------+-------------+--------------------+-------------------------+--------------------+------------+
+| QUERY_ID | STATE                | state_calls | state_sum_duration | state_duration_per_call | state_duration_pct | state_seqs |
++----------+----------------------+-------------+--------------------+-------------------------+--------------------+------------+
+|        1 | checking permissions |           5 |           0.000342 |            0.0000684000 |               0.49 | 5,6,7,8,9  |
+|        1 | cleaning up          |           1 |           0.000008 |            0.0000080000 |               0.01 | 31         |
+|        1 | closing tables       |           1 |           0.000018 |            0.0000180000 |               0.03 | 29         |
+|        1 | Copying to tmp table |           1 |           0.044438 |            0.0444380000 |              63.34 | 15         |
+|        1 | Creating tmp table   |           1 |           0.000202 |            0.0002020000 |               0.29 | 13         |
+|        1 | end                  |           1 |           0.000005 |            0.0000050000 |               0.01 | 23         |
+|        1 | executing            |           2 |           0.000018 |            0.0000090000 |               0.03 | 14,22      |
+|        1 | freeing items        |           2 |           0.000227 |            0.0001135000 |               0.32 | 25,27      |
+|        1 | init                 |           1 |           0.000012 |            0.0000120000 |               0.02 | 20         |
+|        1 | logging slow query   |           1 |           0.000004 |            0.0000040000 |               0.01 | 30         |
+|        1 | Opening tables       |           1 |           0.000284 |            0.0002840000 |               0.40 | 2          |
+|        1 | optimizing           |           2 |           0.000033 |            0.0000165000 |               0.05 | 10,21      |
+|        1 | preparing            |           1 |           0.000025 |            0.0000250000 |               0.04 | 12         |
+|        1 | query end            |           1 |           0.000005 |            0.0000050000 |               0.01 | 24         |
+|        1 | removing tmp table   |           3 |           0.000149 |            0.0000496667 |               0.21 | 18,26,28   |
+|        1 | Sending data         |           2 |           0.017748 |            0.0088740000 |              25.30 | 17,19      |
+|        1 | Sorting result       |           1 |           0.006466 |            0.0064660000 |               9.22 | 16         |
+|        1 | starting             |           1 |           0.000076 |            0.0000760000 |               0.11 | 1          |
+|        1 | statistics           |           1 |           0.000075 |            0.0000750000 |               0.11 | 11         |
+|        1 | System lock          |           1 |           0.000010 |            0.0000100000 |               0.01 | 3          |
+|        1 | Table lock           |           1 |           0.000017 |            0.0000170000 |               0.02 | 4          |
+|        2 | cleaning up          |           1 |           0.000010 |            0.0000100000 |               2.90 | 12         |
+|        2 | end                  |           1 |           0.000012 |            0.0000120000 |               3.48 | 8          |
+|        2 | executing            |           1 |           0.000019 |            0.0000190000 |               5.51 | 7          |
+|        2 | freeing items        |           1 |           0.000038 |            0.0000380000 |              11.01 | 10         |
+|        2 | init                 |           1 |           0.000025 |            0.0000250000 |               7.25 | 5          |
+|        2 | logging slow query   |           1 |           0.000010 |            0.0000100000 |               2.90 | 11         |
+|        2 | Opening tables       |           1 |           0.000031 |            0.0000310000 |               8.99 | 2          |
+|        2 | optimizing           |           1 |           0.000016 |            0.0000160000 |               4.64 | 6          |
+|        2 | query end            |           1 |           0.000015 |            0.0000150000 |               4.35 | 9          |
+|        2 | starting             |           1 |           0.000135 |            0.0001350000 |              39.13 | 1          |
+|        2 | System lock          |           1 |           0.000014 |            0.0000140000 |               4.06 | 3          |
+|        2 | Table lock           |           1 |           0.000020 |            0.0000200000 |               5.80 | 4          |
++----------+----------------------+-------------+--------------------+-------------------------+--------------------+------------+
+</pre></blockquote>
+</p>
+
+<p>Similar to the above, simplify results:
+<blockquote><pre>mysql&gt; SET PROFILING := 1;
+
+mysql&gt; SELECT COUNT(*) FROM sakila.nicer_but_slower_film_list INTO @dummy;
+
+mysql&gt; SELECT query_id, state, state_duration_pct, state_calls 
+          FROM query_profiling 
+          ORDER BY query_id ASC, state_duration_pct DESC;
++----------+----------------------+--------------------+-------------+
+| query_id | state                | state_duration_pct | state_calls |
++----------+----------------------+--------------------+-------------+
+|        1 | Copying to tmp table |              69.63 |           1 |
+|        1 | Sending data         |              20.00 |           2 |
+|        1 | Sorting result       |               8.92 |           1 |
+|        1 | freeing items        |               0.37 |           2 |
+|        1 | checking permissions |               0.28 |           5 |
+|        1 | Opening tables       |               0.22 |           1 |
+|        1 | Creating tmp table   |               0.15 |           1 |
+|        1 | removing tmp table   |               0.15 |           3 |
+|        1 | starting             |               0.07 |           1 |
+|        1 | statistics           |               0.05 |           1 |
+|        1 | optimizing           |               0.03 |           2 |
+|        1 | closing tables       |               0.02 |           1 |
+|        1 | executing            |               0.02 |           2 |
+|        1 | preparing            |               0.02 |           1 |
+|        1 | cleaning up          |               0.01 |           1 |
+|        1 | init                 |               0.01 |           1 |
+|        1 | System lock          |               0.01 |           1 |
+|        1 | Table lock           |               0.01 |           1 |
+|        1 | end                  |               0.00 |           1 |
+|        1 | logging slow query   |               0.00 |           1 |
+|        1 | query end            |               0.00 |           1 |
+|        2 | starting             |              37.39 |           1 |
+|        2 | freeing items        |              12.16 |           1 |
+|        2 | Opening tables       |               8.81 |           1 |
+|        2 | init                 |               7.29 |           1 |
+|        2 | executing            |               5.78 |           1 |
+|        2 | Table lock           |               5.78 |           1 |
+|        2 | optimizing           |               4.86 |           1 |
+|        2 | System lock          |               4.26 |           1 |
+|        2 | logging slow query   |               3.65 |           1 |
+|        2 | cleaning up          |               3.34 |           1 |
+|        2 | end                  |               3.34 |           1 |
+|        2 | query end            |               3.34 |           1 |
++----------+----------------------+--------------------+-------------+
+</pre></blockquote>
+As a point of interest, we can see that <i>"Opening tables"</i> is no longer a major impacting state.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="last_query_profiling.html">last_query_profiling</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
