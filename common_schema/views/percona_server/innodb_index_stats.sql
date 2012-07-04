@@ -8,11 +8,11 @@ VIEW innodb_index_stats AS
   SELECT
     *,
     IFNULL(
-      ROUND((index_size - 1)/(index_size - leaf_pages), 1),
+      ROUND((index_total_pages - 1)/(index_total_pages - index_leaf_pages), 1),
       0
     ) AS split_factor,
     IFNULL(
-      ROUND(1 + log(leaf_pages)/log((index_size - 1)/(index_size - leaf_pages)), 1),
+      ROUND(1 + log(index_leaf_pages)/log((index_total_pages - 1)/(index_total_pages - index_leaf_pages)), 1),
       0
     ) AS index_depth
   FROM
