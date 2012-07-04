@@ -50,7 +50,7 @@ VIEW query_profiling AS
     COUNT(*) AS state_calls,
     SUM(DURATION) AS state_sum_duration,
     SUM(DURATION)/COUNT(*) AS state_duration_per_call,
-    ROUND(100.0 * SUM(DURATION) / _query_profiling_summary.sum_duration, 2) AS state_duration_pct,
+    ROUND(100.0 * SUM(DURATION) / MAX(_query_profiling_summary.sum_duration), 2) AS state_duration_pct,
     GROUP_CONCAT(SEQ ORDER BY SEQ) AS state_seqs
   FROM 
     INFORMATION_SCHEMA.PROFILING
