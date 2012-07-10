@@ -1,0 +1,161 @@
+
+<p>
+QueryScript Flow Control: <strong>try-catch</strong> statement
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>try
+  statement;
+catch
+  statement;
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>try-catch</i> is an error handling flow control structure. Flow is determined based on
+the appearance or non-appearance of execution errors. 
+</p>
+<p>
+The <strong>try</strong> statement (or block of statements) is executed. If no error occurs, it completes, and the
+<strong>catch</strong> statement is never executed.
+</p>
+<p>
+If an error is detected within execution of the <strong>try</strong> statement, the <strong>try</strong> statement is aborted
+at the point of error (i.e. all statements following the point of error are discarded), and the
+<strong>catch</strong> statement (or block of statements) is executed.
+</p>
+<p>
+An error thrown from within a <strong>catch</strong> is not further caught, unless surrounded in itself by a nested <strong>try-catch</strong> statement.
+</p>
+
+<p>
+The <strong>catch</strong> block executes upon any error thrown within the <strong>try</strong> statement. It is not possible, at the moment, to explicitly
+specify a type of error for which the <strong>catch</strong> block should operate. Nor is it possible to specify multiple <strong>catch</strong> blocks as
+is common in various programming languages.
+</p>
+<p>
+Furthermore, it is currently not possible to retrieve the exact error (or error code) causing the <strong>catch</strong> block to operate. All that is known is that
+<i>some</i> error has been raised.
+</p>
+
+<p>
+Empty statements are not allowed in QueryScript. However, empty blocks are, and the 
+<i>try-catch</i> clause may be followed by an empty block, or by the do-nothing <a href="query_script_pass.html">pass</a> statement.
+</p>
+
+<p>
+Though syntactically valid, it makes no sense to use an empty <strong>try</strong> statement. It does make perfect sense to use an
+empty <strong>catch</strong> statement, to the result of silencing an error without termination of the script.
+</p>
+
+<h4>Nesting</h4>
+
+<p>It is possible to have nested <strong>try-catch</strong> statements. When nested, errors are caught by 
+the deepest <strong>catch</strong> block which apllies to the.
+To illustrate, consider:
+<blockquote><pre>
+try {
+  statement1;
+  try {
+    statement2;
+  }
+  catch {
+    -- errors in statement2 are handled here
+    statement 3;
+  }
+  statement 4;
+}
+catch {
+  -- errors in statement1, statement3 and statement4 are handled here
+  -- errors in statement2 are not handled here
+  statement 5;
+}
+</pre></blockquote>
+</p>
+
+<p>Unlike other common implementations of <strong>try-catch</strong>, <i>QueryScript</i> does not
+require block statements, i.e. braces. This allows for the following <i>try all you can</i> syntax, 
+which is very similar to a nested <i>if-else-if-else</i> construct:
+<blockquote><pre>
+try {
+  statement1;
+}
+catch try {
+  -- We only get here if statement1 fails
+  statement2;
+}
+catch try {
+  -- We only get here if statement1 & statement2 fail
+  statement3;
+}
+catch try {
+  -- We only get here if all previous statements fail
+  statement4;
+}
+catch {
+  -- They all failed
+  statement5;
+}
+</pre></blockquote>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>
+Simulate a schema upgrade process: try and create a table. If it already exists, make sure a given column is upgraded to a desired type:
+<blockquote><pre>
+try
+{
+  -- Try and create table:
+  CREATE TABLE test.article (
+    article_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title varchar(128) CHARSET utf8,
+    content text CHARSET utf8
+  );
+}
+catch
+{
+  -- Apparently table already exists. Upgrade it:
+  ALTER TABLE test.article
+    MODIFY COLUMN content text CHARSET utf8;
+}
+</pre></blockquote>
+</p>
+
+<p>
+Repeat attempts for query which is expected to abort on deadlock: insist on executing it until successful:
+<blockquote><pre>
+while (true)
+{
+  try
+  {
+    -- Attempt query which is expected to abort on deadlock:
+    UPDATE some_table SET some_column = 1 WHERE some_condition;
+    -- Got here? This means query is successful! We can leave now.
+    break;
+  }
+  catch
+  {
+    -- Apparently there was a deadlock. Rest, then loop again until succeeds
+    sleep 1;
+  }
+}
+</pre></blockquote>
+</p>
+
+<h3>NOTE</h3>
+<p>
+Since it is impossible to know the nature of the error causing the <strong>catch</strong> block to execute, and since <i>any</i> error
+will cause it to execute, it is the user's responsibility to deduce the origin of the error. In particular, watch out for plain syntax error, or
+otherwise SQL errors, such as misspelling table or column names.
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_if_else.html">if-else</a>,
+<a href="query_script_throw.html">throw</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+
