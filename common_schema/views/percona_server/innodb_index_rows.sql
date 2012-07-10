@@ -11,7 +11,8 @@ VIEW innodb_index_rows AS
     STATISTICS.INDEX_NAME,
     STATISTICS.SEQ_IN_INDEX,
     STATISTICS.COLUMN_NAME,
-    TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(rows_per_key, ',', SEQ_IN_INDEX), ',', -1)) AS incremental_row_per_key
+    SEQ_IN_INDEX = INNODB_INDEX_STATS.fields - IF(NON_UNIQUE, 1, 0) AS is_last_column_in_index,
+    CAST(TRIM(split_token(rows_per_key, ',', SEQ_IN_INDEX)) AS UNSIGNED) AS incremental_row_per_key
   FROM
     INFORMATION_SCHEMA.INNODB_INDEX_STATS
     JOIN INFORMATION_SCHEMA.STATISTICS USING (TABLE_SCHEMA, TABLE_NAME, INDEX_NAME)
