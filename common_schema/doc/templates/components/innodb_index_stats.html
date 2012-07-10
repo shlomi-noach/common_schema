@@ -22,7 +22,12 @@ integer types.
 </p>
 
 <p>This view depends upon the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
-in Percona Server. Note that as of Percona Server 5.5.8-20.0 the schema of the INNODB_INDEX_STATS is incompatible with earlier releases, and is not yet supported. 
+in Percona Server.  
+</p>
+
+<p>
+Note that Percona Server 5.5.8-20.0 version introduced changes to the INNODB_INDEX_STATS schema.
+This view is compatible with the new schema, and is incompatible with older releases.
 </p>
 
 <h3>STRUCTURE</h3>
@@ -51,7 +56,7 @@ mysql&gt; DESC common_schema.innodb_index_stats;
 with the addition of:</p>
 <ul>
 	<li><strong>split_factor</strong>: Estimated split factor of the index tree</li>
-	<li><strong>index_depth</strong>: Estimated depth of the index tree</li>
+	<li><strong>index_depth</strong>: Estimated depth of the index tree. Value is a floating point, though the depth of an index is an integer.</li>
 </ul>
 
 <h3>EXAMPLES</h3>
@@ -67,7 +72,7 @@ with the addition of:</p>
 </pre></blockquote>
 
 <h3>ENVIRONMENT</h3>
-Percona Server &lt; 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
+Percona Server &gt;= 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
 
 <h3>SEE ALSO</h3>
 <a href="innodb_index_rows.html">innodb_index_rows</a>
