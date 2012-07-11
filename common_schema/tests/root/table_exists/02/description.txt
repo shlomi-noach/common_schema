@@ -1,0 +1,1 @@
+Verify table does not exist for temporary table

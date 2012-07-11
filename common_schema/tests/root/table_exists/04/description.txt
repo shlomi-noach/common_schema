@@ -1,0 +1,1 @@
+Verify table exists for I_S table
