@@ -1,0 +1,1 @@
+drop an array passing NULL value. Expect no impact on another array.

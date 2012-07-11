@@ -1,0 +1,1 @@
+drop an array. Expect no impact on another array.
