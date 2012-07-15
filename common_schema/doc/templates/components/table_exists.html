@@ -1,0 +1,62 @@
+<h3>NAME</h3>
+table_exists(): Check if specified table exists
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	<i>table_exists()</i> provides with a quick and efficient boolean check for existence of
+	a table or a view.
+</p>
+<p>
+	It requires both input parameters to identify existing object (no wildcards, NULLs or empty
+	strings allowed), and uses 
+	<a href="http://dev.mysql.com/doc/refman/5.1/en/information-schema-optimization.html">INFORMATION_SCHEMA optimizations</a>
+	to look them up. In particular, no directories are scanned and no tables are opened by the
+	execution of this function.
+</p>
+<p>
+	The function makes no distinction between a table and a view. Any such distinction would require
+	opening the table definition file.
+</p>
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>table_exists(lookup_table_schema varchar(64) charset utf8, lookup_table_name varchar(64) charset utf8) 
+  RETURNS TINYINT UNSIGNED</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>lookup_table_schema</strong>: name of schema (database)</li>
+    <li><strong>lookup_table_name</strong>: name of table to look for within said schema</li>
+  </ul>
+</p>
+<p>
+Output: boolean: <strong>1</strong> is indicated table/view exists, <strong>0</strong> otherwise.
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Qualify a GRANTEE:</p>
+<blockquote><pre>mysql&gt; SELECT table_exists('sakila', 'rental') AS does_it_exist;
++---------------+
+| does_it_exist |
++---------------+
+|             1 |
++---------------+
+
+mysql&gt; SELECT table_exists('sakila', 'zzzztttt') AS does_it_exist;
++---------------+
+| does_it_exist |
++---------------+
+|             0 |
++---------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="schema_analysis_views.html">Schema analysis</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
