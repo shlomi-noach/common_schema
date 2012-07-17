@@ -1,0 +1,1 @@
+call prettify_message('success', 'Execution complete.\nPlease follow next instructions.\n\nThank you for testing!');
