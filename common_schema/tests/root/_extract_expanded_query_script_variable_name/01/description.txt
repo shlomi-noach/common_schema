@@ -1,0 +1,1 @@
+get old-style expanded variable name
