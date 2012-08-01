@@ -21,7 +21,7 @@ main_body: begin
     statement_loop: while id_from <= id_to do
       SELECT state FROM _sql_tokens WHERE id = id_from INTO first_state;
       case
-        when first_state in ('whitespace', 'single line comment', 'multi line comment') then begin
+        when first_state in ('whitespace', 'single line comment', 'multi line comment', 'start') then begin
 	        -- Ignore whitespace
 	        set id_from := id_from + 1;
 	        iterate statement_loop;
