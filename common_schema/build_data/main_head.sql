@@ -26,6 +26,12 @@ CREATE DATABASE IF NOT EXISTS common_schema;
 
 USE common_schema;
 
--- Until otherwise changed during installation:
-set @common_schema_innodb_plugin_installed := true;
-set @common_schema_percona_server_installed := true;
+set @@group_concat_max_len = 1048576;
+set @current_sql_mode := @@sql_mode;
+set @@sql_mode = REPLACE(REPLACE(@@sql_mode, 'ANSI_QUOTES', ''), ',,', ',');
+
+-- To be updated during installation process:
+set @common_schema_innodb_plugin_expected := 0;
+set @common_schema_innodb_plugin_installed := 0;
+set @common_schema_percona_server_expected := 0;
+set @common_schema_percona_server_installed := 0;
