@@ -1,0 +1,43 @@
+<h3>NAME</h3>
+strip_urls(): Strips URLs from given text, replacing them with an empty string.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	Strip out <i>http://</i> and <i>https://</i> URLs from given text.
+	URLs are replaced with the empty string. Otherwise the text is untouched,
+	and in particular, spaces are not compressed.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>strip_urls(txt TEXT CHARSET utf8)
+  RETURNS TEXT CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: an arbitrary text, possibly containing URLs
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Strip both <i>http://</i> and <i>https://</i> URLs from text:</p>
+<blockquote><pre>mysql&gt; SELECT strip_urls('Check out common_schema: http://bit.ly/xKc8k3, an awesome project! https://bit.ly/Nd57HS') AS stripped;
++------------------------------------------------+
+| stripped                                       |
++------------------------------------------------+
+| Check out common_schema:  an awesome project!  |
++------------------------------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="replace_all.html">replace_all()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
