@@ -1,0 +1,126 @@
+<h3>NAME</h3>
+killall(): Kill connections with by matching GRANTEE, user or host
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Kill connections by matching connection GRANTEE, user or host with given input. 
+	This routine provides with a quick "kill those connections right now" solution,
+	which is otherwise achieved by looking up connection IDs from SHOW PROCESSLIST,
+	or by <a href="eval.html">evaluating</a> the <a href="processlist_grantees.html">processlist_grantees</a> view.</p>
+<p>
+	<i>killall()</i>, similar to unix' <i>killall</i> command, kills by name rather than
+	by ID. <i>killall()</i> accepts a <strong>grantee_term</strong> input, which may be
+	either a fully qualified GRANTEE (e.g. 'gromit'@'webhost.local'), a relaxed GRANTEE
+	(e.g. gromit@localhost), a username	only (e.g. 'gromit') or a hostname only 
+	(e.g. 'analytics_server.localdomain').
+</p>
+
+<p>
+	Thus, it makes it easy to quickly kill, for example, all connections by a given user, 
+	wherever that user may connect from.
+</p>
+
+<p>
+	<i>killall()</i> allows killing of all connections, including those of users with the
+	<strong>SUPER</strong> privilege, as well as replication. However, <i>killall()</i> is
+	guaranteed never to kill the current connection - the very one invoking the routine.
+</p>
+
+<p>
+	Whatever the <strong>grantee_term</strong> is, it is compared against GRANTEE accounts,
+	and <i>NOT</i> against particular connections. Thus, the following:
+<blockquote><pre>
+call killall('192.168.0.%');
+</pre></blockquote>
+	will kill all connections of accounts where the host part of the account equals 
+	<strong>'192.168.0.%'</strong>. It will <i>NOT</i> necessarily kill all connections 
+	from hosts matching the pattern. <i>killall()</i> does not do pattern matching.
+	To illustrate, it will <i>NOT</i> kill a connection by the GRANTEE 
+	<strong>'gromit'@'192.168.0.10'</strong>. It <i>will</i> kill connections by
+	<strong>'preston'@'192.168.0.%'</strong>.
+</p>
+
+<p>
+	<i>killall()</i> does not provide the mechanism to kill queries which are slow,
+	or include a given text. Use <a href="eval.html">eval()</a> and 
+	<a href="processlist_grantees.html">processlist_grantees</a> for that.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>killall(IN grantee_term TINYTEXT CHARSET utf8) 
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>grantee_term</strong>: a GRANTEE, qualified or unqualified, or the user or host parts of a GRANTEE.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Kill all connections by user <strong>'apps'</strong>:
+	<blockquote><pre>mysql&gt; SHOW PROCESSLIST;
++----+------+-----------+---------------+---------+------+------------+---------------------+
+| Id | User | Host      | db            | Command | Time | State      | Info                |
++----+------+-----------+---------------+---------+------+------------+---------------------+
+|  7 | root | localhost | common_schema | Query   |    0 | NULL       | SHOW PROCESSLIST    |
+| 78 | apps | localhost | NULL          | Query   |   31 | User sleep | select sleep(10000) |
++----+------+-----------+---------------+---------+------+------------+---------------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; CALL killall('apps');
+
+mysql&gt; SHOW PROCESSLIST;
++----+------+-----------+---------------+---------+------+-------+------------------+
+| Id | User | Host      | db            | Command | Time | State | Info             |
++----+------+-----------+---------------+---------+------+-------+------------------+
+|  7 | root | localhost | common_schema | Query   |    0 | NULL  | SHOW PROCESSLIST |
++----+------+-----------+---------------+---------+------+-------+------------------+
+1 row in set (0.00 sec)
+</pre></blockquote>
+	</p>
+
+
+	<p>
+		Kill all <strong>'localhost'</strong> connections:
+	<blockquote><pre>mysql&gt; SHOW PROCESSLIST;
++----+------+-----------+---------------+---------+------+------------+---------------------+
+| Id | User | Host      | db            | Command | Time | State      | Info                |
++----+------+-----------+---------------+---------+------+------------+---------------------+
+|  7 | root | localhost | common_schema | Query   |    0 | NULL       | SHOW PROCESSLIST    |
+| 81 | apps | localhost | NULL          | Query   |   18 | User sleep | select sleep(10000) |
++----+------+-----------+---------------+---------+------+------------+---------------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; CALL killall('localhost');
+
+mysql&gt; SHOW PROCESSLIST;
++----+------+-----------+---------------+---------+------+-------+------------------+
+| Id | User | Host      | db            | Command | Time | State | Info             |
++----+------+-----------+---------------+---------+------+-------+------------------+
+|  7 | root | localhost | common_schema | Query   |    0 | NULL  | SHOW PROCESSLIST |
++----+------+-----------+---------------+---------+------+-------+------------------+
+1 row in set (0.00 sec)
+</pre></blockquote>
+Note that process <strong>#7</strong> is not killed since it is the one executing the kill. 
+	</p>
+
+
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="query_script_eval.html">eval</a>,
+<a href="eval.html">eval()</a>,
+<a href="processlist_grantees.html">processlist_grantees</a>,
+<a href="processlist_top.html">processlist_top</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
