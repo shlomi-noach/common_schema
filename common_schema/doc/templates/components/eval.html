@@ -18,6 +18,23 @@ Procedure
 	as well as any privileges required for evaluating implied queries.
 </p>
 
+<p>
+	Many of <i>common_schema</i>'s views include SQL columns: columns containing
+	read-to-invoke statements. Consider
+	<a href="processlist_grantees.html">processlist_grantees</a>, 
+	<a href="redundant_keys.html">redundant_keys</a>, 
+	<a href="sql_alter_table.html">sql_alter_table</a>, 
+	<a href="sql_foreign_keys.html">sql_foreign_keys</a>, 
+	<a href="sql_grants.html">sql_grants</a> and more.
+	It is possible, this, to invoke <i>eval()</i> directly on such views, see examples below.	
+</p>
+
+<p>
+	<i>common_schema</i> offers alternatives to <i>eval()</i>, on popular use cases.
+	In particular, see QueryScript's <a href="query_script_foreach.html">foreach</a> statement
+	for many operations that can be produced via INFORMATION_SCHEMA.TABLES. 
+</p>
+
 <h3>SYNOPSIS</h3>
 <p>
 <blockquote><pre>eval(sql_query TEXT CHARSET utf8) 
@@ -39,7 +56,6 @@ Procedure
 	<p>
 		In the following example we kill all connections executing queries for more than 
 		<strong>20</strong> seconds.
-	</p>
 	<blockquote><pre>mysql&gt; SHOW PROCESSLIST;
 +----+------+-----------+---------------+---------+------+------------+---------------------+
 | Id | User | Host      | db            | Command | Time | State      | Info                |
@@ -59,6 +75,12 @@ mysql&gt; SHOW PROCESSLIST;
 +----+------+-----------+---------------+---------+------+-------+------------------+
 1 row in set (0.00 sec)
 </pre></blockquote>
+	As per previous note on <i>common_schema</i> views providing with SQL columns,
+	see an alternative to the above (and slightly more sophisticated), 
+	utilizing <a href="processlist_grantees.html">processlist_grantees</a>: 
+	<blockquote><pre>mysql&gt; CALL eval("SELECT sql_kill_query FROM processlist_grantees WHERE COMMAND != 'Sleep' AND TIME > 20 AND is_super = 0 AND is_repl = 0");
+</pre></blockquote>
+	</p>
 
 	<p>
 		Convert all MyISAM tables to Innodb:
@@ -89,6 +111,7 @@ mysql&gt; SELECT TABLE_NAME, ENGINE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_S
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
+<a href="query_script_eval.html">eval</a>,
 <a href="exec.html">exec()</a>,
 <a href="exec_single.html">exec_single()</a>,
 <a href="foreach.html">foreach()</a>,

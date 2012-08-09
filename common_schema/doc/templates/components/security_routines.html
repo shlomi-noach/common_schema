@@ -3,7 +3,15 @@
 <p>
 Security routines: stored functions managing security and privileges information.
 <ul>
+	<li><a href="killall.html">killall()</a>: Kill connections with by matching GRANTEE, user or host.</li>
 	<li><a href="match_grantee.html">match_grantee()</a>: Match an existing account based on user+host.</li>
 	<li><a href="mysql_grantee.html">mysql_grantee()</a>: Return a qualified MySQL grantee (account) based on user and host.</li>
 </ul>
 </p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Kill all connections made by the <strong>'analytics`</strong> user:
+	</p>
+	<blockquote><pre>mysql&gt; CALL killall('analytics');
+</pre></blockquote>
