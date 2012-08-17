@@ -26,12 +26,11 @@ main_body: begin
     declare id_end_statement int unsigned; 
     
     declare mysql_statement TEXT CHARSET utf8;
-    declare expanded_variables TEXT CHARSET utf8;
-    declare expanded_variables_array_id int unsigned;
     
     declare expression text charset utf8;
     declare expression_statement text charset utf8;
     declare expression_result tinyint unsigned;
+    declare expanded_variables_found tinyint unsigned;
     
     declare peek_match tinyint unsigned;
     declare matched_token text charset utf8;
@@ -40,14 +39,27 @@ main_body: begin
     declare while_statement_id_to int unsigned;
     declare foreach_statement_id_from int unsigned;
     declare foreach_statement_id_to int unsigned;
+    declare split_statement_id_from int unsigned;
+    declare split_statement_id_to int unsigned;
     declare if_statement_id_from int unsigned;
     declare if_statement_id_to int unsigned;
     declare else_statement_id_from int unsigned;
     declare else_statement_id_to int unsigned;
 
+    declare try_statement_error_found tinyint unsigned;
+    declare try_statement_id_from int unsigned;
+    declare try_statement_id_to int unsigned;
+    declare catch_statement_id_from int unsigned;
+    declare catch_statement_id_to int unsigned;
+
     declare foreach_variables_statement text charset utf8;
     declare foreach_collection text charset utf8;
     declare foreach_variables_array_id int unsigned;
+    
+    declare split_table_schema tinytext charset utf8;
+    declare split_table_name tinytext charset utf8;
+    declare split_injected_action_statement text charset utf8;
+    declare split_injected_text text charset utf8;
     
     declare reset_query text charset utf8;
 
@@ -79,15 +91,8 @@ main_body: begin
 	        call _validate_statement_end(id_from, id_to, id_end_statement);
             if should_execute_statement then
               -- Construct the original statement, send it for execution.
-              SELECT GROUP_CONCAT(DISTINCT SUBSTRING(token, 2)) FROM _sql_tokens WHERE id BETWEEN id_from AND id_end_statement AND state = 'expanded query_script variable' INTO expanded_variables;
-              if expanded_variables IS NULL then
-                -- No expanded variables found. Read the query directly from tokens.
-                SELECT GROUP_CONCAT(token ORDER BY id SEPARATOR '') FROM _sql_tokens WHERE id BETWEEN id_from AND id_end_statement INTO mysql_statement;
-              else
-                -- Expanded variables found.
-                call _take_local_variables_snapshot(expanded_variables);
-                SELECT GROUP_CONCAT(IF(_qs_variables.variable_name IS NOT NULL, _qs_variables.value_snapshot, token) ORDER BY id SEPARATOR '') FROM _sql_tokens LEFT JOIN _qs_variables ON(state = 'expanded query_script variable' AND SUBSTRING(token, 2) = _qs_variables.variable_name) WHERE id BETWEEN id_from AND id_end_statement INTO mysql_statement;
-              end if;
+              call _expand_statement_variables(id_from, id_end_statement, mysql_statement, expanded_variables_found, should_execute_statement);
+
               call exec_single(mysql_statement);
               set @query_script_rowcount := @common_schema_rowcount;
             end if;
@@ -99,7 +104,7 @@ main_body: begin
   	        set consumed_to_id := id_end_statement;
           end;
         when first_state = 'alpha' AND first_token = 'while' then begin
-	        call _consume_expression(id_from + 1, id_to, TRUE, consumed_to_id, expression, expression_statement);
+	        call _consume_expression(id_from + 1, id_to, TRUE, consumed_to_id, expression, expression_statement, should_execute_statement);
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
             set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
@@ -137,7 +142,7 @@ main_body: begin
 	        set while_statement_id_to := consumed_to_id;
 	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'while', NULL, peek_match, @_common_schema_dummy);
 	        if peek_match then
-	          call _consume_expression(consumed_to_id + 1, id_to, TRUE, consumed_to_id, expression, expression_statement);
+	          call _consume_expression(consumed_to_id + 1, id_to, TRUE, consumed_to_id, expression, expression_statement, should_execute_statement);
 	          set id_from := consumed_to_id + 1;
             else
               call _throw_script_error(id_from, CONCAT('Expcted "while" on loop-while expression'));
@@ -178,8 +183,24 @@ main_body: begin
               call _foreach(foreach_collection, NULL, foreach_statement_id_from, foreach_statement_id_to, TRUE, @_common_schema_dummy, foreach_variables_array_id, depth+1, TRUE);
             end if;
 	      end;
+        when first_state = 'alpha' AND first_token = 'split' then begin
+	        call _consume_split_statement(id_from + 1, id_to, consumed_to_id, depth, split_table_schema, split_table_name, split_injected_action_statement, split_injected_text, should_execute_statement);
+
+	        set id_from := consumed_to_id + 1;
+	        -- consume single statement (possible compound by {})
+            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
+	        set split_statement_id_from := id_from;
+	        set split_statement_id_to := consumed_to_id;
+            if should_execute_statement then
+             begin end;
+               -- call _split(split_table_schema, split_table_name);
+               call _split(split_table_schema, split_table_name, split_injected_action_statement, split_injected_text, split_statement_id_from, split_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+            end if;
+	      end;
         when first_state = 'alpha' AND first_token = 'if' then begin
-	        call _consume_expression(id_from + 1, id_to, TRUE, consumed_to_id, expression, expression_statement);
+	        call _consume_expression(id_from + 1, id_to, TRUE, consumed_to_id, expression, expression_statement, should_execute_statement);
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
 	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
@@ -205,6 +226,30 @@ main_body: begin
                 if else_statement_id_from IS NOT NULL then
                   call _consume_statement(else_statement_id_from, else_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
                 end if;
+              end if;
+            end if;
+	      end;
+        when first_state = 'alpha' AND first_token = 'try' then begin
+	        -- consume single statement (possible compound by {})
+            set id_from := id_from + 1;
+            call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+            set try_statement_id_from := id_from;
+            set try_statement_id_to := consumed_to_id;
+            -- There must be an 'catch' clause
+            call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'catch', NULL, peek_match, @_common_schema_dummy);
+	        if peek_match then
+              set id_from := consumed_to_id + 1;
+              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+              set catch_statement_id_from := id_from;
+              set catch_statement_id_to := consumed_to_id;
+            else
+              call _throw_script_error(id_from, CONCAT('Expected "catch" on try-catch block'));
+            end if;
+            
+            if should_execute_statement then
+              call _consume_try_statement(try_statement_id_from, try_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE, try_statement_error_found);
+              if try_statement_error_found then
+                call _consume_statement(catch_statement_id_from, catch_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
               end if;
             end if;
 	      end;
