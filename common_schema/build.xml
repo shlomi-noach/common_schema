@@ -11,31 +11,32 @@
 
 	<property name="mysql.database" value="common_schema" />
 
+	<property name="build_data.dir" value="build_data" />
 	<property name="build.dir" value="build" />
 	<property name="dist.dir" value="dist" />
 	<property name="tests.dir" value="tests" />
 	<property name="tmp.dir" value="ant-tmp" />
-	<property name="sql.help.output.file" value="base_help.sql" />
-	<property name="sql.mysql_51.output.file" value="common_schema_mysql_51.sql" />
-	<property name="sql.innodb_plugin.output.file" value="common_schema_innodb_plugin.sql" />
-	<property name="sql.percona_server.output.file" value="common_schema_percona_server.sql" />
+	<property name="sql.help.output.file" value="common_schema_help.sql" />
+	<property name="sql.base_components.output.file" value="common_schema_base_components.sql" />
+	<property name="sql.additional_components.output.file" value="common_schema_additional_components.sql" />
+	<property name="sql.build.output.file" value="common_schema.sql" />
 
 	<property name="doc.templates.dir" value="doc/templates" />
 	<property name="doc.html.dir" value="doc/html" />
 	
 	<property name="doc.sql.tmp.file" value="doc_sql.txt" />
 
+	
 	<target name="all" depends="build">
 	</target>
 
-	<target name="build" depends="revnumber, build_all, build_mysql_51, build_innodb_plugin, build_percona_server">
-	</target>
-
+	
 	<target name="clean">
 		<delete dir="${build.dir}" />
 		<delete dir="${dist.dir}" />
 		<delete dir="${tmp.dir}" />
 	</target>
+	
 
 	<target name="undeploy">
 		<antcall target="exec_mysql_command">
@@ -43,6 +44,7 @@
 		</antcall>
 	</target>
 
+	
 	<target name="revnumber" description="Get the SVN greatest revision number">
 		<mkdir dir="${tmp.dir}" />
 		<exec dir="." executable="svn" output="ant-tmp/svn_output" failifexecutionfails="false" description="Get SVN info for all files recursively">
@@ -62,10 +64,10 @@
 		<echo>revision: ${svn.revision}</echo>
 	</target>
 
-
-	<target name="build_all" depends="revnumber, doc_sql">
+	
+	<target name="build_base_components" depends="revnumber">
 		<mkdir dir="${build.dir}" />
-		<concat destfile="${build.dir}/base_${sql.mysql_51.output.file}">
+		<concat destfile="${build.dir}/${sql.base_components.output.file}">
 			<fileset dir="tables/" includes="*.sql" />
 
 			<fileset dir="routines/dependencies/" includes="*.sql" />
@@ -74,8 +76,14 @@
 			<fileset dir="routines/meta/" includes="*.sql" />
 			<fileset dir="routines/privileges/" includes="*.sql" />
 			<fileset dir="routines/process/" includes="*.sql" />
+			<fileset dir="routines/schema/" includes="*.sql" />
 			<fileset dir="routines/script/" includes="*.sql" />
+			<fileset dir="routines/script/states" includes="*.sql" />
+			<fileset dir="routines/script/variables" includes="*.sql" />
 			<fileset dir="routines/script/array" includes="*.sql" />
+			<fileset dir="routines/script/array/mxarray" includes="*.sql" />
+			<fileset dir="routines/script/split" includes="*.sql" />
+			<fileset dir="routines/script/split/analyze" includes="*.sql" />
 			<fileset dir="routines/text/" includes="*.sql" />
 			<fileset dir="routines/time/" includes="*.sql" />
 			
@@ -88,88 +96,77 @@
 			
 			<fileset dir="views/schema_analysis/" includes="*.sql" />
 			<fileset dir="views/data_dimension/" includes="*.sql" />
+			<fileset dir="views/meta/" includes="*.sql" />
 			<fileset dir="views/monitoring/" includes="*.sql" />
 			<fileset dir="views/process/" includes="*.sql" />
 			<fileset dir="views/security/" includes="*.sql" />
 		</concat>
-		<replace file="${build.dir}/base_${sql.mysql_51.output.file}" token="revision.placeholder" value="${svn.revision}"/>
-		<concat destfile="${build.dir}/base_${sql.innodb_plugin.output.file}">
-			<!--
-			<fileset dir="routines/innodb_plugin/" includes="*.sql" />
-			-->
-			<fileset dir="views/innodb_plugin/" includes="*.sql" />
+		<replace file="${build.dir}/${sql.base_components.output.file}" token="revision.placeholder" value="${svn.revision}"/>
+	</target>
+	
+	
+	<target name="build_additional_components">
+		<delete dir="${tmp.dir}" />
+		<mkdir dir="${tmp.dir}" />
+		<foreach param="innodb_plugin_component.filename" target="build_innodb_plugin_component">
+			<path>
+				<fileset dir="views/innodb_plugin/" includes="*.sql" />
+			</path>
+		</foreach>
+		<foreach param="percona_server_component.filename" target="build_percona_server_component">
+			<path>
+				<fileset dir="views/percona_server/" includes="*.sql" />
+			</path>
+		</foreach>
+		<concat destfile="${build.dir}/${sql.additional_components.output.file}">
+			<fileset dir="${tmp.dir}" includes="*.sql" />
 		</concat>
-		<concat destfile="${build.dir}/base_${sql.percona_server.output.file}">
-			<fileset dir="views/percona_server/" includes="*.sql" />
-		</concat>
+		<delete dir="${tmp.dir}" />
+	</target>
+	
+	<target name="build_innodb_plugin_component">
+		<basename property="innodb_plugin_component.file.basename" file="${innodb_plugin_component.filename}" />
+		
+		<loadfile property="component.text" srcfile="${innodb_plugin_component.filename}"></loadfile>
+		<copy file="${build_data.dir}/innodb_plugin_component.sql" toFile="${tmp.dir}/${innodb_plugin_component.file.basename}" />
+		<replace file="${tmp.dir}/${innodb_plugin_component.file.basename}" token="component.placeholder" value="${component.text}"/>
+	</target>
+	
+	<target name="build_percona_server_component">
+		<basename property="percona_server_component.file.basename" file="${percona_server_component.filename}" />
+		
+		<loadfile property="component.text" srcfile="${percona_server_component.filename}"></loadfile>
+		<copy file="${build_data.dir}/percona_server_component.sql" toFile="${tmp.dir}/${percona_server_component.file.basename}" />
+		<replace file="${tmp.dir}/${percona_server_component.file.basename}" token="component.placeholder" value="${component.text}"/>
 	</target>
 
-	<target name="build_mysql_51" depends="build_all">
-		<mkdir dir="${build.dir}" />
-		<concat destfile="${build.dir}/${sql.mysql_51.output.file}">
-			<fileset file="main_head.sql" />
-			<fileset file="${build.dir}/base_${sql.mysql_51.output.file}" />
+	
+	<target name="build" depends="revnumber, build_base_components, build_additional_components">
+		<concat destfile="${build.dir}/${sql.build.output.file}">
+			<fileset file="${build_data.dir}/main_head.sql" />
+			<fileset file="${build.dir}/${sql.base_components.output.file}" />
+			<fileset file="${build.dir}/${sql.additional_components.output.file}" />
 			<fileset file="${build.dir}/${sql.help.output.file}" />
-			<fileset file="main_tail.sql" />
+			<fileset file="${build_data.dir}/main_tail.sql" />		
 		</concat>
 	</target>
-
-	<target name="build_innodb_plugin" depends="build_all">
-		<concat destfile="${build.dir}/${sql.innodb_plugin.output.file}">
-			<fileset file="main_head.sql" />
-			<fileset file="${build.dir}/base_${sql.mysql_51.output.file}" />
-			<fileset file="${build.dir}/base_${sql.innodb_plugin.output.file}" />
-			<fileset file="${build.dir}/${sql.help.output.file}" />
-			<fileset file="main_tail.sql" />		
-		</concat>
+	
+	
+	<target name="deploy" depends="build">
+		<antcall target="deploy_file">
+			<param name="common_schema_sql_file" value="${build.dir}/${sql.build.output.file}" />
+		</antcall>
 	</target>
 
-	<target name="build_percona_server" depends="build_all">
-		<concat destfile="${build.dir}/${sql.percona_server.output.file}">
-			<fileset file="main_head.sql" />
-			<fileset file="${build.dir}/base_${sql.mysql_51.output.file}" />
-			<fileset file="${build.dir}/base_${sql.innodb_plugin.output.file}" />
-			<fileset file="${build.dir}/base_${sql.percona_server.output.file}" />
-			<fileset file="${build.dir}/${sql.help.output.file}" />
-			<fileset file="main_tail.sql" />		
-		</concat>
-	</target>
-
-	<target name="dist" depends="clean, build, revnumber, test">
+	
+	<target name="dist" depends="clean, build, doc_sql, revnumber, test">
 		<mkdir dir="${dist.dir}" />
-		<antcall target="dist_file">
-			<param name="common_schema_sql_file" value="${sql.mysql_51.output.file}" />
-		</antcall>
-		<antcall target="dist_file">
-			<param name="common_schema_sql_file" value="${sql.innodb_plugin.output.file}" />
-		</antcall>
-		<antcall target="dist_file">
-			<param name="common_schema_sql_file" value="${sql.percona_server.output.file}" />
-		</antcall>
+		<propertyregex property="release_filename" input="${sql.build.output.file}" regexp="(.*).sql" select="\1-r${svn.revision}.sql" />
+		
+		<loadfile property="doc_sql" srcfile="${build.dir}/${sql.help.output.file}"></loadfile>
+		<copy file="${build.dir}/${sql.build.output.file}" tofile="${dist.dir}/${release_filename}" />
+		<replace file="${dist.dir}/${release_filename}" token="doc_sql.placeholder" value="${doc_sql}"/>
 		<tar destfile="${dist.dir}/common_schema_doc_r${svn.revision}.tar.gz" basedir="doc/html" compression="gzip" />
-	</target>
-
-	<target name="dist_file">
-		<propertyregex property="release_filename" input="${common_schema_sql_file}" regexp="(.*).sql" select="\1-r${svn.revision}.sql" />
-		<copy file="${build.dir}/${common_schema_sql_file}" tofile="${dist.dir}/${release_filename}" />
-	</target>
-
-	<target name="deploy_mysql_51" depends="build_mysql_51">
-		<antcall target="deploy_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${sql.mysql_51.output.file}" />
-		</antcall>
-	</target>
-
-	<target name="deploy_innodb_plugin" depends="build_innodb_plugin">
-		<antcall target="deploy_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${sql.innodb_plugin.output.file}" />
-		</antcall>
-	</target>
-
-	<target name="deploy_percona_server" depends="build_percona_server">
-		<antcall target="deploy_file">
-			<param name="common_schema_sql_file" value="${build.dir}/${sql.percona_server.output.file}" />
-		</antcall>
 	</target>
 
 	<target name="deploy_file">
@@ -207,6 +204,7 @@
 		</exec>
 	</target>
 
+	
 	<target name="doc" depends="revnumber">
 		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}/css">
 		</copy>
@@ -225,6 +223,7 @@
 			</path>
 		</foreach>
 	</target>
+	
 	<target name="component_doc">
 		<basename property="doc_basename" file="${component_doc_filename}" />
 		<basename property="component_name" file="${component_doc_filename}" suffix=".html" />
@@ -236,6 +235,7 @@
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${component_name}" />
 		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>		
 	</target>
+	
 	<target name="generaldoc">
 		<basename property="doc_basename" file="${generaldoc_filename}" />
 		<basename property="docname" file="${generaldoc_filename}" suffix=".html" />
@@ -248,7 +248,9 @@
 		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>		
 	</target>
 	
+	
 	<target name="doc_sql">
+		
 		<mkdir dir="${tmp.dir}" />
 		<mkdir dir="${build.dir}" />
 		<delete file="${build.dir}/${sql.help.output.file}" />
@@ -263,7 +265,9 @@
 			</path>
 		</foreach>
 		<delete dir="${tmp.dir}" />
+		
 	</target>
+	
 	<target name="page_doc_sql">
 		<basename property="doc_basename" file="${page_doc_filename}" />
 		<basename property="page_doc_name" file="${page_doc_filename}" suffix=".html" />
@@ -286,6 +290,7 @@
 		</concat>
 	</target>
 
+	
 	<target name="test">
 		<echo>Testing</echo>
 		<exec executable="bash" dir="${tests.dir}" failonerror="true">
@@ -295,6 +300,7 @@
 			<arg value="${mysql.socket}" />
 		</exec>
 	</target>
+	
 	
 	<target name="__test__">
 		<echo>${abc}</echo>
