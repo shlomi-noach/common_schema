@@ -1,0 +1,68 @@
+
+<p>
+<strong>eval</strong>: evaluate statement by dynamically invoking result set test.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>eval select text_col ...;
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>eval</i> is a META statement, which executes a given statement, gets its text output - 
+assumed to be SQL, and invokes this resulting SQL.
+</p>
+<p>
+That is, <i>eval</i> is given a statement as argument. <i>eval</i> expects a SELECT statement
+which produces a single text column, and the text in that columns is expected to be 
+valid SQL statements.
+</p>
+<p>The <i>eval</i> statement invokes the <a href="eval.html">eval()</a> routine, and therefore
+produces the same result/output.</p>
+
+<p>
+Many views in <i>common_schema</i> produce SQL statements as columns. Consider
+<a href="processlist_grantees.html">processlist_grantees</a>, 
+<a href="redundant_keys.html">redundant_keys</a>, 
+<a href="sql_alter_table.html">sql_alter_table</a>, 
+<a href="sql_foreign_keys.html">sql_foreign_keys</a>, 
+<a href="sql_grants.html">sql_grants</a> and more.
+It is possible, then, to <i>eval</i> directly on columns of these views:
+<blockquote><pre>
+eval SELECT sql_revoke FROM sql_grants WHERE user='gromit';
+</pre></blockquote>
+</p>
+<p>
+<i>common_schema</i> also offers programmatic alternatives to <i>eval</i>. For example, instead 
+of evaluating queries on INFORMATION_SCHEMA.TABLES, one can use the 
+<a href="query_script_foreach.html">foreach</a> statement.
+</p>
+
+
+<h3>EXAMPLES</h3>
+<p>
+Drop foreign keys from the <strong>sakila</strong> database:
+<blockquote><pre>
+eval SELECT drop_statement FROM sql_foreign_keys WHERE TABLE_SCHEMA='sakila';
+</pre></blockquote>
+</p>
+
+<p>
+<strong>KILL</strong> long running queries which were invoked by 'normal' users: 
+<blockquote><pre>
+eval SELECT sql_kill_query FROM processlist_grantees WHERE COMMAND != 'Sleep' AND TIME > 20 AND is_super = 0 AND is_repl = 0;
+</pre></blockquote>
+</p>
+
+
+<h3>SEE ALSO</h3>
+<a href="eval.html">eval()</a>,
+<a href="query_script_foreach.html">foreach</a>,
+<a href="killall.html">killall()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

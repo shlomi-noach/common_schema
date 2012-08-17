@@ -11,6 +11,7 @@ QueryScript Statements: operations on data, schema or flow.
     statement;
 }
 </pre></blockquote>
+<a href="#qs_statements">List of QueryScript statements</a>
 </p>
 
 <h3>DESCRIPTION</h3>
@@ -46,11 +47,15 @@ held by this variable is the value of <a href="http://dev.mysql.com/doc/refman/5
 resulting from the statement. 
 </p>
 
+<a name="qs_statements"></a>
 <h4>QueryScript statements</h4>
 <p>
 QueryScript adds and recognizes the following statements: 
 <ul>
+	<li><a href="query_script_eval.html">eval</a></li>
 	<li><a href="query_script_input.html">input</a></li>
+	<li><a href="query_script_pass.html">pass</a></li>
+	<li><a href="query_script_sleep.html">sleep</a></li>
 	<li><a href="query_script_throttle.html">throttle</a></li>
 	<li><a href="query_script_throw.html">throw</a></li>
 	<li><a href="query_script_var.html">var</a></li>
@@ -82,7 +87,7 @@ structures, such as <a href="query_script_foreach.html">foreach</a>,
 
 <h4>Statement delimiters</h4>
 <p>
-QueryScript statements are terminates by a semicolon (<strong>;</strong>"). The last query in a block or script can optionally <i>not</i> be terminated by the semicolon. 
+QueryScript statements are terminates by a semicolon ("<strong>;</strong>"). The last query in a block or script can optionally <i>not</i> be terminated by the semicolon. 
 Thus, the following are valid scripts:
 <blockquote><pre>
     statement

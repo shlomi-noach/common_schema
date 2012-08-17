@@ -1,9 +1,9 @@
 <p><i>common_schema</i> distribution file is a SQL source file.  To install it, you should execute it on your MySQL server.</p>
 
 <p>There are many ways to import a SQL file into MySQL, listed below. 
-<strong>Make sure</strong> to execute them as a privileged user, e.g. <strong>'root'@'localhost'</strong>, as installation involves creation of schema, tables, views &amp; routines. </p>
+<strong>Make sure</strong> to execute them as a privileged user, e.g. <strong>'root'@'localhost'</strong>, as installation involves creation of schema, tables, views &amp; routines.</p>
 
-<p>There are several <i>common_schema</i> distribution options, depending on your MySQL server version. Consult the <a href="download">download page</a></p>
+<p>Consult the <a href="download.html">download page</a> for obtaining the <i>common_schema</i> distribution file.</p>
 <ul>
 	<li>Within MySQL, issue (replace <i>"common_schema_distribution_file"</i> with actual file name):
 		<br/>
@@ -29,6 +29,23 @@
 +--------------------+
 </pre></blockquote>
 
+
+<h3>Requirements</h3>
+
+<p>The <i>common_schema</i> distribution file supports MySQL <strong>5.1</strong>, <strong>5.5</strong>, 
+Percona Server, with and without InnoDB Plugin. It should support MySQL <strong>5.6</strong>, which is not yet GA
+at the time of this release of <i>common_schema</i>.</p>
+
+<p>Percona Server features are supported for versions >= <strong>5.5.8</strong>. Please note that <i>common_schema</i> will
+install regardless of the version. It will automatically recognize available feature set and install accordingly.
+Likewise, it will install regardless of the availability of InnoDB Plugin and associated INFORMATION_SCHEMA tables.</p>
+
+<p>
+If you should upgrade your MySQL server, or enable features which were turned off during install of <i>common_schema</i>,
+the new feature set are not automatically available by <i>common_schema</i>, and a re-install of <i>common_schema</i> is required.
+
+</p>
+
 <h3>Troubleshooting</h3>
 
 <p>Since installation is merely an import act, you should only expect trouble if
@@ -37,13 +54,7 @@ schema generation is unable to execute on your server.
 
 <ul>
 	<li>Are you executing on a <strong>5.0</strong> MySQL server? This version is not supported.</li>
-	<li>Are you trying to import the innodb_plugin version of <i>common_schema</i> on
-	a server where innodb_plugin is disabled?</li>
-	<li>Are you trying to import the innodb_plugin version of <i>common_schema</i> on
-	a server where innodb_plugin is enabled, but not all plugin's modules are loaded? 
-	Each innodb_plugin INFORMATION_SCHEMA table is its own plugin; you should enable them all.</li>
-	<li>Are you trying to import the Percona Server version of <i>common_schema</i> on
-	a standard MySQL server? This won't work</li> 
-	<li>Are you trying to import the Percona Server version of <i>common_schema</i> on
-	a Percona server where INNODB_INDEX_STATS is not enabled?</li> 
+	<li>Were errors reported during installation process?</li>
+	<li>What was <i>common_schema</i>'s last message during install?</li>
+	<li>What is the output of <strong>SELECT * FROM common_schema.status</strong>?</li>
 </ul>

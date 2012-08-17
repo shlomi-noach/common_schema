@@ -10,6 +10,8 @@ QueryScript supports the following flow control structures:
 	<li><a href="query_script_foreach.html">foreach</a>: iterating collections</li>
 	<li><a href="query_script_while.html">while</a>: looping</li>
 	<li><a href="query_script_loop_while.html">loop-while</a>: looping</li>
+	<li><a href="query_script_split.html">split</a>: splitting long operations into smaller tasks</li>
+	<li><a href="query_script_try_catch.html">try-catch</a>: error handling</li>
 </ul>
 </p>
 <p> 
@@ -48,4 +50,25 @@ while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
 }
 </pre></blockquote>
 </p>
-		
+
+<p>
+Create or upgrade a table
+<blockquote><pre>
+try
+{
+  -- Try and create table:
+  CREATE TABLE test.article (
+    article_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title varchar(128) CHARSET utf8,
+    content text CHARSET utf8
+  );
+}
+catch
+{
+  -- Apparently table already exists. Upgrade it:
+  ALTER TABLE test.article
+    MODIFY COLUMN content text CHARSET utf8;
+}
+</pre></blockquote>
+</p>
+				

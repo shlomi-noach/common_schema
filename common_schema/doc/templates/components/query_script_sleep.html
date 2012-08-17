@@ -1,0 +1,53 @@
+
+<p>
+<strong>sleep</strong>: suspend execution for a given number of seconds
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>sleep &lt;number&gt;;
+sleep $seconds;
+sleep @seconds;
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>sleep</i> is a QueryScript <a href="query_script_statements.html">statement</a> which,
+when invoked, makes for a non-busy wait for a given period of time. Essentially, it is a convenience
+statement making for a shortcut to a "DO
+<a href="http://dev.mysql.com/doc/refman/5.1/en/miscellaneous-functions.html#function_sleep">SLEEP()</a>" execution.
+</p>
+<i>sleep</i> takes a number as a parameter, which is the time, in seconds, for which the script is to sleep.
+The number can be an integer or a floating point, and it is interpreted as follows:
+<ul>
+	<li><strong>0 or less</strong>: no sleep is done. It makes no sense to provide such values</li>
+	<li><strong>x, a positive number</strong>: sleep for given number of seconds.</li>
+</ul>
+</p>
+<p>
+<i>sleep</i> also accepts a local variable or a MySQL user defined variable as argument. 
+Such argument is cast to a number and handled as specified above. 
+</p>
+
+<h3>EXAMPLES</h3>
+
+<p>
+Purge rows from table, sleep for <strong>2</strong> seconds in between operations:
+<blockquote><pre>
+while (delete from world.City limit 10)
+{
+  sleep 2.0;
+}
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="script_runtime.html">script_runtime()</a>,
+<a href="query_script_statements.html">Statements</a>,
+<a href="query_script_throttle.html">throttle</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+

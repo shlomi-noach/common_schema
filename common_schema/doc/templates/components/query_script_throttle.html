@@ -12,6 +12,13 @@ while (expression)
   throttle &lt;number&gt;;
 }
 </pre></blockquote>
+<blockquote><pre>
+while (expression)
+{
+  statement;
+  throttle $throttle_ratio;
+}
+</pre></blockquote>
 </p>
 
 <h3>DESCRIPTION</h3>
@@ -28,6 +35,10 @@ or a floating point, and it is interpreted as follows:
 		a throttled operation is expected to run <strong>s*(1 + x)</strong> seconds.</li>
 </ul>
 </p>
+<i>throttle</i> also accepts a local variable or a MySQL user defined variable as argument. 
+Such argument is cast to a number and handled as specified above. 
+</p>
+
 <p>
 Consider the following code as example:
 <blockquote><pre>
@@ -64,15 +75,8 @@ the iterations of the loop are being throttled.</p>
 Duplicate a table: copy rows in small chunks, throttle:
 <blockquote><pre>
 create table world.City2 like world.City;
-while (true)
+split (insert into world.City2 select * from world.City)
 {
-  select max(id) from world.City2 into @max_id;
-  if (insert into world.City2 select * from world.City where id > IFNULL(@max_id, 0) order by id asc limit 10)
-  {
-    /* OK! Rows are being copied! */
-  }
-  else
-    break;
   throttle 2;
 }
 </pre></blockquote>
@@ -80,7 +84,8 @@ while (true)
 
 <h3>SEE ALSO</h3>
 <a href="query_script_execution.html">Execution</a>,
-<a href="query_script_flow_control.html">Flow control</a>
+<a href="query_script_flow_control.html">Flow control</a>,
+<a href="query_script_sleep.html">sleep</a>
 
 <h3>AUTHOR</h3>
 Shlomi Noach

@@ -19,8 +19,11 @@ statement;
 when invoked, raises an error.
 </p>
 <p>
-At this point, there is no mechanism in QueryScript to catch an error. Therefore,
-the result of raising an error is the termination of the script's execution. If
+When executed from within a <a href="query_script_try_catch.html">try</a> statement, flow resumes at the
+matching <strong>catch</strong> block. 
+</p>
+<p>  
+Otherwise, it makes for the (ungraceful) termination of the script's execution. If
 an active transaction is in place, it is rolled back.  
 </p>
 <p>
@@ -33,7 +36,6 @@ is only introduced in MySQL 5.5, current implementation of <i>throw</i> uses a d
 in the form of attempting to <strong>SELECT</strong> from a non-existent table.
 The result is a rather obscure error message, noting that some table does not exist. The name of the 
 non-existing table is actually the error message. 
-
 </p>
 
 <h3>EXAMPLES</h3>
@@ -62,6 +64,7 @@ mysql&gt; select @common_schema_error;
 
 <h3>SEE ALSO</h3>
 <a href="query_script_flow_control.html">Flow control</a>,
+<a href="query_script_try_catch.html">try-catch</a>,
 <a href="query_script_return.html">return</a>
 
 <h3>AUTHOR</h3>

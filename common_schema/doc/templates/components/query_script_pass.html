@@ -1,0 +1,47 @@
+
+<p>
+<strong>pass</strong>: a do-nothing statement.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>
+if (expression)
+  pass
+else {
+  statement;
+}
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>pass</i> is a QueryScript <a href="query_script_statements.html">statement</a> which does nothing.
+It can be used as a placeholder for empty statements.</p>
+<p>
+QueryScript does not allow an empty statement (the standalone semicolon <strong>;</strong> character). 
+The programmer may choose to use the <i>pass</i> statement:
+<blockquote><pre>
+while (delete from world.City limit 10)
+  pass;
+</pre></blockquote>
+Alternatively, the programmer may use an empty block as in the following:
+<blockquote><pre>
+while (delete from world.City limit 10)
+{
+}
+</pre></blockquote>
+The <i>pass</i> statement serves as a convenience statement.
+</p>
+
+<p>
+<i>pass</i> accepts no arguments.
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_statements.html">Statements</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+
