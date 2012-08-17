@@ -1,5 +1,5 @@
 --
--- common_schema: utility schema, views & routines for MySQL
+-- common_schema: DBA's framework for MySQL
 --
 -- Released under the BSD license
 --
