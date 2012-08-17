@@ -27,7 +27,7 @@ begin
     ,   level int not null
     ,   token text          
     ,   state text           not null
-    );
+    ) engine=MyISAM;
     
     repeat 
         set v_old_from = v_from;
