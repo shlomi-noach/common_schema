@@ -12,7 +12,8 @@ create procedure _consume_expression(
    in   require_parenthesis tinyint unsigned,
    out  consumed_to_id int unsigned,
    out  expression text charset utf8,
-   out  expression_statement text charset utf8
+   out  expression_statement text charset utf8,
+   in   should_execute_statement tinyint unsigned
 )
 comment 'Reads expression'
 language SQL
@@ -23,6 +24,8 @@ main_body: begin
     declare first_state text;
     declare expression_level int unsigned;
     declare id_end_expression int unsigned; 
+    declare expanded_variables TEXT CHARSET utf8;
+    declare expanded_variables_found tinyint unsigned;
     
     set expression_statement := NULL ;
     
@@ -36,10 +39,13 @@ main_body: begin
 	  end if;
 	  set id_from := id_from + 1;
       call _skip_spaces(id_from, id_to);
-      SELECT GROUP_CONCAT(token ORDER BY id SEPARATOR '') FROM _sql_tokens WHERE id BETWEEN id_from AND id_end_expression-1 INTO expression;
+      
+      call _expand_statement_variables(id_from, id_end_expression-1, expression, expanded_variables_found, should_execute_statement);
+      -- SELECT GROUP_CONCAT(token ORDER BY id SEPARATOR '') FROM _sql_tokens WHERE id BETWEEN id_from AND id_end_expression-1 INTO expression;
+      
       -- Note down the statement (if any) of the expression:
       SELECT token FROM _sql_tokens WHERE id = id_from AND state = 'alpha' INTO expression_statement;
-      if expression is NULL then
+      if ((expression is NULL) or (trim_wspace(expression) = '')) and (should_execute_statement or not expanded_variables_found) then
         call _throw_script_error(id_from, 'Found empty expression');
       end if;
       -- ~~~ select expression, expression_statement;
