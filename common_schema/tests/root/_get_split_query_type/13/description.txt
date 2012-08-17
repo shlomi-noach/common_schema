@@ -1,0 +1,1 @@
+Fail to analyze TRUNCATE query

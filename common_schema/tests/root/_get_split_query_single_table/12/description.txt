@@ -1,0 +1,1 @@
+Fail to get table on multitable UPDATE statement using STRAIGHT_JOIN

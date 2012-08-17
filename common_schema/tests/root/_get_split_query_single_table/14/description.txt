@@ -1,0 +1,1 @@
+Get single table from SELECT query with GROUP BY

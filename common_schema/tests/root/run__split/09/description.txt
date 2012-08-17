@@ -1,0 +1,1 @@
+statementless split: test magic $split_clause

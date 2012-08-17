@@ -1,0 +1,1 @@
+split: run two successive splits. Expect simple result

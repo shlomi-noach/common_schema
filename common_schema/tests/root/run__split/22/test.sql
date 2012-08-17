@@ -1,7 +1,7 @@
 update test_cs.test_split set nval = 1;
 
 SET @s := '
-  split(test_cs.test_split: update test_cs.test_split set nval = nval + 1)
+  split(update test_cs.test_split set nval = nval + 1)
   {
   }
   ';

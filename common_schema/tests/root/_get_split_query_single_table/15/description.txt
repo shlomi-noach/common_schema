@@ -1,0 +1,1 @@
+Get single table from simplest SELECT query
