@@ -1,0 +1,1 @@
+Use "throw" within try block. Expect to catch

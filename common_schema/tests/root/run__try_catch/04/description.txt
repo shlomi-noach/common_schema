@@ -1,0 +1,1 @@
+Invalid try-catch statement; expect error

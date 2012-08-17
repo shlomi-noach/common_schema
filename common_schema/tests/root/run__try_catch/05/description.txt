@@ -1,0 +1,1 @@
+test try multiple statements with no error

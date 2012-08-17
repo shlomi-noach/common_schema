@@ -1,0 +1,1 @@
+try block with error. Expect try block to skip statements
