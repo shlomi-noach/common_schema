@@ -1,1 +1,0 @@
-declare multiple local variables; expect no errors

@@ -1,1 +1,0 @@
-multiple local variabels delarations; expect no errors
