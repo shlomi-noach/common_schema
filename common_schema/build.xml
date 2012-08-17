@@ -222,6 +222,12 @@
 				</fileset>
 			</path>
 		</foreach>
+		<exec dir="." executable="svn" failifexecutionfails="false" description="Add files to SVN">
+			<arg value="--depth"/>
+			<arg value="files"/>
+			<arg value="add"/>
+			<arg value="${doc.html.dir}/"/>
+		</exec>
 		<exec dir="." executable="svn" failifexecutionfails="false" description="Set text/html property for all HTML doc files">
 			<arg value="--depth"/>
 			<arg value="files"/>
