@@ -32,7 +32,7 @@ begin
   call exec_single(@q);
   
   begin	
-	declare current_query TEXT CHARSET utf8 DEFAULT NULL;
+    declare current_query TEXT CHARSET utf8 DEFAULT NULL;
     declare done INT DEFAULT 0;
     declare eval_cursor cursor for SELECT query FROM _tmp_eval_queries;
     declare continue handler for NOT FOUND SET done = 1;
@@ -44,7 +44,7 @@ begin
         leave read_loop;
       end if;
       set @execute_query := current_query;
-	  call exec_single(@execute_query);
+      call exec_single(@execute_query);
     end loop;
 
     close eval_cursor;

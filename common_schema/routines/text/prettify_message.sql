@@ -9,8 +9,12 @@ NO SQL
 SQL SECURITY INVOKER
 COMMENT 'Outputs a prettified text message, one row per line in text'
 
-begin
+main_body: begin
   declare query text charset utf8;
+  
+  if msg is null or msg = '' then
+    leave main_body;
+  end if;
   
   set @_prettify_message_text := msg;
   set @_prettify_message_num_rows := get_num_tokens(msg, '\n');

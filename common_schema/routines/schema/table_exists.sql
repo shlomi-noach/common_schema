@@ -8,7 +8,10 @@
 DELIMITER $$
 
 DROP FUNCTION IF EXISTS table_exists $$
-CREATE FUNCTION table_exists(lookup_table_schema varchar(64) charset utf8, lookup_table_name varchar(64) charset utf8) RETURNS TINYINT UNSIGNED
+CREATE FUNCTION table_exists(
+  lookup_table_schema varchar(64) charset utf8, 
+  lookup_table_name varchar(64) charset utf8) 
+RETURNS TINYINT UNSIGNED
 DETERMINISTIC
 READS SQL DATA
 SQL SECURITY INVOKER

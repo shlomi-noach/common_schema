@@ -1,5 +1,5 @@
 -- 
--- Encode (escape_ given text for XML
+-- Encode a given text for XML.
 -- 
 
 DELIMITER $$
