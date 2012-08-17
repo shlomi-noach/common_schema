@@ -1,0 +1,1 @@
+Declare and assign variable depending on another variable. Check value.

@@ -1,0 +1,1 @@
+Use expanded variable, new format, in logical expression

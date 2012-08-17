@@ -1,0 +1,1 @@
+verify local variable is null

@@ -1,0 +1,1 @@
+Declare and assign variable in foreach loop. Check value.

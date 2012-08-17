@@ -1,0 +1,1 @@
+Expect error on expanded variable containing local variable

@@ -1,0 +1,1 @@
+Declare and assign variable with complex value. Check value.
