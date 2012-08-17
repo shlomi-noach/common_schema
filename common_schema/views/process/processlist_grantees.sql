@@ -2,7 +2,7 @@
 -- Active processes sorted by current query runtime, desc (longest first). Exclude current connection.
 -- 
 CREATE OR REPLACE
-ALGORITHM = MERGE
+ALGORITHM = TEMPTABLE
 SQL SECURITY INVOKER
 VIEW processlist_grantees AS
   SELECT 
@@ -28,4 +28,28 @@ VIEW processlist_grantees AS
     LEFT JOIN mysql.user ON (CONCAT('''', mysql.user.user, '''@''', mysql.user.host, '''') = USER_PRIVILEGES.GRANTEE)
   GROUP BY
     PROCESSLIST.ID, PROCESSLIST.USER, PROCESSLIST.HOST, PROCESSLIST.DB, PROCESSLIST.COMMAND, PROCESSLIST.TIME, PROCESSLIST.STATE, PROCESSLIST.INFO, USER_PRIVILEGES.GRANTEE, mysql.user.user, mysql.user.host
+;
+
+
+-- 
+-- Explode various grantee, user & host combinations
+-- 
+CREATE OR REPLACE
+ALGORITHM = MERGE
+SQL SECURITY INVOKER
+VIEW _processlist_grantees_exploded AS
+  SELECT 
+    id,
+    sql_kill_query,
+    sql_kill_connection,
+    grantee,
+    concat(grantee_user, '@', grantee_host) as unqualified_grantee,
+    grantee_host,
+    grantee_user,
+    concat('''', user, '''@''', SUBSTRING_INDEX(host, ':', 1), '''') as qualified_user_host,
+    concat(user, '@', SUBSTRING_INDEX(host, ':', 1)) as unqualified_user_host,
+    SUBSTRING_INDEX(host, ':', 1) as hostname,
+    user
+  FROM
+    processlist_grantees
 ;

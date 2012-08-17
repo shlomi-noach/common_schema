@@ -17,5 +17,5 @@ VIEW status AS
     max(if(attribute_name = 'install_mysql_version', attribute_value, null)) as install_mysql_version,
     max(if(attribute_name = 'install_sql_mode', attribute_value, null)) as install_sql_mode
   from
-    metadata;
+    metadata
 ;
