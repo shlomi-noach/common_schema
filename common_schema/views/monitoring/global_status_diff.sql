@@ -15,7 +15,7 @@ VIEW _global_status_sleep AS
   UNION ALL
   (
     SELECT 
-      '', 
+      '' AS VARIABLE_NAME, 
       SLEEP(10) 
     FROM DUAL
   )
