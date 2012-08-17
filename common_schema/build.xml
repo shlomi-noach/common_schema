@@ -222,6 +222,14 @@
 				</fileset>
 			</path>
 		</foreach>
+		<exec dir="." executable="svn" failifexecutionfails="false" description="Set text/html property for all HTML doc files">
+			<arg value="--depth"/>
+			<arg value="files"/>
+			<arg value="propset"/>
+			<arg value="svn:mime-type"/>
+			<arg value="text/html"/>
+			<arg value="${doc.html.dir}/"/>
+		</exec>
 	</target>
 	
 	<target name="component_doc">
@@ -303,6 +311,7 @@
 	
 	
 	<target name="__test__">
+		<echo>${basedir}</echo>
 		<echo>${abc}</echo>
 		<loadfile property="f.c" srcfile="/tmp/crc64.sql">
 		</loadfile>
