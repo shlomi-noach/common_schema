@@ -15,6 +15,9 @@ no sql
 sql security invoker
 
 main_body: begin
+  if array_id is null then
+    return null;
+  end if;
   set @_common_schema_mx_array := UpdateXML(@_common_schema_mx_array, CONCAT('/ma/a[@id="', array_id, '"]'), '');
   return array_id;
 end;
