@@ -1,1 +1,0 @@
-Expect NULL on invalid input
