@@ -21,7 +21,7 @@ any construct which can produce a string.
 <p>
 <i>common_schema</i> provides the following routines to execute a script: 
 <ul>
-	<li><a href="run.html">run()</a>: run a script provided as text.</li>
+	<li><a href="run.html">run()</a>: run a script provided as text, or possibly run script from file</li>
 	<li><a href="run_file.html">run_file()</a>: run a script from file.</li>
 </ul>
 And the following script managing routines:
@@ -118,6 +118,20 @@ foreach($i: 1:10)
 </pre></blockquote>
 <blockquote><pre>
 <strong>mysql&gt;</strong> call run_file('/tmp/sample.qs');
+
+<strong>mysql&gt;</strong> SELECT COUNT(*) FROM test.many_numbers;
++----------+
+| COUNT(*) |
++----------+
+|     1024 |
++----------+
+</pre></blockquote>
+</p>
+
+<p>
+<i>run()</i> can also load scripts from file, if given input appears to indicate a file name:
+<blockquote><pre>
+<strong>mysql&gt;</strong> call run('/tmp/sample.qs');
 
 <strong>mysql&gt;</strong> SELECT COUNT(*) FROM test.many_numbers;
 +----------+

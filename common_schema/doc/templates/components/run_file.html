@@ -10,7 +10,9 @@ This procedure accepts a server-side file name, containing a
 <a href="query_script.html">QueryScript</a> text, and invokes the script.
 </p>
 <p>
-<i>run_file()</i> is a convenience method. It merely refers to <a href="run.html">run()</a>
+	<i>run_file()</i> is a convenience method. It merely refers to <a href="run.html">run()</a>.
+	Also note that <i>run()</i> may also accept file name as input, but has to guess that given input
+	is indeed file name, whereas <i>run_file()</i> trusts input to be file name.
 with content of indicated file.
 </p>
 <p>
