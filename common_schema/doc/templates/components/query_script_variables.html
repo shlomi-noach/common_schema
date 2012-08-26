@@ -12,7 +12,7 @@ var $v_pi := 3.14;
 var $table_name := 'rental';
 SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = $table_name;
 ALTER TABLE sakila.:$table_name ENGINE=InnoDB; 
-CREATE TABLE test.tmp_:{$table_name}_tbl ENGINE=InnoDB; 
+CREATE TABLE test.tmp_:${table_name}_tbl ENGINE=InnoDB; 
 </pre></blockquote>
 </p>
 
