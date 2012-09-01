@@ -45,7 +45,7 @@ mysql&gt; DESC common_schema.data_size_per_engine;
 
 <h3>EXAMPLES</h3>
 <p>Show dimensions per storage engine on an InnoDB-dedicated server:</p>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.auto_increment_columns WHERE TABLE_SCHEMA='sakila';
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.data_size_per_engine;
 +--------+--------------+--------------+-------------+--------------+---------------------------+--------------------+
 | ENGINE | count_tables | data_size    | index_size  | total_size   | largest_table             | largest_table_size |
 +--------+--------------+--------------+-------------+--------------+---------------------------+--------------------+
