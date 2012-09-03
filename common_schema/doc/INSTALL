@@ -3,9 +3,9 @@ The file is a SQL source file. To install it, you should execute it on your MySQ
 Either:
 
 - Within MySQL, issue:
-mysql> SOURCE '/path/to/file.sql';
+mysql> SOURCE '/path/to/common_schema.sql';
 
 - From shell, execute:
-bash$ mysql < '/path/to/file.sql'
+bash$ mysql < '/path/to/common_schema.sql'
 
 - Use your favorite MySQL GUI editor, copy+paste file content, execute.

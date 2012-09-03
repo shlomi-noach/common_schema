@@ -1,6 +1,6 @@
 common_schema
-Common views & routines for MySQL
-=================================
+DBA's framework for MySQL
+=========================
 
 Documentation can be found on the common_schema home page, see
 http://code.openark.org/forge/common-schema
