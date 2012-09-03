@@ -1,6 +1,30 @@
 --
 -- common_schema: DBA's framework for MySQL
 --
+
+--
+-- HOW TO INSTALL
+-- =======================================
+-- This file is a SQL source file. To install it, you should execute it on your MySQL server.
+--
+-- Choose either:
+-- 
+-- - Within MySQL, issue:
+-- mysql> SOURCE '/path/to/common_schema.sql';
+-- 
+-- - From shell, execute:
+-- bash$ mysql < '/path/to/common_schema.sql'
+-- 
+-- - Use your favorite MySQL GUI editor, copy+paste file content, execute.
+-- 
+-- To verify install, execute:
+-- SHOW DATABASES LIKE 'common_schema';
+-- SELECT * FROM common_schema.status;
+--
+
+--
+-- LICENSE
+-- =======================================
 -- Released under the BSD license
 --
 -- Copyright (c) 2011 - 2012, Shlomi Noach
@@ -14,6 +38,7 @@
 --
 -- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --
+
 
 --
 -- Generate schema
