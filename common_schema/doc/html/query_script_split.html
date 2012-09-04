@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>query_script_split: common_schema documentation</title>
+	<meta name="description" content="query_script_split: common_schema" />
+	<meta name="keywords" content="query_script_split: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="query_script_split.html">query_script_split</a></h2>	
+
+<p>
+QueryScript Flow Control: <strong>split</strong> statement
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+Single table operations, autodetect mode:
+<blockquote><pre>split (<i>statement operating on single table</i>)
+  statement;
+</pre></blockquote>
+Multiple tables operations; explicit declaration of <i>splitting table</i>:
+<blockquote><pre>split (schema_name.table_name: <i>statement operating on multiple tables</i>)
+  statement;
+</pre></blockquote>
+Statementless split, manual mode:
+<blockquote><pre>split (schema_name.table_name)
+  statement;
+</pre></blockquote>
+Discussion on the various flavors of <i>split</i> <a href="#flavors">follows</a>.
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+<i>split</i> automagically breaks a query into subparts -- smaller chunks -- and works these in
+steps. It alleviates the load caused by large operations by turning them into smaller ones.
+</p>
+
+<p>
+Consider the following query: we realize we must <strong>UPDATE</strong> a column on all rows:
+<blockquote><pre>split (UPDATE sakila.rental SET rental_date = rental_date + INTERVAL 6 HOUR)
+  pass;
+</pre></blockquote>
+
+To execute a "normal" <strong>UPDATE</strong> of the above form would mean, 
+assuming the table is very large, 
+issuing a very large transaction. Such transaction could take hours to complete, by which time locks
+are accumulating, performance is degrading, and an attempt attempt at rollback can make for an even
+larger overhead. 
+</p>
+
+<p>
+A solution to such a problem is in the form of <i>chunking</i>: splitting the query into many smaller ones, 
+each operating on a distinct group of rows. Not only the query, but the transaction itself 
+(assuming <strong>AUTOCOMMIT=1</strong>) is broken into smaller transactions. Each such transaction is
+quick to complete, and has better chance at not making for any locks. One may choose to "rest" in between
+chunks, making for the availability of system resources. 
+</p>
+
+<p>
+The above <i>split</i> code does just that: it automagically breaks the query, by:
+<ul> 
+	<li>Analyzing the query, <a href="#autodetect">detecting</a>, if possible, the table on which the split is done
+		(with a multi-table query <a href="#explicit">explicit</a> instruction is required)</li>
+	<li>Analyzing the table, detecting best method of splitting it up into smaller parts. This is done
+		by choosing the best UNIQUE KEY by which to work out the splitting process.</li>
+	<li>Rewriting the query so as to add a filtering condition placeholder: the expression which
+		limits.</li>
+	<li>Determining the particular chunks by running over the actual rows, and issuing query on each chunk.</li>
+</ul> 
+Thus, <i>split</i> works by selecting a particular table used by the SQL action statement, and by breaking it apart.
+This table is called the <i>splitting table</i> or the <i>chunking table</i>.
+</p>
+<p>
+<i>split</i> looks like a looping construct: the <i>statement</i> gets executed once per each
+chunk of the original query.
+As with looping constructs, it respects, among others, the following statements:
+<ul>
+	<li><a href="query_script_break.html">break</a>: terminate <i>split</i> execution: this means skipping any remaining
+		chunks.</li>
+	<li><a href="query_script_throttle.html">throttle</a>: control loop execution time by sleeping in between iterations, time of sleep
+		proportional to time of execution.</li>
+</ul>
+</p>
+
+<p>
+At current, <i>split</i> breaks into chunks of <strong>1,000</strong> (hard coded) rows each.
+</p>
+
+<a name="magic_variables"></a>
+<h4>Magic variables</h4>
+<p>
+<i>split</i> introduces magic variables, which are available within a <i>split</i> iteration statement. These are:
+<ul>
+	<li><strong>$split_step</strong>: iteration counter. 
+		Value is <strong>1</strong> for <strong>1st iteration</strong>
+		<strong>2</strong> for <strong>2nd iteration</strong>, etc.
+	</li>
+	<li><strong>$split_rowcount</strong>: the number of rows affected by current <i>split</i> step.</li>
+	<li><strong>$split_total_rowcount</strong>: the total number of rows affected so far by the <i>split</i> statement.</li>
+	<li><strong>$split_clause</strong>: the computed filtering clause. See following discussion.</li>
+	<li><strong>$split_total_elapsed_time</strong>: total number of seconds elapsed since <i>split</i> operation started.
+		This includes possible <a href="query_script_throttle.html">throttling</a> or <a href="query_script_sleep.html">sleeping</a> time.</li>
+	<li><strong>$split_table_schema</strong>: schema for <i>splitting table</i>.</li>
+	<li><strong>$split_table_name</strong>: the <i>splitting table</i>, by which <i>split</i> works out the smaller steps.</li>
+</ul>
+</p>
+
+<a name="flavors"></a>
+<h3>Flavors</h3>
+<a name="autodetect"></a>
+<h4>Single table, autodetect mode</h4>
+<p>
+	<i>split</i> can analyze statements involving single table, and automatically identify the referenced table. This makes for the simplest
+	and cleanest syntax:
+<blockquote><pre>split (DELETE FROM sakila.rental WHERE rental_date < NOW() - INTERVAL 5 YEAR)
+  SELECT $split_total_rowcount AS 'rows deleted so far';
+</pre></blockquote>
+<blockquote><pre>
+create table world.City_dup like world.City;
+split (insert into world.City_dup select * from world.City)
+{
+  throttle 2;
+}
+</pre></blockquote>
+</p>
+
+<a name="explicit"></a>
+<h4>Multiple tables operations; explicit declaration of splitting table</h4>
+<p>
+	When multiple tables are involved, the user must specify the <i>splitting table</i>:
+<blockquote><pre>
+split (<strong>sakila.film</strong>: UPDATE sakila.film, sakila.film_category SET film.rental_rate = film.rental_rate * 1.10 WHERE film.film_id = film_category.film_id AND film_category.category_id = 3)
+  sleep 0.5;
+</pre></blockquote>
+The user is always allowed to specify the splitting table, even on single table operations:
+<blockquote><pre>split (<strong>sakila.rental</strong>: DELETE FROM sakila.rental WHERE rental_date < NOW() - INTERVAL 5 YEAR) {
+  SELECT $split_total_rowcount AS 'rows deleted so far';
+}
+</pre></blockquote>
+</p>
+
+<a name="statementless"></a>
+<h4>Statementless split, manual mode</h4>
+<p>
+	<i>split</i> can also accept just the <i>splitting table</i>, without a query. In this "manual mode" the table is being
+	split and iterated, but no "actual" query is issued.
+</p>
+<p>
+	The loop construct, however, is iterated, and the <a href="#magic_variables">magic variables</a> are available. This allows the user
+	to manually execute what would have been automatic, or otherwise act in unconventional manner. Consider: 
+<blockquote><pre>split (<strong>sakila.rental</strong>) {
+  DELETE FROM sakila.rental WHERE rental_date < NOW() - INTERVAL 5 YEAR AND <strong>:${split_statement}</strong>;
+}
+</pre></blockquote>
+In the above example, the user builds the splitting of the <strong>DELETE</strong> query manually.
+</p>
+
+<a name="limitations"></a>
+<h3>LIMITATIONS</h3>
+<p>
+	<i>split</i> accepts these types of statements:
+	<ul>
+		<li>DELETE FROM table_name ...</li>
+		<li>DELETE FROM table_name USING &lt;multi table syntax&gt; ...</li>
+		<li>UPDATE table_name SET ...</li>
+		<li>UPDATE &lt;multiple tables&gt; SET ...</li>
+		<li>INSERT INTO some_table SELECT ... FROM &lt;single or multiple tables&gt; ...</li>
+		<li>REPLACE INTO some_table SELECT ... FROM &lt;single or multiple tables&gt; ...</li>
+		<li>SELECT ... FROM &lt;multiple tables&gt; ...</li>
+	</ul>
+</p>
+<p>
+	The following limitations apply to the split statement:
+	<ul>
+		<li>
+			You should avoid using index hints on the <i>splitting table</i>.
+		</li>
+		<li>
+			At current, <i>split</i> does not accept the <strong>DELETE FROM tbl.* ...</strong> syntax. Use <strong>DELETE FROM tbl ...</strong> instead.
+		</li>
+		<li>
+			Statements with <strong>DISTICT</strong> will probably result with unexpected results. 
+			Statements with <strong>GROUP BY</strong> may also behave unexpectedly, depending on the statement.
+		</li>
+	</ul>
+</p>
+<p>
+	<i>split</i> is furthermore subject to the following limitations:
+	<ul>
+		<li>A <i>split</i> statement cannot be nested within another <i>split</i> statement. To clarify, there is no problem with
+			nesting other loop constructs such as <a href="query_script_while.html">while</a>, <a href="query_script_foreach.html">foreach</a> etc.
+		</li>
+		<li>Aliasing the <i>splitting table</i> is not allowed.</li>
+		<li>
+			For <a href="#autodetect">table autodetection</a> to work, the statement must work on a single table only, and must not
+			contain index hints, derived tables or subqueries. You may always choose to <a href="#explicit">explicitly</a> declare the <i>splitting table</i>
+			using the <strong>split (<strong>schema_name.table_name</strong>: the statement) {...}</strong> variation.
+		</li>
+	</ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>
+Mike is resigned. Assign all mike's issues to Jon:
+<blockquote><pre>call run("
+  <strong>split (update sakila.rental set staff_id = 2 where staff_id = 1)
+    select $split_total_rowcount as 'processed issues';</strong>
+");
+  
++------------------+
+| processed issues |
++------------------+
+|              479 |
++------------------+
+1 row in set (0.07 sec)
+
++------------------+
+| processed issues |
++------------------+
+|              983 |
++------------------+
+1 row in set (0.09 sec)
+
+...
+
++------------------+
+| processed issues |
++------------------+
+|             8040 |
++------------------+
+1 row in set (0.40 sec)
+</pre></blockquote>
+</p>
+
+<p>
+Create denormalized table, fill it:
+<blockquote><pre>
+CREATE TABLE sakila.denormalized_film_category (
+  film_id smallint unsigned NOT NULL,
+  category_id tinyint unsigned NOT NULL,
+  last_update timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  film_title varchar(255),
+  category_name varchar(255),
+  PRIMARY KEY (film_id,category_id)
+);
+
+split (<strong>sakila.film_category</strong>:
+  INSERT INTO sakila.denormalized_film_category
+  SELECT
+    film_id,
+    category_id,
+    film_category.last_update,
+    film.title,
+    category.name
+  FROM
+    sakila.film_category
+    JOIN sakila.film USING (film_id)
+    JOIN sakila.category USING (category_id)
+  ) 
+{
+  SELECT <strong>$split_total_rowcount</strong> AS 'total rows generated so far';
+  throttle 2;
+}
+</pre></blockquote>
+The above uses the sample <strong>sakila</strong> database. It just so happens that the number of rows in <strong>sakila.film_category</strong>
+is exactly <strong>1,000</strong>, which makes for a single step.
+</p>
+
+
+<h3>SEE ALSO</h3>
+<a href="query_script_foreach.html">foreach</a>,
+<a href="query_script_break.html">break</a>,
+<a href="query_script_throttle.html">throttle</a>,
+<a href="candidate_keys.html">candidate_keys</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

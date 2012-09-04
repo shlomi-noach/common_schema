@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>killall: common_schema documentation</title>
+	<meta name="description" content="killall: common_schema" />
+	<meta name="keywords" content="killall: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="killall.html">killall</a></h2>	
+<h3>NAME</h3>
+killall(): Kill connections with by matching GRANTEE, user or host
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Kill connections by matching connection GRANTEE, user or host with given input. 
+	This routine provides with a quick "kill those connections right now" solution,
+	which is otherwise achieved by looking up connection IDs from SHOW PROCESSLIST,
+	or by <a href="eval.html">evaluating</a> the <a href="processlist_grantees.html">processlist_grantees</a> view.</p>
+<p>
+	<i>killall()</i>, similar to unix' <i>killall</i> command, kills by name rather than
+	by ID. <i>killall()</i> accepts a <strong>grantee_term</strong> input, which may be
+	either a fully qualified GRANTEE (e.g. 'gromit'@'webhost.local'), a relaxed GRANTEE
+	(e.g. gromit@localhost), a username	only (e.g. 'gromit') or a hostname only 
+	(e.g. 'analytics_server.localdomain').
+</p>
+
+<p>
+	Thus, it makes it easy to quickly kill, for example, all connections by a given user, 
+	wherever that user may connect from.
+</p>
+
+<p>
+	<i>killall()</i> allows killing of all connections, including those of users with the
+	<strong>SUPER</strong> privilege, as well as replication. However, <i>killall()</i> is
+	guaranteed never to kill the current connection - the very one invoking the routine.
+</p>
+
+<p>
+	Whatever the <strong>grantee_term</strong> is, it is compared against GRANTEE accounts,
+	and <i>NOT</i> against particular connections. Thus, the following:
+<blockquote><pre>
+call killall('192.168.0.%');
+</pre></blockquote>
+	will kill all connections of accounts where the host part of the account equals 
+	<strong>'192.168.0.%'</strong>. It will <i>NOT</i> necessarily kill all connections 
+	from hosts matching the pattern. <i>killall()</i> does not do pattern matching.
+	To illustrate, it will <i>NOT</i> kill a connection by the GRANTEE 
+	<strong>'gromit'@'192.168.0.10'</strong>. It <i>will</i> kill connections by
+	<strong>'preston'@'192.168.0.%'</strong>.
+</p>
+
+<p>
+	<i>killall()</i> does not provide the mechanism to kill queries which are slow,
+	or include a given text. Use <a href="eval.html">eval()</a> and 
+	<a href="processlist_grantees.html">processlist_grantees</a> for that.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>killall(IN grantee_term TINYTEXT CHARSET utf8) 
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>grantee_term</strong>: a GRANTEE, qualified or unqualified, or the user or host parts of a GRANTEE.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Kill all connections by user <strong>'apps'</strong>:
+	<blockquote><pre>mysql&gt; SHOW PROCESSLIST;
++----+------+-----------+---------------+---------+------+------------+---------------------+
+| Id | User | Host      | db            | Command | Time | State      | Info                |
++----+------+-----------+---------------+---------+------+------------+---------------------+
+|  7 | root | localhost | common_schema | Query   |    0 | NULL       | SHOW PROCESSLIST    |
+| 78 | apps | localhost | NULL          | Query   |   31 | User sleep | select sleep(10000) |
++----+------+-----------+---------------+---------+------+------------+---------------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; CALL killall('apps');
+
+mysql&gt; SHOW PROCESSLIST;
++----+------+-----------+---------------+---------+------+-------+------------------+
+| Id | User | Host      | db            | Command | Time | State | Info             |
++----+------+-----------+---------------+---------+------+-------+------------------+
+|  7 | root | localhost | common_schema | Query   |    0 | NULL  | SHOW PROCESSLIST |
++----+------+-----------+---------------+---------+------+-------+------------------+
+1 row in set (0.00 sec)
+</pre></blockquote>
+	</p>
+
+
+	<p>
+		Kill all <strong>'localhost'</strong> connections:
+	<blockquote><pre>mysql&gt; SHOW PROCESSLIST;
++----+------+-----------+---------------+---------+------+------------+---------------------+
+| Id | User | Host      | db            | Command | Time | State      | Info                |
++----+------+-----------+---------------+---------+------+------------+---------------------+
+|  7 | root | localhost | common_schema | Query   |    0 | NULL       | SHOW PROCESSLIST    |
+| 81 | apps | localhost | NULL          | Query   |   18 | User sleep | select sleep(10000) |
++----+------+-----------+---------------+---------+------+------------+---------------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; CALL killall('localhost');
+
+mysql&gt; SHOW PROCESSLIST;
++----+------+-----------+---------------+---------+------+-------+------------------+
+| Id | User | Host      | db            | Command | Time | State | Info             |
++----+------+-----------+---------------+---------+------+-------+------------------+
+|  7 | root | localhost | common_schema | Query   |    0 | NULL  | SHOW PROCESSLIST |
++----+------+-----------+---------------+---------+------+-------+------------------+
+1 row in set (0.00 sec)
+</pre></blockquote>
+Note that process <strong>#7</strong> is not killed since it is the one executing the kill. 
+	</p>
+
+
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="query_script_eval.html">eval</a>,
+<a href="eval.html">eval()</a>,
+<a href="processlist_grantees.html">processlist_grantees</a>,
+<a href="processlist_top.html">processlist_top</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

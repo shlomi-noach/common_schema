@@ -29,9 +29,23 @@ Percona server views: views enhancing INFORMATION_SCHEMA tables available in Per
 
 <h3>DESCRIPTION</h3>
 <p>
-These views rely on the INNODB_INDEX_STATS feature to be enabled. At current, due to incompatible changes in
-Percona Server 5.5.8-20.0, views work only on earlier versions. This is subject to change.
+These views rely on the INNODB_INDEX_STATS feature to be enabled.
+The views are compatible with recent versions of Percona Server (due to changes to INNODB_INDEX_STATS
+schema in Percona Server 5.5.8, these views are incompatible with earlier versions).
 </p>
+
+<h3>EXAMPLES</h3>
+<p>Examine keys selectivity/cardinality on a specific table:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_index_rows WHERE TABLE_SCHEMA='sakila' AND TABLE_NAME='inventory';
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+| TABLE_SCHEMA | TABLE_NAME | INDEX_NAME           | SEQ_IN_INDEX | COLUMN_NAME  | is_last_column_in_index | incremental_row_per_key |
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+| sakila       | inventory  | PRIMARY              |            1 | inventory_id |                       1 |                       1 |
+| sakila       | inventory  | idx_fk_film_id       |            1 | film_id      |                       1 |                       5 |
+| sakila       | inventory  | idx_store_id_film_id |            1 | store_id     |                       0 |                    4478 |
+| sakila       | inventory  | idx_store_id_film_id |            2 | film_id      |                       1 |                       2 |
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+</pre></blockquote>
 
 				<br/>
 			</div>
@@ -59,6 +73,7 @@ Percona Server 5.5.8-20.0, views work only on earlier versions. This is subject 
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -82,6 +97,7 @@ Percona Server 5.5.8-20.0, views work only on earlier versions. This is subject 
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	

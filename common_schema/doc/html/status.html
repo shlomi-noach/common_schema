@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>status: common_schema documentation</title>
+	<meta name="description" content="status: common_schema" />
+	<meta name="keywords" content="status: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="status.html">status</a></h2>	
+<h3>NAME</h3>
+status: General metadata/status of <i>common_schema</i>
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>status</i> provides with metadata/status information on <i>common_schema</i> internals.
+</p>
+
+<p>
+The metadata provided by the status view can be essential for:
+<ul>
+	<li>Integrity/versioning: by knowing the exact version/revision of <i>common_schema</i></li>
+	<li>Diagnostics: as an essential information in a bug report</li>
+	<li>More diagnostics: knowing the envorinment in which <i>common_schema</i> runs</li>
+</ul>
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; desc common_schema.status;
++-------------------------------------+----------+------+-----+---------+-------+
+| Field                               | Type     | Null | Key | Default | Extra |
++-------------------------------------+----------+------+-----+---------+-------+
+| project_name                        | longtext | YES  |     | NULL    |       |
+| version                             | longtext | YES  |     | NULL    |       |
+| revision                            | longtext | YES  |     | NULL    |       |
+| install_time                        | longtext | YES  |     | NULL    |       |
+| install_success                     | longtext | YES  |     | NULL    |       |
+| base_components_installed           | longtext | YES  |     | NULL    |       |
+| innodb_plugin_components_installed  | longtext | YES  |     | NULL    |       |
+| percona_server_components_installed | longtext | YES  |     | NULL    |       |
+| install_mysql_version               | longtext | YES  |     | NULL    |       |
+| install_sql_mode                    | longtext | YES  |     | NULL    |       |
++-------------------------------------+----------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:
+
+	<ul>
+		<li><strong>project_name</strong>: this is the text "common_schema"</li>
+		<li><strong>version</strong>: external version number</li>
+		<li><strong>revision</strong>: internal revision number (more granular than <strong>version</strong>)</li>
+		<li><strong>install_time</strong>: TIMESTAMP at which <i>common_schema</i> as installed</li>
+		<li><strong>install_success</strong>: boolean, installation result. <strong>"1"</strong> indicates success</li>
+		<li><strong>base_components_installed</strong>: boolean. <strong>"1"</strong> indicates that base components were installed.</li>
+		<li><strong>innodb_plugin_components_installed</strong>: boolean. <strong>"1"</strong> indicates InnoDB Plugin components were installed.</li>
+		<li><strong>percona_server_components_installed</strong>: boolean. <strong>"1"</strong> indicates Percona Server components were installed.</li>
+		<li><strong>install_mysql_version</strong>: version of MySQL at the time of <i>common_schema</i> installation.</li>
+		<li><strong>install_sql_mode</strong>: the <strong>sql_mode</strong> used when creation <i>common_schema</i>.
+			This applies to stored routines even though the DBA may change the global <strong>sql_mode</strong>,
+			as MySQL's stored routines retain the snapshot of <strong>sql_mode</strong> by which they were created.</li>
+	</ul>
+</p>
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT * FROM status \G
+*************************** 1. row ***************************
+                       project_name: common_schema
+                            version: 1.1
+                           revision: 243
+                       install_time: 2012-07-04 08:35:13
+                    install_success: 1
+          base_components_installed: 1
+ innodb_plugin_components_installed: 1
+percona_server_components_installed: 0
+              install_mysql_version: 5.1.51-log
+                   install_sql_mode: ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="help.html">help()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

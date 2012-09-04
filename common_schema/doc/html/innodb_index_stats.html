@@ -41,7 +41,12 @@ integer types.
 </p>
 
 <p>This view depends upon the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
-in Percona Server. Note that as of Percona Server 5.5.8-20.0 the schema of the INNODB_INDEX_STATS is incompatible with earlier releases, and is not yet supported. 
+in Percona Server.  
+</p>
+
+<p>
+Note that Percona Server 5.5.8-20.0 version introduced changes to the INNODB_INDEX_STATS schema.
+This view is compatible with the new schema, and is incompatible with older releases.
 </p>
 
 <h3>STRUCTURE</h3>
@@ -70,7 +75,7 @@ mysql&gt; DESC common_schema.innodb_index_stats;
 with the addition of:</p>
 <ul>
 	<li><strong>split_factor</strong>: Estimated split factor of the index tree</li>
-	<li><strong>index_depth</strong>: Estimated depth of the index tree</li>
+	<li><strong>index_depth</strong>: Estimated depth of the index tree. Value is a floating point, though the depth of an index is an integer.</li>
 </ul>
 
 <h3>EXAMPLES</h3>
@@ -86,7 +91,7 @@ with the addition of:</p>
 </pre></blockquote>
 
 <h3>ENVIRONMENT</h3>
-Percona Server &lt; 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
+Percona Server &gt;= 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
 
 <h3>SEE ALSO</h3>
 <a href="innodb_index_rows.html">innodb_index_rows</a>
@@ -119,6 +124,7 @@ Shlomi Noach
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -142,6 +148,7 @@ Shlomi Noach
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	

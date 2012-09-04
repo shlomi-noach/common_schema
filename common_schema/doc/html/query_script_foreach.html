@@ -204,11 +204,12 @@ Following is a brief sample of valid <i>foreach</i> expressions:
 	<li>SELECT query
 		<p>
 		Kill queries for user <strong>'analytics'</strong>. 
-		</p>
 		<blockquote><pre>
 foreach($id: SELECT id FROM INFORMATION_SCHEMA.PROCESSLIST WHERE user = 'analytics') 
   KILL QUERY :$id;
 </pre></blockquote>
+		(But see also <a href="killall.html">killall()</a>)
+		</p>
 		<p>
 		Select multiple columns; execute multiple queries based on those columns:
 		</p>
@@ -237,7 +238,7 @@ foreach($year: 2001:2009)
 		</p>
 		<blockquote><pre>
 foreach($i: 1:8)
-  CREATE TABLE test.t_:$i (id INT);
+  CREATE TABLE test.t_:${i} (id INT);
 		
 SHOW TABLES FROM test;
 +----------------+ 
@@ -262,7 +263,7 @@ SHOW TABLES FROM test;
 		</p>
 		<blockquote><pre>
 foreach($shard: {US, GB, Japan, FRA})
-  CREATE DATABASE dbshard_:$shard;
+  CREATE DATABASE dbshard_:${shard};
 
 show databases LIKE 'dbshard_%';
 +----------------------+
@@ -378,7 +379,7 @@ Very briefly, in Geekish, the differences are:
 	<li><i>foreach</i> is more limited in terms of what it can do with iterated values.</li>
 </ul>
 To fully understand the differences, one must first be acquainted with <a href="query_script_variables.html#expansion">variables expansion</a>
-. Consider the following examples:</p>
+. Consider the following example:</p>
 
 <p>
 <ul>
@@ -390,7 +391,7 @@ To fully understand the differences, one must first be acquainted with <a href="
 	"DELETE FROM sakila.rental WHERE rental_date >= '${1}-07-01' AND rental_date < '${1}-09-01'");
 </pre></blockquote>
 		Iterated values are integers in the range <strong>2001 - 2009</strong>. The placeholder <strong>${1}</strong>
-		is assigned with iterated value. The script (a single query in this case) never sees <strong>${0}</strong> because
+		is assigned with iterated value. The script (a single query in this case) never sees <strong>${1}</strong> because
 		the text of the script gets manipulated before being invoked. Thus, there are <strong>9</strong> different looking scripts
 		invoked. For example, the second iteration would execute the following script:
 		<blockquote><pre>DELETE FROM sakila.rental WHERE rental_date >= '2002-07-01' AND rental_date < '2002-09-01'
@@ -408,69 +409,6 @@ foreach($year: 2001:2009)
 		The <strong>$year</strong> variable has the same limitations as any user-defined variable. It cannot be used from within a quoted text:
 		<strong>'$year-07-01'</strong> is just a string, and the fact the term <strong>$year</strong> appears inside this quoted text means nothing.
 		Hence, we must use <strong>CONCAT</strong> in order to build the date.		
-		</p>
-	</li>
-	<li>
-		<p>As another example, consider META managing of tables and databases.</p>
-		<p>
-		<i>foreach() routine</i>
-		<blockquote><pre>mysql&gt; call foreach('{US, GB, Japan, FRA}', 'CREATE DATABASE db_${1}');
-
-mysql&gt; show databases LIKE 'db_%';
-+-----------------+
-| Database (db_%) |
-+-----------------+
-| db_FRA          |
-| db_GB           |
-| db_Japan        |
-| db_US           |
-+-----------------+
-</pre></blockquote>		
-		<blockquote><pre>mysql&gt; call foreach('{US, GB, Japan, FRA}', 'CREATE DATABASE db_${1}_shard');
-
-mysql&gt; show databases LIKE 'db_%_shard';
-+-----------------------+
-| Database (db_%_shard) |
-+-----------------------+
-| db_FRA_shard          |
-| db_GB_shard           |
-| db_Japan_shard        |
-| db_US_shard           |
-+-----------------------+
-</pre></blockquote>		
-		Again, placeholders simply make for text manipulation. There is no limit to what can be done with them.
-		</p>
-
-		<p>
-		<i>foreach</i> flow control structure:
-		<blockquote><pre>
-foreach($shard: {US, GB, Japan, FRA})
-  CREATE DATABASE dbshard_:$shard;
-
-show databases LIKE 'dbshard_%';
-+----------------------+
-| Database (dbshard_%) |
-+----------------------+
-| dbshard_FRA          |
-| dbshard_GB           |
-| dbshard_Japan        |
-| dbshard_US           |
-+----------------------+
-</pre></blockquote>		
-		The <strong>$shard</strong> variable is susceptible to all limitations on user defined variables.
-		This means it cannot be used in a query such as <strong>CREATE DATABASE $shard</strong>.
-		</p>
-		<p>
-		Variable <i>expansion</i> is used to override this: the variable is replaced with its text upon runtime.
-		As opposed to the way this is handled with the <i>foreach()</i> routine, expansion is done by the script itself,
-		upon reaching the point of code where expansion appears. But this also limits the options for expansion.
-		Expansion cannot occur within a quoted text. Expansion cannot occur just within any string. The second 
-		<i>foreach()</i> example above <i>cannot</i> be handled via expansion. One <i>cannot</i> use 
-		<strong>CREATE DATABASE dbshard_:$shard_shard</strong> since it is impossible to infer whether the variable to expand
-		is <strong>$s</strong>, <strong>$shard</strong> or <strong>$shard_shard</strong>.
-		</p>
-		<p>
-		Some limitations on variable expansion may be lifted in the future.
 		</p>
 	</li>
 	</ul>
@@ -510,6 +448,7 @@ Shlomi Noach
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -533,6 +472,7 @@ Shlomi Noach
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	

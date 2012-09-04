@@ -31,6 +31,13 @@ while (expression)
   throttle &lt;number&gt;;
 }
 </pre></blockquote>
+<blockquote><pre>
+while (expression)
+{
+  statement;
+  throttle $throttle_ratio;
+}
+</pre></blockquote>
 </p>
 
 <h3>DESCRIPTION</h3>
@@ -47,6 +54,10 @@ or a floating point, and it is interpreted as follows:
 		a throttled operation is expected to run <strong>s*(1 + x)</strong> seconds.</li>
 </ul>
 </p>
+<i>throttle</i> also accepts a local variable or a MySQL user defined variable as argument. 
+Such argument is cast to a number and handled as specified above. 
+</p>
+
 <p>
 Consider the following code as example:
 <blockquote><pre>
@@ -83,15 +94,8 @@ the iterations of the loop are being throttled.</p>
 Duplicate a table: copy rows in small chunks, throttle:
 <blockquote><pre>
 create table world.City2 like world.City;
-while (true)
+split (insert into world.City2 select * from world.City)
 {
-  select max(id) from world.City2 into @max_id;
-  if (insert into world.City2 select * from world.City where id > IFNULL(@max_id, 0) order by id asc limit 10)
-  {
-    /* OK! Rows are being copied! */
-  }
-  else
-    break;
   throttle 2;
 }
 </pre></blockquote>
@@ -99,7 +103,8 @@ while (true)
 
 <h3>SEE ALSO</h3>
 <a href="query_script_execution.html">Execution</a>,
-<a href="query_script_flow_control.html">Flow control</a>
+<a href="query_script_flow_control.html">Flow control</a>,
+<a href="query_script_sleep.html">sleep</a>
 
 <h3>AUTHOR</h3>
 Shlomi Noach
@@ -131,6 +136,7 @@ Shlomi Noach
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -154,6 +160,7 @@ Shlomi Noach
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	

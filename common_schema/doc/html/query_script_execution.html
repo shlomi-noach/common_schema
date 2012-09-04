@@ -40,7 +40,7 @@ any construct which can produce a string.
 <p>
 <i>common_schema</i> provides the following routines to execute a script: 
 <ul>
-	<li><a href="run.html">run()</a>: run a script provided as text.</li>
+	<li><a href="run.html">run()</a>: run a script provided as text, or possibly run script from file</li>
 	<li><a href="run_file.html">run_file()</a>: run a script from file.</li>
 </ul>
 And the following script managing routines:
@@ -147,6 +147,20 @@ foreach($i: 1:10)
 </pre></blockquote>
 </p>
 
+<p>
+<i>run()</i> can also load scripts from file, if given input appears to indicate a file name:
+<blockquote><pre>
+<strong>mysql&gt;</strong> call run('/tmp/sample.qs');
+
+<strong>mysql&gt;</strong> SELECT COUNT(*) FROM test.many_numbers;
++----------+
+| COUNT(*) |
++----------+
+|     1024 |
++----------+
+</pre></blockquote>
+</p>
+
 <h3>SEE ALSO</h3>
 <a href="run.html">run()</a>,
 <a href="query_script_flow_control.html">Flow control</a>,
@@ -182,6 +196,7 @@ Shlomi Noach
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -205,6 +220,7 @@ Shlomi Noach
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	

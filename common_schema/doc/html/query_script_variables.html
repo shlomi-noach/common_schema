@@ -24,10 +24,14 @@ QueryScript Variables: creation, assignment, expansion & cleanup
 
 <h3>SYNOPSIS</h3>
 <p>
-<blockquote><pre>var $table_name;
-set $table_name := 'rental';
+<blockquote><pre>
+var $v1, $v2, $v3;
+set $v1 := 1;
+var $v_pi := 3.14;
+var $table_name := 'rental';
 SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = $table_name;
 ALTER TABLE sakila.:$table_name ENGINE=InnoDB; 
+CREATE TABLE test.tmp_:${table_name}_tbl ENGINE=InnoDB; 
 </pre></blockquote>
 </p>
 
@@ -41,27 +45,42 @@ with supported in-place expansion.
 <h4>Declaration, usage and cleanup</h4>
 <p>
 The following code declares, sets and reads local variables:
-<blockquote><pre>var $x;
-set $x := 3; 
+<blockquote><pre>var $x := 3; 
 while ($x > 0)
 {
-  var $y;
-  set $y := CONCAT('Value of $x is: ', $x);
+  var $y := CONCAT('Value of $x is: ', $x);
   SELECT $y AS msg;
   set $x := $x - 1;
 }
 </pre></blockquote>
-The <strong>$x</strong> and <strong>$y</strong> variables behave much like a <i>user defined variable</i>. 
-They can be assigned to, read from, used within a query. 
+</p>
+<p>
+Multiple variables can be declared with a single <strong>var</strong> statement:
+<blockquote><pre>var $x, $y, $z;
+</pre></blockquote>
+It is possible to declare and assign a variable within the <strong>var</strong> statement as follows:
+<blockquote><pre>var $x := 'declared!';
+</pre></blockquote>
+However this is limited to a single variable. It is not possible to declare and assign multiple variables from within
+the same <strong>var</strong> statement. Multiple <strong>var</strong> statements would be required for that - one per variable.
+</p>
+<p>
+QueryScript variables behave much like a <i>user defined variable</i>. 
+They can be assigned to, read from, used within a query:
+<blockquote><pre>var $x := 3;
+SELECT $x, $x + 1 AS next_value;
+SET $x := POW($x, 2);
+SET @msg := CONCAT('value is ', $x);
+</pre></blockquote>
 </p>
 <p>
 However, the following differentiates it from MySQL's user defined variables:
 <ul>
 	<li>Variables must be declared by the <a href="query_script_var.html">var</a> statement.</li>
-	<li>At the point of declaration, they are known to be <strong>NULL</strong>.</li>
+	<li>At the point of declaration, they are known to be <strong>NULL</strong> (unless assigned with a value at point of declaration)</li>
 	<li>Local variables are only recognized within their scope (see following).</li>
 	<li>Once a variable's scope terminates, the variable is reset to <strong>NULL</strong>.
-	  In the above example, <strong>$y</strong> is being reset to null at the end of each
+	  In the above <strong>while</strong> loop example, <strong>$y</strong> is being reset to null at the end of each
 	  loop iteration.</li>
 </ul>
 MySQL's user defined variables, in contrast, retain their value throughout the session, or until they are
@@ -99,8 +118,7 @@ sub-blocks of code:
 -- $x is known to be cleared at this point, and will
 -- not be recognized from this point and on.
 {
-  var $y;
-  set $y := 'abc';
+  var $y := 'abc';
 } 
 -- $y is known to be cleared at this point, and will
 -- not be recognized from this point and on.
@@ -118,12 +136,26 @@ in the second block in the above example.
 A variable may be <i>expanded</i> in-place. <i>Expansion</i> means the variable is replaced with the constant value it holds.
 Expansion allows the programmer to use variables where variables are not allowed. To illustrate, we must first look at the basics.
 </p>
+<p>
+The value held by the local variable is interpreted as text, and is seamlessly integrated with
+the surrounding statement or expression.
+</p>
+
+<p>
+Expansion syntax:
+<blockquote><pre>
+var $foo := 3;
+SELECT $foo, :$foo, :${foo};
+
+var $bar := 'Population &gt; 1000000';
+SELECT * FROM world.Country WHERE :$bar;
+</pre></blockquote>
+</p>
 
 <p>
 Consider the following code:
 <blockquote><pre>
-var $x;
-set $x := 3;
+var $x := 3;
 SELECT $x, :$x;
 
 +--------------------+---+
@@ -138,11 +170,24 @@ the <i>expansion</i> of <strong>$x</strong>, and is <i>the constant <strong>3</s
 </p>
 
 <p>
+Both <strong>:$x</strong> and <strong>:${x}</strong> result with the expanded value of 
+<strong>$x</strong>. The latter is a more expressive form, and is useful in resolving ambiguities
+as in the following:
+<blockquote><pre>
+var $table_name := 'links';
+CREATE TABLE test.:$table_name;                 -- fine
+CREATE TABLE test.personal_:$table_name;        -- fine
+CREATE TABLE test.:$table_name_to_categories;   -- impossible to resolve variable name
+CREATE TABLE test.:${table_name}_to_categories; -- fine
+
+</pre></blockquote>
+</p>
+
+<p>
 Now consider cases where variables cannot be used, yet expansion allows for seamless script approach: 
 <blockquote><pre>
 set @n := 2;
-var $x;
-set $x := @n + 1;
+var $x := @n + 1;
 
 -- An error: -- SELECT Name FROM world.City ORDER BY Population DESC LIMIT @n;
 -- An error: -- SELECT Name FROM world.City ORDER BY Population DESC LIMIT $x;
@@ -181,15 +226,26 @@ translates to <strong>ALTER TABLE world.City ENGINE=InnoDB;</strong> before bein
 <blockquote><pre>
 foreach($t: {City, Country, CountryLanguage})
 {
-  ALTER TABLE world.:$t ENGINE=InnoDB;
+  ALTER TABLE world.:${t} ENGINE=InnoDB;
 }
 </pre></blockquote>
 </p>
 
 <p>
-At this moment, expansion only applies to <a href="query_script_statements.html">SQL statements</a>. They do not work for QueryScript statements,
-nor for <a href="query_script_expressions.html">expressions</a>.
-
+	Expansion limitations:
+	<ul>
+		<li>Expansion applies for <a href="query_script_statements.html">SQL statements</a>
+			and <a href="query_script_expressions.html">expressions</a>.</li>
+		<li>Expansion does not apply to variables of QueryScript statements.</li>
+		<li>Expansion in expressions only applies once. 
+			Thus, in a <strong>while(:${condition}) {...}</strong> loop, the 
+			expansion of <strong>:${condition}</strong> occurs at one time only,
+			before the first loop iteration. Future changes to the <strong>$condition</strong>
+			local variable itself do not affect the expression.</li>
+		<li>Expanded variables must not specify local variables. Expanding the variable
+			<strong>var $some_var := '$another_var'</strong> will result in a runtime
+			error. You may relate to MySQL's user defined variables.</li>
+	</ul>
 </p>
 
 <h3>SEE ALSO</h3>
@@ -227,6 +283,7 @@ Shlomi Noach
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -250,6 +307,7 @@ Shlomi Noach
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	

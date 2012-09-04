@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>last_query_profiling: common_schema documentation</title>
+	<meta name="description" content="last_query_profiling: common_schema" />
+	<meta name="keywords" content="last_query_profiling: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="last_query_profiling.html">last_query_profiling</a></h2>	
+<h3>NAME</h3>
+last_query_profiling: Last query's profiling info, aggregated by query's states
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>last_query_profiling</i> presents with pretty profiling info for last executed query. 
+</p>
+
+<p>
+	Based on the INFORMATION_SCHEMA.PROFILING table, this view aggregates data by query state, and 
+	presents with more easy to comprehend details, such as the total runtime for the various states
+	and the time ration per state of the total query runtime. 
+</p>
+
+<p>
+	To populate this view, one must enable profiling. This is done by:
+	<blockquote><pre>mysql&gt; SET PROFILING := 1;
+</pre></blockquote>
+</p>
+
+<p>
+	This code is based on queries presented on
+	<a href="http://www.mysqlperformanceblog.com/2012/02/20/how-to-convert-show-profiles-into-a-real-profile/">How to convert MySQL’s SHOW PROFILES into a real profile</a>
+	and in the book <i>High Performance MySQL, 3nd Edition</i>, By Baron Schwartz et al., published by O'REILLY
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.last_query_profiling;
++-------------------------+----------------+------+-----+---------+-------+
+| Field                   | Type           | Null | Key | Default | Extra |
++-------------------------+----------------+------+-----+---------+-------+
+| QUERY_ID                | int(20)        | NO   |     | 0       |       |
+| STATE                   | varchar(30)    | NO   |     |         |       |
+| state_calls             | bigint(21)     | NO   |     | 0       |       |
+| state_sum_duration      | decimal(31,6)  | YES  |     | NULL    |       |
+| state_duration_per_call | decimal(35,10) | YES  |     | NULL    |       |
+| state_duration_pct      | decimal(37,2)  | YES  |     | NULL    |       |
+| state_seqs              | longblob       | YES  |     | NULL    |       |
++-------------------------+----------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Structure of this view is identical to that of the 
+	<a href="query_profiling.html">query_profiling</a> view.
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Profile a query over a complex view:
+
+<blockquote><pre>mysql&gt; SET PROFILING := 1;
+
+mysql&gt; SELECT COUNT(*) FROM sakila.nicer_but_slower_film_list INTO @dummy;
+
+mysql&gt; SELECT * FROM last_query_profiling;
++----------+----------------------+-------------+--------------------+-------------------------+--------------------+------------+
+| QUERY_ID | STATE                | state_calls | state_sum_duration | state_duration_per_call | state_duration_pct | state_seqs |
++----------+----------------------+-------------+--------------------+-------------------------+--------------------+------------+
+|       41 | checking permissions |           5 |           0.000320 |            0.0000640000 |               0.33 | 5,6,7,8,9  |
+|       41 | cleaning up          |           1 |           0.000007 |            0.0000070000 |               0.01 | 31         |
+|       41 | closing tables       |           1 |           0.000016 |            0.0000160000 |               0.02 | 29         |
+|       41 | Copying to tmp table |           1 |           0.042363 |            0.0423630000 |              44.34 | 15         |
+|       41 | Creating tmp table   |           1 |           0.000123 |            0.0001230000 |               0.13 | 13         |
+|       41 | end                  |           1 |           0.000004 |            0.0000040000 |               0.00 | 23         |
+|       41 | executing            |           2 |           0.000014 |            0.0000070000 |               0.01 | 14,22      |
+|       41 | freeing items        |           2 |           0.000216 |            0.0001080000 |               0.23 | 25,27      |
+|       41 | init                 |           1 |           0.000012 |            0.0000120000 |               0.01 | 20         |
+|       41 | logging slow query   |           1 |           0.000004 |            0.0000040000 |               0.00 | 30         |
+|       41 | Opening tables       |           1 |           0.028909 |            0.0289090000 |              30.26 | 2          |
+|       41 | optimizing           |           2 |           0.000026 |            0.0000130000 |               0.03 | 10,21      |
+|       41 | preparing            |           1 |           0.000018 |            0.0000180000 |               0.02 | 12         |
+|       41 | query end            |           1 |           0.000004 |            0.0000040000 |               0.00 | 24         |
+|       41 | removing tmp table   |           3 |           0.000130 |            0.0000433333 |               0.14 | 18,26,28   |
+|       41 | Sending data         |           2 |           0.016823 |            0.0084115000 |              17.61 | 17,19      |
+|       41 | Sorting result       |           1 |           0.006302 |            0.0063020000 |               6.60 | 16         |
+|       41 | starting             |           1 |           0.000163 |            0.0001630000 |               0.17 | 1          |
+|       41 | statistics           |           1 |           0.000048 |            0.0000480000 |               0.05 | 11         |
+|       41 | System lock          |           1 |           0.000017 |            0.0000170000 |               0.02 | 3          |
+|       41 | Table lock           |           1 |           0.000018 |            0.0000180000 |               0.02 | 4          |
++----------+----------------------+-------------+--------------------+-------------------------+--------------------+------------+
+</pre></blockquote>
+From the above we can see that <i>"Copying to tmp table"</i>, <i>"Opening tables"</i> and <i>"Sending data"</i> 
+are the major states impacting the query runtime.
+</p>
+
+<p>Similar to the above, simplify results:
+<blockquote><pre>mysql&gt; SET PROFILING := 1;
+
+mysql&gt; SELECT COUNT(*) FROM sakila.nicer_but_slower_film_list INTO @dummy;
+
+mysql&gt; SELECT STATE, state_duration_pct, state_calls 
+          FROM last_query_profiling 
+          ORDER BY state_duration_pct DESC;
++----------------------+--------------------+-------------+
+| STATE                | state_duration_pct | state_calls |
++----------------------+--------------------+-------------+
+| Copying to tmp table |              61.42 |           1 |
+| Sending data         |              25.96 |           2 |
+| Sorting result       |               9.56 |           1 |
+| checking permissions |               0.84 |           5 |
+| Opening tables       |               0.77 |           1 |
+| Creating tmp table   |               0.51 |           1 |
+| starting             |               0.21 |           1 |
+| removing tmp table   |               0.18 |           3 |
+| statistics           |               0.18 |           1 |
+| freeing items        |               0.08 |           2 |
+| optimizing           |               0.07 |           2 |
+| preparing            |               0.06 |           1 |
+| Table lock           |               0.04 |           1 |
+| executing            |               0.03 |           2 |
+| closing tables       |               0.02 |           1 |
+| init                 |               0.02 |           1 |
+| System lock          |               0.02 |           1 |
+| cleaning up          |               0.01 |           1 |
+| end                  |               0.01 |           1 |
+| logging slow query   |               0.01 |           1 |
+| query end            |               0.01 |           1 |
++----------------------+--------------------+-------------+
+</pre></blockquote>
+As a point of interest, we can see that <i>"Opening tables"</i> is no longer a major impacting state.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="query_profiling.html">query_profiling</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

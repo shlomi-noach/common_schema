@@ -29,6 +29,8 @@ QueryScript supports the following flow control structures:
 	<li><a href="query_script_foreach.html">foreach</a>: iterating collections</li>
 	<li><a href="query_script_while.html">while</a>: looping</li>
 	<li><a href="query_script_loop_while.html">loop-while</a>: looping</li>
+	<li><a href="query_script_split.html">split</a>: splitting long operations into smaller tasks</li>
+	<li><a href="query_script_try_catch.html">try-catch</a>: error handling</li>
 </ul>
 </p>
 <p> 
@@ -67,7 +69,28 @@ while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
 }
 </pre></blockquote>
 </p>
-						<br/>
+
+<p>
+Create or upgrade a table
+<blockquote><pre>
+try
+{
+  -- Try and create table:
+  CREATE TABLE test.article (
+    article_id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title varchar(128) CHARSET utf8,
+    content text CHARSET utf8
+  );
+}
+catch
+{
+  -- Apparently table already exists. Upgrade it:
+  ALTER TABLE test.article
+    MODIFY COLUMN content text CHARSET utf8;
+}
+</pre></blockquote>
+</p>
+								<br/>
 			</div>
 			<div id="sidebarwrapper">
 				<div id="menu">
@@ -93,6 +116,7 @@ while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -116,6 +140,7 @@ while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	

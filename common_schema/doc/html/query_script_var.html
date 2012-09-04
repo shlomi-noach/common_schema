@@ -25,9 +25,11 @@
 <h3>SYNOPSIS</h3>
 <p>
 <blockquote><pre>var $variable1 [, $variable2 ...];
+var $single_var := 'some_value';
 while(expression)
 {
   var $variable3 [, $variable4 ...];
+  var $pi := PI();
 }
 </pre></blockquote>
 </p>
@@ -49,8 +51,12 @@ once out of scope (being reassigned as <strong>NULL</strong>).
 </p>
 
 <p>
-<i>var</i> accepts one or more variables. It is an error to re-declare a local variable within
-a script, regardless of scope.
+<i>var</i> allows for two types of variable declaration:
+<ul>
+	<li>One or more variables, comma delimited. These variables are assigned with <strong>NULL</strong>.</li>
+	<li>A single variable with assignment, as in <strong>var $area := PI() * POW($r, 2)</strong>. The assigned value can be of any valid expression.</li>
+</ul>
+It is an error to re-declare a local variable within a script, regardless of scope.
 </p>
 
 
@@ -60,12 +66,10 @@ a script, regardless of scope.
 <blockquote><pre>
 var $a, $b;
 set $a := 4, $b := 17;
-var $c;
-set $c := $a;
+var $c := $a;
 while ($c > 0)
 {
-  var $d;
-  set $d := $c - 1;
+  var $d := $c - 1;
   set $c := $c - 1;
 }
 set $b := $c;
@@ -105,6 +109,7 @@ Shlomi Noach
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -128,6 +133,7 @@ Shlomi Noach
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	

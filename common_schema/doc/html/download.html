@@ -21,40 +21,17 @@
 Code. Downloads are available at the Google Code 
 <a	href="http://code.google.com/p/common-schema/">common_schema project page</a></p>
 
-<p>All downloads are plain text SQL source files. There are several
-distributions of <i>common_schema</i>, compatible with different MySQL
-server versions, utilizing different features in the different versions:</p>
+<p>The <i>common_schema</i> distribution is a plain text SQL source file.</p>
 
-<h4>common_schema_mysql_51</h4>
-<p>Includes the majority of features.</p>
-<p>Compatible with:</p>
-<ul>
-	<li>MySQL <strong>5.1</strong> and above</li>
-</ul>
+<p>The <i>common_schema</i> distribution file supports MySQL <strong>5.1</strong>, <strong>5.5</strong>, 
+Percona Server, with and without InnoDB Plugin. It should support MySQL <strong>5.6</strong>, which is not yet GA
+at the time of this release of <i>common_schema</i>.</p>
 
-<h4>common_schema_innodb_plugin</h4>
-<p>Extends the former distribution. Adds InnoDB Plugin specific
-features (relies on introduced INFORMATION_SCHEMA tables).</p>
-<p>Compatible with:</p>
-<ul>
-	<li>MySQL <strong>5.1</strong> with InnoDB Plugin enabled (and
-	with all INFORMATION_SCHEMA plugins loaded).</li>
-	<li>MySQL <strong>5.5</strong> (includes InnoDB Plugin by
-	default)</li>
-	<li>Percona Server <strong>5.1</strong> and above (uses XtraDB, a
-	fork of InnoDB Plugin)</li>
-</ul>
 
-<h4>common_schema_percona_server</h4>
-<p>Extends the former distributions. Adds Percona Server specific
-features.</p>
-<p>Compatible with:</p>
-<ul>
-	<li>Percona Server <strong>5.1</strong> and above, with
-	INNODB_INDEX_STATS enabled</li>
-</ul>
-<p>Note: In Percona Server 5.5.8-20.0, some incompatible changes were made to schemata. At current,
-<i>common_schema</i> only supports earlier versions. This may change in the future.</p>
+<p>
+	<i>common_schema</i> includes its own documentation (see <a href="help.html">help()</a>). 
+	However, it is also possible to download the documentation as a bundled HTML archive.
+</p>
 
 <h3>Get it</h3>
 I'm ready!
@@ -89,6 +66,7 @@ downloads page</a>
 						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
 						<li><a title="Security" href="security_routines.html">Security</a></li>
@@ -112,6 +90,7 @@ downloads page</a>
 					<ul>
 						<li><a title="Help" href="help.html">help</a></li>
 						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
 					</ul>						
 				</div>
 			</div>	
