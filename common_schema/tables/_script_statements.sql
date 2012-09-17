@@ -51,6 +51,7 @@ INSERT INTO _script_statements VALUES ('update', 'sql');
 --
 -- Script statements
 --
+INSERT INTO _script_statements VALUES ('echo', 'script');
 INSERT INTO _script_statements VALUES ('eval', 'script');
 INSERT INTO _script_statements VALUES ('pass', 'script');
 INSERT INTO _script_statements VALUES ('sleep', 'script');
@@ -58,3 +59,4 @@ INSERT INTO _script_statements VALUES ('throttle', 'script');
 INSERT INTO _script_statements VALUES ('throw', 'script');
 INSERT INTO _script_statements VALUES ('var', 'script');
 INSERT INTO _script_statements VALUES ('input', 'script');
+INSERT INTO _script_statements VALUES ('report', 'script');
