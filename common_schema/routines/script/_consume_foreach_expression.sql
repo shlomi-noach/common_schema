@@ -13,6 +13,7 @@ create procedure _consume_foreach_expression(
    in   depth int unsigned,
    out  collection text charset utf8,
    out  variables_array_id int unsigned,
+   out  variables_delaration_id int unsigned,
    in should_execute_statement tinyint unsigned
 )
 comment 'Reads foreach() expression'
@@ -48,14 +49,16 @@ main_body: begin
 	
 	-- Expect variables declaration:
     call _expect_dynamic_states_list(id_from, id_end_variables_definition-1, 'query_script variable', variables_array_id);
+	set variables_delaration_id := id_from;
 	call _declare_local_variables(id_from, id_to, id_end_variables_definition, depth, variables_array_id);
 		
     -- Get the collection clause:
 	set id_from := id_end_variables_definition + 1;
     call _skip_spaces(id_from, id_to);
-    SELECT GROUP_CONCAT(token ORDER BY id SEPARATOR '') FROM _sql_tokens WHERE id BETWEEN id_from AND id_end_expression-1 INTO collection;
 
-      -- ~~~ select expression, expression_statement;
+    call _expand_statement_variables(id_from, id_end_expression-1, collection, @_common_schema_dummy, should_execute_statement);
+    -- SELECT GROUP_CONCAT(token ORDER BY id SEPARATOR '') FROM _sql_tokens WHERE id BETWEEN id_from AND id_end_expression-1 INTO collection;
+
     set consumed_to_id := id_end_expression;
 end;
 //

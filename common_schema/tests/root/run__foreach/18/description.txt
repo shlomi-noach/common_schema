@@ -1,0 +1,1 @@
+foreach: expanded variable as number range expression
