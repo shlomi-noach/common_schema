@@ -37,8 +37,9 @@ main_body: begin
   end if;
   
   if should_execute_statement then
-  -- Start declaration
-    select GROUP_CONCAT(token order by id separator '') from _sql_tokens where id between assign_id+1 AND statement_id_to-1 into set_expression;
+    call _expand_statement_variables(assign_id+1, statement_id_to, set_expression, @_common_schema_dummy, should_execute_statement);
+  
+    -- select GROUP_CONCAT(token order by id separator '') from _sql_tokens where id between assign_id+1 AND statement_id_to-1 into set_expression;
     select CONCAT('SET ', mapped_user_defined_variable_name, ' := ', set_expression) from _qs_variables where variable_name = local_variable and declaration_depth = depth into set_statement;
     call exec(set_statement);
     -- SELECT GROUP_CONCAT('SET ', mapped_user_defined_variable_name, ' := NULL ' SEPARATOR ';') FROM _qs_variables WHERE declaration_depth = depth INTO reset_query;

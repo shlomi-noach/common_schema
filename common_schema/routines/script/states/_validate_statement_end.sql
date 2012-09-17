@@ -10,7 +10,8 @@ drop procedure if exists _validate_statement_end //
 create procedure _validate_statement_end(
    in   id_from      int unsigned,
    in   id_to      int unsigned,
-   out  id_end_statement int unsigned
+   out  id_end_statement int unsigned,
+   out	statement_delimiter_found tinyint unsigned
 ) 
 comment 'Validates delimiter or end of block'
 language SQL
@@ -32,6 +33,7 @@ main_body: begin
     -- Last query in script or block is allowed not to be terminated by ';'
     set id_end_statement := id_to;
   end if;
+  set statement_delimiter_found := (state_end_statement = 'statement delimiter');
 end;
 //
 
