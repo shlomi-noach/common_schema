@@ -1,0 +1,1 @@
+Declare two variables of same name in non-overlapping blocks. Expect no error 

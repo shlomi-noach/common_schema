@@ -1,0 +1,1 @@
+Redeclare variable inside foreach(...). Expect error

@@ -1,0 +1,1 @@
+var & foreach in distinct scopes, same variable name
