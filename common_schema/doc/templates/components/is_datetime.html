@@ -1,0 +1,47 @@
+<h3>NAME</h3>
+is_datetime(): Check whether given string is a valid DATETIME.
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	Test if given text makes for a valid DATETIME object. 
+	Returns <strong>TRUE</strong> (<strong>1</strong>) when it does, 
+	or <strong>FALSE</strong> (<strong>0</strong>) when it does not,
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>is_datetime(txt TINYTEXT) 
+  RETURNS TINYINT UNSIGNED</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: text to validate
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT is_datetime('2012-01-01') as result1, is_datetime('20120101123456') as result2;
++---------+---------+
+| result1 | result2 |
++---------+---------+
+|       1 |       1 |
++---------+---------+
+</pre></blockquote>
+
+<blockquote><pre>mysql&gt; SELECT is_datetime('abc') as result1, is_datetime(17) as result2;
++---------+---------+
+| result1 | result2 |
++---------+---------+
+|       0 |       0 |
++---------+---------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>AUTHOR</h3>
+Shlomi Noach, based on contribution by Roland Bouman 
