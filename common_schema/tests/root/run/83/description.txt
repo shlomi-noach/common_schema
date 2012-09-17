@@ -1,1 +1,0 @@
-foreach: error on missing variables

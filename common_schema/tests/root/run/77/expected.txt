@@ -1,4 +1,0 @@
-test_script_foreach_table_0a	test_cs_script_foreach_00	InnoDB
-test_script_foreach_table_0b	test_cs_script_foreach_00	MyISAM
-test_script_foreach_table_0c	test_cs_script_foreach_01	MEMORY
-test_script_foreach_table_0d	test_cs_script_foreach_01	InnoDB

@@ -1,4 +1,0 @@
-test_script_foreach_00	test_cs_script_foreach	InnoDB
-test_script_foreach_01	test_cs_script_foreach	InnoDB
-test_script_foreach_02	test_cs_script_foreach	InnoDB
-test_script_foreach_03	test_cs_script_foreach	MyISAM
