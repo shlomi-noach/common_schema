@@ -47,11 +47,26 @@ main_body: begin
       mapped_user_defined_variable_name  VARCHAR(65) CHARSET ascii NOT NULL,
       declaration_depth INT UNSIGNED NOT NULL,
       declaration_id INT UNSIGNED NOT NULL,
+      scope_end_id INT UNSIGNED NOT NULL,
       value_snapshot TEXT DEFAULT NULL,
       PRIMARY KEY(variable_name),
       KEY(declaration_depth),
-      KEY(declaration_id)
+      KEY(declaration_id),
+      KEY(scope_end_id)
   ) engine=MyISAM;
+--  create temporary table _qs_variables(
+--      _qs_variables_id int unsigned auto_increment,
+--      variable_name VARCHAR(65) CHARSET ascii NOT NULL,
+--      mapped_user_defined_variable_name  VARCHAR(65) CHARSET ascii NOT NULL,
+--      declaration_depth INT UNSIGNED NOT NULL,
+--      declaration_id INT UNSIGNED NOT NULL,
+--      scope_end_id INT UNSIGNED NOT NULL,
+--      value_snapshot TEXT DEFAULT NULL,
+--      PRIMARY KEY(_qs_variables_id),
+--      KEY(variable_name),
+--      KEY(declaration_depth),
+--      KEY(declaration_id)
+--  ) engine=MyISAM;
   
   -- Identify ${my_var} expanded variables. These are initially not identified as a state.
   -- We hack the _sql_tokens table to make these in their own state, combining multiple rows into one,
@@ -86,14 +101,25 @@ main_body: begin
   set @_common_schema_script_loop_nesting_level := 0;
   set @_common_schema_script_throttle_chunk_start := NULL;
   set @_common_schema_script_start_timestamp := NOW();
-    
+  set @_common_schema_script_report_used := false;
+  set @_common_schema_script_report_delimiter := '';
+
+  -- We happen to know tokens in _sql_tokens begin at "1". So "0" is a safe 
+  -- place not to step on anyone's toes.
+  call _declare_local_variable(0, 0, id_to, 0, '$rowcount', '@query_script_rowcount', FALSE);
+  
   -- First, do syntax validation: go through the code, but execute nothing:
   call _consume_statement(id_from, id_to, FALSE, id_to, 0, FALSE);
   -- Now, if need be, execute it:
   if should_execute_statement then
+    -- delete from _qs_variables;
     call _consume_statement(id_from, id_to, FALSE, id_to, 0, TRUE);
   end if;
-
+  
+  if @_common_schema_script_report_used then
+    call _script_report_finalize();
+  end if;
+  
   set @@group_concat_max_len := @__script_group_concat_max_len;  
 end;
 //

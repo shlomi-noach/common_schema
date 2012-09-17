@@ -28,11 +28,16 @@ main_body: begin
   declare statement_arguments text charset utf8;
   declare expanded_variables_found tinyint unsigned;
   
-  call _expand_statement_variables(id_from+1, statement_id_to-1, statement_arguments, expanded_variables_found, should_execute_statement);
+  call _expand_statement_variables(id_from+1, statement_id_to, statement_arguments, expanded_variables_found, should_execute_statement);
   
   set tokens_array_id := NULL;
   
   case script_statement
+	when 'echo' then begin
+        if should_execute_statement then
+          select trim_wspace(statement_arguments) as echo;
+        end if;
+	  end;
 	when 'eval' then begin
         if should_execute_statement then
           call eval(statement_arguments);
@@ -65,9 +70,9 @@ main_body: begin
         end if;
 	  end;
     when 'var' then begin
-	    -- initial support for "var $x := 3"
 	    call _peek_states_list(statement_id_from, statement_id_to, 'query_script variable,assign', true, true, false, @_common_schema_dummy, @_common_schema_peek_to_id);
 	    if @_common_schema_peek_to_id > 0 then
+	      -- a delare-and-assign statement, e.g. var $x := 3;
 	      call _declare_and_assign_local_variable(id_from, id_to, statement_id_from, @_common_schema_peek_to_id, statement_id_to, depth, should_execute_statement);
 	    else
           call _expect_dynamic_states_list(statement_id_from, statement_id_to, 'query_script variable', tokens_array_id);
@@ -82,6 +87,11 @@ main_body: begin
 		call _declare_local_variables(id_from, id_to, statement_id_to, depth, tokens_array_id);
         if should_execute_statement then
           call _assign_input_local_variables(tokens_array_id);
+        end if;
+	  end;
+	when 'report' then begin
+        if should_execute_statement then
+          call _script_report(statement_arguments);
         end if;
 	  end;
     else begin 

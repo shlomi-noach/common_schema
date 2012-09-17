@@ -1,0 +1,1 @@
+echo statement with expanded local variable
