@@ -50,7 +50,7 @@ main_body: begin
     leave main_body;
   end if;
   
-  call _foreach(collection, execute_queries, NULL, NULL, NULL, @_common_schema_dummy, NULL, NULL, NULL);
+  call _foreach(collection, execute_queries, NULL, NULL, NULL, @_common_schema_dummy, NULL, NULL, NULL, @_common_schema_dummy);
 end $$
 
 DELIMITER ;
