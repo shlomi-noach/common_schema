@@ -26,6 +26,7 @@ main_body: begin
     declare id_end_statement int unsigned; 
     
     declare mysql_statement TEXT CHARSET utf8;
+    declare statement_delimiter_found tinyint unsigned;
     
     declare expression text charset utf8;
     declare expression_statement text charset utf8;
@@ -35,10 +36,15 @@ main_body: begin
     declare peek_match tinyint unsigned;
     declare matched_token text charset utf8;
     
+    declare loop_iteration_count bigint unsigned;
     declare while_statement_id_from int unsigned;
     declare while_statement_id_to int unsigned;
+    declare while_otherwise_statement_id_from int unsigned;
+    declare while_otherwise_statement_id_to int unsigned;
     declare foreach_statement_id_from int unsigned;
     declare foreach_statement_id_to int unsigned;
+    declare foreach_otherwise_statement_id_from int unsigned;
+    declare foreach_otherwise_statement_id_to int unsigned;
     declare split_statement_id_from int unsigned;
     declare split_statement_id_to int unsigned;
     declare if_statement_id_from int unsigned;
@@ -55,6 +61,7 @@ main_body: begin
     declare foreach_variables_statement text charset utf8;
     declare foreach_collection text charset utf8;
     declare foreach_variables_array_id int unsigned;
+    declare foreach_variables_delaration_id int unsigned;
     
     declare split_table_schema tinytext charset utf8;
     declare split_table_name tinytext charset utf8;
@@ -88,7 +95,7 @@ main_body: begin
           end;
         when first_state = 'alpha' AND first_token in (SELECT statement FROM _script_statements WHERE statement_type = 'sql') then begin
 	        -- This is a SQL statement
-	        call _validate_statement_end(id_from, id_to, id_end_statement);
+	        call _validate_statement_end(id_from, id_to, id_end_statement, statement_delimiter_found);
             if should_execute_statement then
               -- Construct the original statement, send it for execution.
               call _expand_statement_variables(id_from, id_end_statement, mysql_statement, expanded_variables_found, should_execute_statement);
@@ -99,8 +106,8 @@ main_body: begin
   	        set consumed_to_id := id_end_statement;
           end;
         when first_state = 'alpha' AND first_token in (SELECT statement FROM _script_statements WHERE statement_type = 'script') then begin
-	        call _validate_statement_end(id_from, id_to, id_end_statement);	        
-	        call _consume_script_statement(id_from, id_to, id_from + 1, id_end_statement, depth, first_token, should_execute_statement);
+	        call _validate_statement_end(id_from, id_to, id_end_statement, statement_delimiter_found);	        
+	        call _consume_script_statement(id_from, id_to, id_from + 1, id_end_statement - IF(statement_delimiter_found, 1, 0), depth, first_token, should_execute_statement);
   	        set consumed_to_id := id_end_statement;
           end;
         when first_state = 'alpha' AND first_token = 'while' then begin
@@ -112,8 +119,18 @@ main_body: begin
             set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set while_statement_id_from := id_from;
 	        set while_statement_id_to := consumed_to_id;
+	        -- Is there an 'otherwise' clause?
+	        set while_otherwise_statement_id_from := NULL;
+	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'otherwise', NULL, peek_match, @_common_schema_dummy);
+	        if peek_match then
+	          set id_from := consumed_to_id + 1;
+              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+	          set while_otherwise_statement_id_from := id_from;
+              set while_otherwise_statement_id_to := consumed_to_id;
+	        end if;
             if should_execute_statement then
               -- Simulate "while" loop:
+              set loop_iteration_count := 0;
               interpret_while_loop: while TRUE do
                 -- Check for 'break'/'return';
                 if @_common_schema_script_break_type IS NOT NULL then
@@ -127,9 +144,17 @@ main_body: begin
                 if NOT expression_result then
                   leave interpret_while_loop;
                 end if;
-                -- Expression holds true. We revisit 'while' block
+                -- Expression holds true. We (re)visit 'while' block
+                set loop_iteration_count := loop_iteration_count + 1;
                 call _consume_statement(while_statement_id_from, while_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
               end while;
+              if loop_iteration_count = 0 then
+                -- no iterations made.
+                -- If there's an "otherwise" statement -- invoke it!
+                if while_otherwise_statement_id_from IS NOT NULL then
+                  call _consume_statement(while_otherwise_statement_id_from, while_otherwise_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                end if;
+              end if;
             end if;
 	      end;
         when first_state = 'alpha' AND first_token = 'loop' then begin
@@ -170,7 +195,7 @@ main_body: begin
             end if;
 	      end;
         when first_state = 'alpha' AND first_token = 'foreach' then begin
-	        call _consume_foreach_expression(id_from + 1, id_to, consumed_to_id, depth, foreach_collection, foreach_variables_array_id, should_execute_statement);
+	        call _consume_foreach_expression(id_from + 1, id_to, consumed_to_id, depth, foreach_collection, foreach_variables_array_id, foreach_variables_delaration_id, should_execute_statement);
 
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
@@ -179,8 +204,25 @@ main_body: begin
             set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set foreach_statement_id_from := id_from;
 	        set foreach_statement_id_to := consumed_to_id;
+	        update _qs_variables set scope_end_id = foreach_statement_id_to where declaration_id = foreach_variables_delaration_id;
+	        -- Is there an 'otherwise' clause?
+	        set foreach_otherwise_statement_id_from := NULL;
+	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'otherwise', NULL, peek_match, @_common_schema_dummy);
+	        if peek_match then
+	          set id_from := consumed_to_id + 1;
+              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+	          set foreach_otherwise_statement_id_from := id_from;
+              set foreach_otherwise_statement_id_to := consumed_to_id;
+	        end if;
             if should_execute_statement then
-              call _foreach(foreach_collection, NULL, foreach_statement_id_from, foreach_statement_id_to, TRUE, @_common_schema_dummy, foreach_variables_array_id, depth+1, TRUE);
+              call _foreach(foreach_collection, NULL, foreach_statement_id_from, foreach_statement_id_to, TRUE, @_common_schema_dummy, foreach_variables_array_id, depth+1, TRUE, loop_iteration_count);
+              if loop_iteration_count = 0 then
+                -- no iterations made.
+                -- If there's an "otherwise" statement -- invoke it!
+                if foreach_otherwise_statement_id_from IS NOT NULL then
+                  call _consume_statement(foreach_otherwise_statement_id_from, foreach_otherwise_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                end if;
+              end if;
             end if;
 	      end;
         when first_state = 'alpha' AND first_token = 'split' then begin
