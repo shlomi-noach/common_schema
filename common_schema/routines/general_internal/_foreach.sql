@@ -46,7 +46,8 @@ CREATE PROCEDURE _foreach(
    out  consumed_to_id int unsigned,
    in   variables_array_id int unsigned,
    in depth int unsigned,
-   in should_execute_statement tinyint unsigned
+   in should_execute_statement tinyint unsigned,
+   out iteration_count bigint unsigned
 )  
 MODIFIES SQL DATA
 SQL SECURITY INVOKER
@@ -364,6 +365,7 @@ main_body: begin
   else
     call throw(CONCAT('foreach(): unrecognized collection format: \"', collection, '\"'));
   end if;    
+  set iteration_count = GREATEST(iteration_number - 1, 0);
   set @@group_concat_max_len := @__group_concat_max_len;
 end $$
 
