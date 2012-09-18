@@ -1,0 +1,70 @@
+<h3>NAME</h3>
+starts_with(): Checks whether given text starts with given prefix..
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	A string <i>p</i> is a prefix of <i>s</i> if there is a string <i>t</i>
+	such that <strong>CONCAT(p, t) = s</strong>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>starts_with(txt TEXT CHARSET utf8, prefix TEXT CHARSET utf8)
+  RETURNS INT UNSIGNED</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: an arbitrary text.</li>
+    <li><strong>prefix</strong>: the string suspected/expected to be a prefix as <strong>txt</strong>.
+	</li>
+  </ul>
+</p>
+<p>
+	If	<strong>txt</strong> does indeed start with <strong>prefix</strong>,
+	<i>starts_with</i> returns the number of characters in the prefix. That is, the
+	length of <strong>prefix</strong>.
+</p>
+<p>
+	In case of mismatch (not a prefix), the function returns <strong>0</strong>.	 
+</p>
+<p>
+
+	One should note that a positive number holds in SQL as a <strong>TRUE</strong> 
+	value, whereas <strong>0</strong> holds as <strong>FALSE</strong>.
+	Also note that in the particular case of the empty string being the
+	<strong>prefix</strong>, the value <strong>0</strong> is always returned.	 
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Trim text (spaces between literals are unaffected):</p>
+<blockquote><pre>SELECT starts_with('The quick brown fox', 'The quick') as is_prefix;
++-----------+
+| is_prefix |
++-----------+
+|         9 |
++-----------+
+</pre></blockquote>
+
+<p>Similar to the above, quoted for clarity:</p>
+<blockquote><pre>SELECT starts_with('The quick brown fox', 'fox') as is_prefix;
++-----------+
+| is_prefix |
++-----------+
+|         0 |
++-----------+
+</pre></blockquote>
+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="get_num_tokens.html">get_num_tokens()</a>,
+<a href="split_token.html">split_token()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
