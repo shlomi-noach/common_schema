@@ -19,6 +19,7 @@
 	<property name="sql.help.output.file" value="common_schema_help.sql" />
 	<property name="sql.base_components.output.file" value="common_schema_base_components.sql" />
 	<property name="sql.additional_components.output.file" value="common_schema_additional_components.sql" />
+	<property name="sql.scripts.output.file" value="common_schema_scripts.sql" />
 	<property name="sql.build.output.file" value="common_schema.sql" />
 
 	<property name="doc.templates.dir" value="doc/templates" />
@@ -141,11 +142,35 @@
 	</target>
 
 	
-	<target name="build" depends="revnumber, build_base_components, build_additional_components">
+	<target name="build_scripts">
+		<delete file="${build.dir}/${sql.scripts.output.file}" />
+		<foreach param="script.filename" target="build_script">
+			<path>
+				<fileset dir="scripts" includes="*.sql" />
+			</path>
+		</foreach>
+	</target>
+	
+	<target name="build_script">
+		<basename property="script.file.basename" file="${script.filename}" suffix=".sql"/>
+		<loadfile property="script.text" srcfile="${script.filename}"></loadfile>
+
+		<propertyregex override="true" property="script.text" input="${script.text}"
+			regexp="[\\\\]" replace="\\\\\\\\" global="true" />
+		<propertyregex override="true" property="script.text" input="${script.text}"
+			regexp="[']" replace="''" global="true" />
+		<concat destfile="${build.dir}/${sql.scripts.output.file}" append="true">
+			INSERT INTO ${mysql.database}._named_scripts (script_name, script_text) VALUES ('${script.file.basename}','${script.text}');
+		</concat>
+	</target>
+
+	
+	<target name="build" depends="revnumber, build_base_components, build_additional_components, build_scripts">
 		<concat destfile="${build.dir}/${sql.build.output.file}">
 			<fileset file="${build_data.dir}/main_head.sql" />
 			<fileset file="${build.dir}/${sql.base_components.output.file}" />
 			<fileset file="${build.dir}/${sql.additional_components.output.file}" />
+			<fileset file="${build.dir}/${sql.scripts.output.file}" />
 			<fileset file="${build.dir}/${sql.help.output.file}" />
 			<fileset file="${build_data.dir}/main_tail.sql" />		
 		</concat>
@@ -264,7 +289,6 @@
 	
 	
 	<target name="doc_sql">
-		
 		<mkdir dir="${tmp.dir}" />
 		<mkdir dir="${build.dir}" />
 		<delete file="${build.dir}/${sql.help.output.file}" />
@@ -279,7 +303,6 @@
 			</path>
 		</foreach>
 		<delete dir="${tmp.dir}" />
-		
 	</target>
 	
 	<target name="page_doc_sql">
