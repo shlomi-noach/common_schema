@@ -17,6 +17,7 @@ begin
   declare is_header tinyint unsigned default 0;
   declare is_paragraph tinyint unsigned default 0;
   declare is_bullet tinyint unsigned default 0;
+  declare is_code tinyint unsigned default 0;
   declare is_horizontal_ruler tinyint unsigned default 0;
   
   if not @_common_schema_script_report_used then
@@ -37,6 +38,8 @@ begin
     set is_paragraph := 1;
   elseif (@_common_schema_script_report_prefix_len := starts_with(report_params, 'li ')) then
     set is_bullet := 1;
+  elseif (@_common_schema_script_report_prefix_len := starts_with(report_params, 'code ')) then
+    set is_code := 1;
   elseif (@_common_schema_script_report_prefix_len := starts_with(report_params, 'hr ')) then
     set is_horizontal_ruler := 1;
   end if;
@@ -46,12 +49,6 @@ begin
   call exec_single(report_query);
   
   set @_query_script_report_line := trim_wspace(@_query_script_report_line);
-  set @_query_script_report_line := case @_query_script_report_line
-    when '<h1>' then ' '
-    when '<p>' then ' '
-    when '<br>' then ' '
-    else @_query_script_report_line
-  end;
 --  insert into 
 --    _script_report_data (info) values (@_query_script_report_line);
   if is_header then
@@ -60,6 +57,9 @@ begin
   end if;
   if is_bullet then
     set @_query_script_report_line := CONCAT('- ', @_query_script_report_line);
+  end if;
+  if is_code then
+    set @_query_script_report_line := CONCAT('> ', @_query_script_report_line);
   end if;
   if is_paragraph then
     set @_query_script_report_line := CONCAT('\n', @_query_script_report_line);

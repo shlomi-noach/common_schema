@@ -1,5 +1,5 @@
 -- 
--- Checkes whether given text starts with given prefix.
+-- Checks whether given text starts with given prefix.
 -- Returns length of prefix if indeed text starts with it
 -- Returns 0 when text does not start with prefix
 -- 
