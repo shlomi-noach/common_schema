@@ -1,25 +1,46 @@
-<h3>SYNOPSIS</h3>
+<h3>NAME</h3>
+security_audit(): Generate a server's security audit report.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Audit a server's security setup, including reviewing accounts and settings.
+</p>
+<p>
+	This audit generates a human readable report with recommendations on
+	actions to take so as to enhance server security.
+</p>
 
 <p>
-Security routines: stored functions managing security and privileges information.
-<ul>
-	<li><a href="killall.html">killall()</a>: Kill connections with by matching GRANTEE, user or host.</li>
-	<li><a href="match_grantee.html">match_grantee()</a>: Match an existing account based on user+host.</li>
-	<li><a href="mysql_grantee.html">mysql_grantee()</a>: Return a qualified MySQL grantee (account) based on user and host.</li>
-	<li><a href="security_audit.html">security_audit()</a>: Generate a server's security audit report.</li>
-</ul>
+	<i>security_audit()</i> reviews the following:
+	<ul>
+		<li>Non-local root accounts</li>
+		<li>Anonymous users</li>
+		<li>Accounts accessible by any host</li>
+		<li>Password-less accounts</li>
+		<li>Accounts sharing same password</li>
+		<li>Non-root accounts with admin privileges</li>
+		<li>Non-root accounts with global DDL privileges</li>
+		<li>Non-root accounts with global DML privileges</li>
+		<li>sql_mode</li>
+		<li>Old passwords</li>
+	</ul> 
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>security_audit() 
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  This procedure takes no input.
 </p>
 
 <h3>EXAMPLES</h3>
 	<p>
-		Kill all connections made by the <strong>'analytics`</strong> user:
-	</p>
-	<blockquote><pre>mysql&gt; CALL killall('analytics');
-</pre></blockquote>
-
-	<p>
-		Audit server's security:
-	</p>
+		Audit a server:
 	<blockquote><pre>mysql&gt; CALL security_audit();
 +------------------------------------------------------------------------------+
 | report                                                                       |
@@ -96,3 +117,18 @@ Security routines: stored functions managing security and privileges information
 | Report generated on '2012-09-21 11:49:52                                     |
 +------------------------------------------------------------------------------+
 </pre></blockquote>
+	</p>
+
+
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="killall.html">killall</a>,
+<a href="processlist_grantees.html">processlist_grantees</a>,
+<a href="sql_accounts.html">sql_accounts</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
