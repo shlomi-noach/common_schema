@@ -11,6 +11,8 @@ foreach ($var1 [, $var2...] : <i>collection</i>)
   statement;
   statement, typically using $var1 [, $var2...];
 }
+[otherwise
+  statement;]
 </pre></blockquote>
 </p>
 
@@ -32,9 +34,12 @@ such as
 <a href="query_script_loop_while.html">loop-while</a> and
 <i>foreach</i> itself (see examples below).
 read more about the difference between the <i>foreach</i> control flow and the <i>foreach()</i> routine <a href="#notes">following</a>.
-
 </p>
-
+<p>
+	The <strong>otherwise</strong> clause is optional. It will execute once should no iteration
+	take place. That is, if at least one <strong>collection</strong> element exists,
+	<strong>otherwise</strong> is skipped.
+</p>
 <h4>Variables</h4>
 <p>
 The <i>foreach</i> construct is also a <a href="query_script_variables.html">variable</a> declaration point. Variables are created
@@ -342,6 +347,24 @@ foreach($tbl, $scm: table like wp_posts)
 foreach ($tbl, $scm: table ~ '^customer_data_[\d]+$')
   ALTER TABLE :$scm.:$tbl ADD COLUMN customer_geo_location VARCHAR(128);
 		</pre></blockquote>
+	</li>
+
+	<li>Use an <strong>otherwise</strong> clause:
+		<p>
+		The following collection will not match any table:
+		</p>
+		<blockquote><pre>
+foreach ($table, $schema: table like non_existing_table_name_%)
+  select $table, $schema;
+otherwise
+  echo 'No tables found';
+
++-------------------+
+| echo              |
++-------------------+
+| 'No tables found' |
++-------------------+  
+  		</pre></blockquote>
 	</li>
 </ul>
 
