@@ -153,9 +153,9 @@ otherwise
 
 
 report h1 'Testing sql_mode';
-if (select FIND_IN_SET('NO_AUTO_CREATE_USER', install_sql_mode) = 0 from status) {
-  report 'When common_schema was installed, the server''s sql_mode did not';
-  report 'include NO_AUTO_CREATE_USER.';
+if (FIND_IN_SET('NO_AUTO_CREATE_USER', @@global.sql_mode) = 0) {
+  report 'Server''s sql_mode does not include NO_AUTO_CREATE_USER.';
+  report 'This means users can be created with empty passwords.';
   report 'Recommendation: add NO_AUTO_CREATE_USER to sql_mode,';
   report 'both in config file as well as dynamically.';
   report code 'SET @@global.sql_mode := CONCAT(@@global.sql_mode, '',NO_AUTO_CREATE_USER'')'; 
