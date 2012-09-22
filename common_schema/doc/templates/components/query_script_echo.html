@@ -1,0 +1,87 @@
+
+<p>
+<strong>echo</strong>: display a line of text as result set.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>echo 'Starting';
+echo Will now drop all tables called %name%;
+foreach ($table, $schema: table like %name%)
+  echo DROP TABLE :${schema}.:${table};
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+	<i>echo</i> is a QueryScript <a href="query_script_statements.html">statement</a> which
+	writes (echoes) back its argument text as a message. 
+</p>
+<p>
+	<i>echo</i> takes any number and type of arguments and treats them all as a string.
+	Expanded variables are evaluated (thus, the output replaces them with contained values).
+	Local variables (unexpanded) or user defined variables are untouched.
+</p>
+<p>
+	<i>echo</i> is useful in showing progress messages, as well as testing dangerous operations
+	beforehand (echoing the dangerous statement, to be reviewed by a human, before actually
+	executing it).
+</p>
+
+<h3>EXAMPLES</h3>
+
+<p>
+Static text:
+<blockquote><pre>
+echo 'Starting';
+
++------------+
+| echo       |
++------------+
+| 'Starting' |
++------------+
+</pre></blockquote>
+</p>
+
+<p>
+Static text, no need to quote:
+<blockquote><pre>
+echo Will now drop all tables called %name%;
+
++----------------------------------------+
+| echo                                   |
++----------------------------------------+
+| Will now drop all tables called %name% |
++----------------------------------------+
+</pre></blockquote>
+</p>
+
+<p>
+Dynamic text, via expanded variables. Test <strong>DROP TABLE</strong> iteration before
+actually invoking it.
+<blockquote><pre>
+foreach ($table, $schema: table like %name%)
+  echo DROP TABLE :${schema}.:${table};
+
++-----------------------------------------+
+| echo                                    |
++-----------------------------------------+
+| DROP TABLE common_schema._named_scripts |
++-----------------------------------------+
+
++---------------------------------+
+| echo                            |
++---------------------------------+
+| DROP TABLE mysql.time_zone_name |
++---------------------------------+
+</pre></blockquote>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script_report.html">report</a>,
+<a href="query_script_statements.html">Statements</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+
