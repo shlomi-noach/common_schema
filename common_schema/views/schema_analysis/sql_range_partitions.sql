@@ -58,6 +58,7 @@ VIEW _sql_range_partitions_base AS
   where 
     p0.PARTITION_METHOD IN ('RANGE', 'RANGE COLUMNS')
     and p1.PARTITION_DESCRIPTION != 'MAXVALUE'
+    and not (p0.PARTITION_ORDINAL_POSITION = 1 and p0.PARTITION_DESCRIPTION = 0)
 ;
 
 -- 
