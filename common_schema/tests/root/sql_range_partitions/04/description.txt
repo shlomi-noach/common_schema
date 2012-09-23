@@ -1,0 +1,1 @@
+sql_range_partitions: eval SQL add partition query, with maxvalue

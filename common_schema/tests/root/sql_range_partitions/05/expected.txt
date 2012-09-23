@@ -1,0 +1,1 @@
+alter table `test_cs`.`test_sql_range_partitions_weekly` add partition (partition `p_20120205000000` values less than (734903) /* 2012-02-05 00:00:00 */ )

@@ -1,0 +1,1 @@
+alter table `test_cs`.`test_sql_range_partitions_quarter_maxvalue` reorganize partition `p6` into (partition `p_20090701000000` values less than (1246395600) /* 2009-07-01 00:00:00 */ , partition p_maxvalue values less than MAXVALUE)

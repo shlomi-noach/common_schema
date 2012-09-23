@@ -1,0 +1,1 @@
+alter table `test_cs`.`test_sql_range_partitions_int_interval` add partition (partition `p_2026` values less than (2026))
