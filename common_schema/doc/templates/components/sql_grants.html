@@ -4,7 +4,6 @@ sql_grants: generate SQL GRANT/REVOKE statements for existing accounts; provide 
 View
 
 <h3>DESCRIPTION</h3>
-<p></p>
 
 <p><i>sql_grants</i> presents metadata for existing accounts, and generates SQL queries for granting/revoking their privileges set.
 </p>
@@ -33,7 +32,7 @@ Alas, it is not a proper SQL query, and does not provide with structured result.
 <h3>STRUCTURE</h3>
 
 <blockquote><pre>
-mysql&gt; DESC sql_grants;
+mysql&gt; DESC common_schema.sql_grants;
 +--------------------+--------------+------+-----+---------+-------+
 | Field              | Type         | Null | Key | Default | Extra |
 +--------------------+--------------+------+-----+---------+-------+
@@ -61,9 +60,18 @@ mysql&gt; DESC sql_grants;
 	<li><strong>priv_level_name</strong>: description of priv_level: <strong>'user'</strong>, <strong>'schema'</strong>, <strong>'table'</strong>, <strong>'column'</strong>, <strong>'routine'</strong></li>
 	<li><strong>current_privileges</strong>: comma delimited list of privileges assigned to account on current privilege level</li>
 	<li><strong>IS_GRANTABLE</strong>: does current account have the GRANT privileges on this domain? <strong>'Yes'</strong> or <strong>'NO'</strong></li>
-	<li><strong>sql_grant</strong>: A <strong>GRANT</strong> query to generate current set of privileges</li>
-	<li><strong>sql_revoke</strong>: A <strong>REVOKE</strong> query to revoke current set of privileges</li>
-	<li><strong>sql_drop_user</strong>: A <strong>DROP USER</strong> query to drop account</li>
+	<li><strong>sql_grant</strong>: 
+		A <strong>GRANT</strong> query to generate current set of privileges.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+	<li><strong>sql_revoke</strong>: 
+		A <strong>REVOKE</strong> query to revoke current set of privileges.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+	<li><strong>sql_drop_user</strong>: 
+		A <strong>DROP USER</strong> query to drop account.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
 </ul>
 
 <p>The view is in 1st normal form. The <strong>sql_drop_user</strong> column applies to a grantee in general, unrelated to the current domain.</p>

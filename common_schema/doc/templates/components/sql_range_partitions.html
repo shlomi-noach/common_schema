@@ -1,0 +1,130 @@
+<h3>NAME</h3>
+sql_range_partitions: Generate SQL statements for managing range partitions
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p>
+	<i>sql_range_partitions</i> provides with SQL statements to create/drop 
+	partitions in a <strong>RANGE</strong> or <strong>RANGE COLUMNS</strong> partitioned table 
+</p>
+
+<p>
+	It generates the <strong>DROP PARTITION</strong> statement required to drop the oldest
+	partition, and the  <strong>ADD PARTITION</strong> or <strong>REORGANIZE PARTITION</strong>
+	statement for generating the next partition in sequence.
+</p>
+
+<p>
+	This view auto-deduces the "next in sequence" partition value. It handles consistent
+	partitioning schemes, where the interval of values between partitions makes some sense.
+	Such an interval can be a constant value, but can also be a time-based interval.
+</p>
+
+<p>
+	The view supports MySQL <strong>5.1</strong> as well as <strong>5.5</strong>.  
+	<strong>5.1</strong> requires an integer partitioning key, thereby forcing users to 
+	convert such values	as timestamps to integers via <strong>UNIX_TIMESTAMP()</strong>, 
+	<strong>TO_DAYS()</strong> etc. <i>sql_range_partitions</i> reverse engineers this
+	conversion so as to compute the next in sequence <strong>LESS THAN</strong> value.
+</p>
+
+<p>
+	It handles views with a <strong>LESS THAN MAXVALUE</strong> partition by reorganizing
+	such partition into a "normal" partition followed by a new
+	<strong>LESS THAN MAXVALUE</strong> one. 
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.sql_range_partitions;
++--------------------------+--------------+------+-----+---------+-------+
+| Field                    | Type         | Null | Key | Default | Extra |
++--------------------------+--------------+------+-----+---------+-------+
+| table_schema             | varchar(64)  | NO   |     |         |       |
+| table_name               | varchar(64)  | NO   |     |         |       |
+| count_partitions         | bigint(21)   | NO   |     | 0       |       |
+| sql_drop_first_partition | varchar(284) | YES  |     | NULL    |       |
+| sql_add_next_partition   | longblob     | YES  |     | NULL    |       |
++--------------------------+--------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>table_schema</strong>: schema of partitioned table table</li>
+	<li><strong>table_name</strong>: table partitioned by <strong>RANGE</strong> or <strong>RANGE COLUMNS</strong></li>
+	<li><strong>count_partitions</strong>: number of partitions in table</li>
+	<li><strong>sql_drop_first_partition</strong>: 
+		A SQL statement which drops the first partition.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+	<li><strong>sql_add_next_partition</strong>: 
+		A SQL statement which adds the "next in sequence" partition.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+</ul>
+
+<p>The SQL statements are not terminated by ';'.</p>
+
+<h3>EXAMPLES</h3>
+
+<p>Show drop/reorganize statements for a partitioned table with <strong>MAXVALUE</strong> partition:</p>
+<blockquote><pre>mysql&gt; CREATE TABLE test.quarterly_report_status (
+    report_id INT NOT NULL,
+    report_status VARCHAR(20) NOT NULL,
+    report_updated TIMESTAMP NOT NULL 
+)
+PARTITION BY RANGE (UNIX_TIMESTAMP(report_updated)) (
+    PARTITION p0 VALUES LESS THAN (UNIX_TIMESTAMP('2008-01-01 00:00:00')),
+    PARTITION p1 VALUES LESS THAN (UNIX_TIMESTAMP('2008-04-01 00:00:00')),
+    PARTITION p2 VALUES LESS THAN (UNIX_TIMESTAMP('2008-07-01 00:00:00')),
+    PARTITION p3 VALUES LESS THAN (UNIX_TIMESTAMP('2008-10-01 00:00:00')),
+    PARTITION p4 VALUES LESS THAN (UNIX_TIMESTAMP('2009-01-01 00:00:00')),
+    PARTITION p5 VALUES LESS THAN (UNIX_TIMESTAMP('2009-04-01 00:00:00')),
+    PARTITION p6 VALUES LESS THAN (MAXVALUE)
+);
+
+mysql&gt; SELECT * FROM sql_range_partitions WHERE table_name='quarterly_report_status' \G
+*************************** 1. row ***************************
+            table_schema: test
+              table_name: quarterly_report_status
+        count_partitions: 7
+sql_drop_first_partition: alter table `test`.`quarterly_report_status` drop partition `p0`
+  sql_add_next_partition: alter table `test`.`quarterly_report_status` reorganize partition `p6` into (partition `p_20090701000000` values less than (1246395600) /* 2009-07-01 00:00:00 */ , partition p_maxvalue values less than MAXVALUE)
+</pre></blockquote>
+
+
+<p>Add next partition:</p>
+<blockquote><pre>mysql&gt; call eval("SELECT sql_add_next_partition FROM sql_range_partitions WHERE table_name='quarterly_report_status'");
+
+mysql&gt; SHOW CREATE TABLE test.quarterly_report_status \G
+
+Create Table: CREATE TABLE `quarterly_report_status` (
+  `report_id` int(11) NOT NULL,
+  `report_status` varchar(20) NOT NULL,
+  `report_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=MyISAM DEFAULT CHARSET=latin1
+/*!50100 PARTITION BY RANGE (UNIX_TIMESTAMP(report_updated))
+(PARTITION p0 VALUES LESS THAN (1199138400) ENGINE = MyISAM,
+ PARTITION p1 VALUES LESS THAN (1206997200) ENGINE = MyISAM,
+ PARTITION p2 VALUES LESS THAN (1214859600) ENGINE = MyISAM,
+ PARTITION p3 VALUES LESS THAN (1222808400) ENGINE = MyISAM,
+ PARTITION p4 VALUES LESS THAN (1230760800) ENGINE = MyISAM,
+ PARTITION p5 VALUES LESS THAN (1238533200) ENGINE = MyISAM,
+ PARTITION p_20090701000000 VALUES LESS THAN (1246395600) ENGINE = MyISAM,
+ PARTITION p_maxvalue VALUES LESS THAN MAXVALUE ENGINE = MyISAM) */
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="eval.html">eval()</a>,
+<a href="sql_foreign_keys.html">sql_foreign_keys</a>
+<h3>AUTHOR</h3>
+Shlomi Noach

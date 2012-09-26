@@ -77,8 +77,14 @@ This view extends <strong>PROCESSLIST</strong> by including all existing columns
 		<li><strong>is_super</strong>: <strong>1</strong> if the grantee has the <strong>SUPER</strong> privilege; <strong>0</strong> if not.</li>
 		<li><strong>is_repl</strong>: <strong>1</strong> if the connection appears to be a replication thread; <strong>0</strong> if not.</li>
 		<li><strong>is_current</strong>: <strong>1</strong> if the process is the current connection; <strong>0</strong> if not.</li>
-		<li><strong>sql_kill_query</strong>: generated statement to kill current query</li>
-		<li><strong>sql_kill_connection</strong>: generated statement to kill current connection</li>
+		<li><strong>sql_kill_query</strong>: 
+			generated statement to kill current query.
+			<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+		</li>
+		<li><strong>sql_kill_connection</strong>: 
+			generated statement to kill current connection.
+			<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+		</li>
 	</ul>
 </p>
 <h3>EXAMPLES</h3>
