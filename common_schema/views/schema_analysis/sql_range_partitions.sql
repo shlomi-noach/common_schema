@@ -11,6 +11,7 @@ VIEW _sql_range_partitions_summary AS
     table_name, 
     COUNT(*) as count_partitions,
     substring_index(group_concat(PARTITION_NAME order by PARTITION_ORDINAL_POSITION), ',', 1) as first_partition_name,
+    substring_index(group_concat(IF((PARTITION_ORDINAL_POSITION = 1 and PARTITION_DESCRIPTION = 0), NULL, PARTITION_NAME) order by PARTITION_ORDINAL_POSITION), ',', 1) as first_partition_name_skipping_zero,    
     substring_index(group_concat(PARTITION_NAME order by PARTITION_ORDINAL_POSITION), ',', -1) as last_partition_name,
     SUM(PARTITION_DESCRIPTION = 'MAXVALUE') as has_maxvalue,
     MAX(IF(PARTITION_DESCRIPTION = 'MAXVALUE', PARTITION_NAME, NULL)) as maxvalue_partition_name,
@@ -27,7 +28,8 @@ VIEW _sql_range_partitions_summary AS
 ;
 
 -- 
--- 
+-- Diff all values.
+-- Ignore first partition if it's "LESS THAN 0" as this is a common use case and is not part of a constant interval.
 -- 
 
 CREATE OR REPLACE
@@ -171,7 +173,7 @@ VIEW sql_range_partitions AS
     table_schema,
     table_name,
     count_partitions,
-    CONCAT('alter table ', mysql_qualify(table_schema), '.', mysql_qualify(table_name), ' drop partition ', mysql_qualify(first_partition_name)) as sql_drop_first_partition,
+    CONCAT('alter table ', mysql_qualify(table_schema), '.', mysql_qualify(table_name), ' drop partition ', mysql_qualify(first_partition_name_skipping_zero)) as sql_drop_first_partition,
     IF (has_maxvalue,
       CONCAT(
         'alter table ', mysql_qualify(table_schema), '.', mysql_qualify(table_name), 
