@@ -174,5 +174,16 @@ if (select @@global.old_passwords) {
 else
   report 'OK';
 
+  
+report h1 'Checking for `test` database';
+foreach ($schema: schema like test) {
+  report '`test` database has been found.';
+  report '`test` is a special database where any user can create, drop and manipulate';
+  report 'table data. Recommendation: drop it';
+  report code 'DROP DATABASE `test`'; 
+}
+otherwise
+  report 'OK';
+
 report '';
 
