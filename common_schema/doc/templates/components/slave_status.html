@@ -1,0 +1,81 @@
+<h3>NAME</h3>
+slave_status: Provide with slave status info 
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p>
+	<i>slave_status</i> displays minimal information about this server's slave status.
+	Its information is generally a subset of <strong>SHOW SLAVE STATUS</strong>. 
+</p>
+
+<p>
+	A problem with MySQL's <strong>SHOW SLAVE STATUS</strong> is that it cannot be read
+	nor used on server side; one cannot open cursor on this statement. The
+	<i>slave_status</i> view attempts to provide with as much info (though minimal)
+	about the status of replication. In particular, the 
+	<strong>Seconds_Behind_Master</strong> value is provided by this view.  
+</p>
+
+<p>
+	<strong>NOTE</strong>, this view is experimental.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.processlist_repl;
++-----------------------+---------------+------+-----+---------+-------+
+| Field                 | Type          | Null | Key | Default | Extra |
++-----------------------+---------------+------+-----+---------+-------+
+| Slave_Connected_time  | decimal(32,0) | YES  |     | NULL    |       |
+| Slave_IO_Running      | int(1)        | NO   |     | 0       |       |
+| Slave_SQL_Running     | int(1)        | NO   |     | 0       |       |
+| Slave_Running         | int(1)        | NO   |     | 0       |       |
+| Seconds_Behind_Master | decimal(32,0) | YES  |     | NULL    |       |
++-----------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>Slave_Connected_time</strong>: Number of seconds this slave has been connected to its 
+			master, or <strong>NULL</strong> if not connected.
+		</li>
+		<li><strong>Slave_IO_Running</strong>: <strong>1</strong> if the slave I/O thread is currently running, <strong>0</strong> otherwise.</li>
+		<li><strong>Slave_SQL_Running</strong>: <strong>1</strong> if the slave SQL thread is currently running, <strong>0</strong> otherwise.</li>
+		<li><strong>Slave_Running</strong>: <strong>1</strong> if both IO and SQL threads are running, <strong>0</strong> otherwise.</li>
+		<li><strong>Seconds_Behind_Master</strong>: number of seconds this server is lagging behind its master, 
+		or <strong>NULL</strong> if not replicating.</li>
+	</ul>
+</p>
+
+
+<h3>EXAMPLES</h3>
+<p>Get slave status on a replicating slave:
+
+<blockquote><pre>mysql&gt; SELECT * FROM slave_status \G
+*************************** 1. row ***************************
+ Slave_Connected_time: 82077
+     Slave_IO_Running: 1
+    Slave_SQL_Running: 1
+        Slave_Running: 1
+Seconds_Behind_Master: 5
+</pre></blockquote>
+
+In the above the slave is lagging <strong>5</strong> seconds behind its master. Otherwise,
+replication is up and running.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer. 
+
+<h3>SEE ALSO</h3>
+<a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_top.html">processlist_top</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
