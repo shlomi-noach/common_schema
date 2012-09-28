@@ -29,9 +29,21 @@ VIEW processlist_summary AS
         (COMMAND != 'Sleep') AND (USER != 'system user') AND (COMMAND != 'Binlog Dump'),
         TIME,
         NULL
-      )), 0) AS average_active_time
+      )), 0) AS average_active_time,
+    IFNULL(CAST(
+      split_token(
+        GROUP_CONCAT(
+          IF(
+            (COMMAND != 'Sleep') AND (USER != 'system user') AND (COMMAND != 'Binlog Dump'),
+            TIME,
+            NULL
+          ) ORDER BY TIME
+        ), 
+        ',', COUNT(*)*95/100
+      ) AS DECIMAL(10,2)
+    ), 0) AS median_95pct_active_time
   FROM 
     INFORMATION_SCHEMA.PROCESSLIST 
   WHERE 
     id != CONNECTION_ID()
-;
+\G

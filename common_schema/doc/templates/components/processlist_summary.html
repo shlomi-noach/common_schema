@@ -14,18 +14,19 @@ It presents with counters listing the number of connected, running, sleeping, lo
 
 <blockquote><pre>
 mysql&gt; DESC common_schema.processlist_summary;
-+-------------------------+---------------+------+-----+---------+-------+
-| Field                   | Type          | Null | Key | Default | Extra |
-+-------------------------+---------------+------+-----+---------+-------+
-| count_processes         | bigint(21)    | NO   |     | 0       |       |
-| active_processes        | decimal(23,0) | YES  |     | NULL    |       |
-| sleeping_processes      | decimal(23,0) | YES  |     | NULL    |       |
-| active_queries          | decimal(23,0) | YES  |     | NULL    |       |
-| num_queries_over_1_sec  | decimal(23,0) | NO   |     | 0       |       |
-| num_queries_over_10_sec | decimal(23,0) | NO   |     | 0       |       |
-| num_queries_over_60_sec | decimal(23,0) | NO   |     | 0       |       |
-| average_active_time     | decimal(14,4) | NO   |     | 0.0000  |       |
-+-------------------------+---------------+------+-----+---------+-------+
++--------------------------+---------------+------+-----+---------+-------+
+| Field                    | Type          | Null | Key | Default | Extra |
++--------------------------+---------------+------+-----+---------+-------+
+| count_processes          | bigint(21)    | NO   |     | 0       |       |
+| active_processes         | decimal(23,0) | YES  |     | NULL    |       |
+| sleeping_processes       | decimal(23,0) | YES  |     | NULL    |       |
+| active_queries           | decimal(23,0) | YES  |     | NULL    |       |
+| num_queries_over_1_sec   | decimal(23,0) | NO   |     | 0       |       |
+| num_queries_over_10_sec  | decimal(23,0) | NO   |     | 0       |       |
+| num_queries_over_60_sec  | decimal(23,0) | NO   |     | 0       |       |
+| average_active_time      | decimal(14,4) | NO   |     | 0.0000  |       |
+| median_95pct_active_time | decimal(10,2) | NO   |     | 0.00    |       |
++--------------------------+---------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
@@ -40,6 +41,7 @@ mysql&gt; DESC common_schema.processlist_summary;
 	<li><strong>num_queries_over_10_sec</strong>: non-replication queries running at 10 second or more</li>
 	<li><strong>num_queries_over_60_sec</strong>: non-replication queries running at 60 second or more</li>
 	<li><strong>average_active_time</strong>: average query execution time for non-replication, non-sleeping queries queries</li>
+	<li><strong>median_95pct_active_time</strong>: run time at 95% (95% processes run at this or lower time) for active processes</li>
 </ul>
 <p>All of the above counters exclude the connection from which the view is being queried.
 </p>
@@ -51,24 +53,26 @@ mysql&gt; DESC common_schema.processlist_summary;
 
 
 <h3>EXAMPLES</h3>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_summary;
-+-----------------+------------------+--------------------+----------------+------------------------+-------------------------+-------------------------+---------------------+
-| count_processes | active_processes | sleeping_processes | active_queries | num_queries_over_1_sec | num_queries_over_10_sec | num_queries_over_60_sec | average_active_time |
-+-----------------+------------------+--------------------+----------------+------------------------+-------------------------+-------------------------+---------------------+
-|              84 |               13 |                 71 |             10 |                      2 |                       1 |                       0 |              7.5000 |
-+-----------------+------------------+--------------------+----------------+------------------------+-------------------------+-------------------------+---------------------+
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_summary where average_active_time > 0\G
+*************************** 1. row ***************************
+         count_processes: 123
+        active_processes: 68
+      sleeping_processes: 55
+          active_queries: 66
+  num_queries_over_1_sec: 34
+ num_queries_over_10_sec: 0
+ num_queries_over_60_sec: 0
+     average_active_time: 1.3939
+median_95pct_active_time: 4.00
 </pre></blockquote>
 
-<p>
-In the above, the server participates in a Master-Master topology, which makes for <strong>3</strong> replication processes
-(<strong>1</strong> serving a slave, <strong>2</strong> being a slave).
-</p>
 <h3>ENVIRONMENT</h3>
 MySQL 5.1 or newer.
 
 <h3>SEE ALSO</h3>
 <a href="processlist_per_userhost.html">processlist_per_userhost</a>,
 <a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_states.html">processlist_states</a>,
 <a href="processlist_top.html">processlist_top</a>
 
 <h3>AUTHOR</h3>
