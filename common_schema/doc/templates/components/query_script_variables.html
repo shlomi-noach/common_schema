@@ -83,7 +83,7 @@ Note: current implementation uses MySQL's user defined variables, using variable
 unique within the script and the session in which they are declared.
 </p>
 
-<h4>Visibility</h4>
+<h4>Visibility & scope</h4>
 <p>
 A variable is only visible in the scope in which it is declared. In the above example,
 <strong>$x</strong> is recognized throughout the script, but <strong>$y</strong> may
@@ -106,9 +106,19 @@ sub-blocks of code:
 </pre></blockquote>
 </p>
 <p>
-It is not allowed to declare two variables of the same name in the same script, even if 
-they are not visible to each other. Thus, it would be an error to re-declare <strong>$x</strong>
-in the second block in the above example.
+One may declare two variables of the same name, as long as they are invisible to each other.
+In other words, they must be in non-overlapping scopes. For example, the following is valid:
+<blockquote><pre>{
+  var $a := 3;
+  var $b := 4;
+}
+var $a := 5;
+{
+  var $b := '6';
+} 
+</pre></blockquote>
+The second declaration point of <strong>$a</strong> appears after the first one went out of scope,
+which makes this a valid declaration. The same goes for <strong>$b</strong>.
 </p>
 
 <a name="expansion"></a>
