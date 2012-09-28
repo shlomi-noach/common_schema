@@ -1,0 +1,68 @@
+<h3>NAME</h3>
+processlist_states: Summary of processlist states and their run time
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p>
+	<i>processlist_states</i> aggregates the various <a href="http://dev.mysql.com/doc/refman/5.1/en/general-thread-states.html">thread states</a> 
+	and presents time metrics for those states. 
+</p>
+
+<p>
+	It makes for a general overview of "what is my MySQL server doing right now".	
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.processlist_states;
++-------------------------+---------------+------+-----+---------+-------+
+| Field                   | Type          | Null | Key | Default | Extra |
++-------------------------+---------------+------+-----+---------+-------+
+| state                   | varchar(64)   | YES  |     | NULL    |       |
+| count_processes         | bigint(21)    | NO   |     | 0       |       |
+| median_state_time       | decimal(10,2) | YES  |     | NULL    |       |
+| median_95pct_state_time | decimal(10,2) | YES  |     | NULL    |       |
+| max_state_time          | int(7)        | YES  |     | NULL    |       |
+| sum_state_time          | decimal(32,0) | YES  |     | NULL    |       |
++-------------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>state</strong>: a thread state which is currently running</li>
+	<li><strong>count_processes</strong>: number of threads (processes) in this state</li>
+	<li><strong>median_state_time</strong>: median run time processes in this state</li>
+	<li><strong>median_95pct_state_time</strong>: run time at 95% processes (95% processes run at this or under this time) in this state</li>
+	<li><strong>max_state_time</strong>: maximum run time for process in this state</li>
+	<li><strong>sum_state_time</strong>: sum of all run time seconds for processes in this state</li>
+</ul>
+
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_states;
++----------------------------------------------------------------+-----------------+-------------------+-------------------------+----------------+----------------+
+| state                                                          | count_processes | median_state_time | median_95pct_state_time | max_state_time | sum_state_time |
++----------------------------------------------------------------+-----------------+-------------------+-------------------------+----------------+----------------+
+|                                                                |              77 |              2.00 |                  203.00 |            500 |           2475 |
+| NULL                                                           |               2 |              0.00 |                    0.00 |              0 |              0 |
+| Has sent all binlog to slave; waiting for binlog to be updated |               2 |          38896.00 |                38896.00 |          38896 |          77792 |
+| freeing items                                                  |               1 |              0.00 |                    0.00 |              0 |              0 |
+| Sending data                                                   |               1 |              0.00 |                    0.00 |              0 |              0 |
++----------------------------------------------------------------+-----------------+-------------------+-------------------------+----------------+----------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="processlist_summary.html">processlist_summary</a>,
+<a href="processlist_top.html">processlist_top</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
