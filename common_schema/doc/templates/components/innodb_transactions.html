@@ -1,17 +1,23 @@
 <h3>NAME</h3>
-innodb_transactions: Listing of active (InnoDB Plugin) transactions, which are currently performing queries
+innodb_transactions: Listing of open (InnoDB Plugin) transactions
 <h3>TYPE</h3>
 View
 
 <h3>DESCRIPTION</h3>
 <p></p>
 
-<p><i>innodb_transactions</i> is a simplification of INFORMATION_SCHEMA.INNODB_TRX. 
-It only lists those transactions which are executing queries at the moment. "Sleeping" transactions are not listed.
+<p>
+	<i>innodb_transactions</i> is a simplification of INFORMATION_SCHEMA.INNODB_TRX. 
 </p>
 
 <p>
-The connection calling upon this view is never listed.
+	<strong>CHANGE:</strong> up to common_schema <strong>1.1</strong>, this view would only show
+	transactions that are executing statements. It now lists all open transactions, and offers the
+	<strong>trx_idle_seconds</strong> columns to help finding sleeping open transactions.
+</p>
+
+<p>
+	The connection calling upon this view is never listed.
 </p>
 
 <h3>STRUCTURE</h3>
