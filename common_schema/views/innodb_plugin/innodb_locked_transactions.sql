@@ -17,7 +17,10 @@ VIEW innodb_locked_transactions AS
     locking_transaction.trx_started AS locking_trx_started,
     locking_transaction.trx_wait_started AS locking_trx_wait_started,
     locking_transaction.trx_mysql_thread_id AS locking_trx_mysql_thread_id,
-    locking_transaction.trx_query AS locking_trx_query
+    locking_transaction.trx_query AS locking_trx_query,
+    TIMESTAMPDIFF(SECOND, locked_transaction.trx_wait_started, NOW()) as trx_wait_seconds,
+    CONCAT('KILL QUERY ', locking_transaction.trx_mysql_thread_id) AS sql_kill_blocking_query,
+    CONCAT('KILL ', locking_transaction.trx_mysql_thread_id) AS sql_kill_blocking_connection    
   FROM 
     INFORMATION_SCHEMA.INNODB_TRX AS locked_transaction
     JOIN INFORMATION_SCHEMA.INNODB_LOCK_WAITS ON (locked_transaction.trx_id = INNODB_LOCK_WAITS.requesting_trx_id)
