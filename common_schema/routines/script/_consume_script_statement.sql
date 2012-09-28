@@ -51,7 +51,7 @@ main_body: begin
 	    -- Now that states list is validated, we just take the statement argument (there's only 1) for benefit of variable expansion:
         if should_execute_statement then
           call exec(CONCAT('SET @_common_schema_intermediate_var := ', statement_arguments));
-          DO SLEEP(CAST(trim_wspace(@_common_schema_intermediate_var) AS DECIMAL));
+          DO SLEEP(CAST(trim_wspace(@_common_schema_intermediate_var) AS DECIMAL(64, 2)));
         end if;
 	  end;
 	when 'throttle' then begin
@@ -59,7 +59,7 @@ main_body: begin
 	    -- Now that states list is validated, we just take the statement argument (there's only 1) for benefit of variable expansion:
         if should_execute_statement then
           call exec(CONCAT('SET @_common_schema_intermediate_var := ', statement_arguments));
-          call _throttle_script(CAST(trim_wspace(@_common_schema_intermediate_var) AS DECIMAL));
+          call _throttle_script(CAST(trim_wspace(@_common_schema_intermediate_var) AS DECIMAL(64, 2)));
         end if;
 	  end;
     when 'throw' then begin
