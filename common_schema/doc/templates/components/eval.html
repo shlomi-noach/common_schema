@@ -105,6 +105,12 @@ mysql&gt; SHOW PROCESSLIST;
 </pre></blockquote>
 
 
+<p>Kill transactions idle for <strong>30</strong> seconds or more:
+<blockquote><pre>mysql&gt; CALL eval("SELECT sql_kill_query FROM common_schema.innodb_transactions WHERE trx_idle_seconds >= 30");
+</pre></blockquote>
+</p>
+
+
 <h3>ENVIRONMENT</h3>
 MySQL 5.1 or newer
 
