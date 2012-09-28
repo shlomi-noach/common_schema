@@ -6,7 +6,9 @@ ALGORITHM = MERGE
 SQL SECURITY INVOKER
 VIEW processlist_top AS
   SELECT 
-    * 
+    *,
+    CONCAT('KILL QUERY ', PROCESSLIST.ID) AS sql_kill_query,
+    CONCAT('KILL ', PROCESSLIST.ID) AS sql_kill_connection    
   FROM 
     INFORMATION_SCHEMA.PROCESSLIST 
   WHERE 

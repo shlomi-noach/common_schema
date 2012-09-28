@@ -28,23 +28,38 @@ or <a href="http://code.google.com/p/innotop/">innotop</a>.
 
 <blockquote><pre>
 mysql&gt; DESC common_schema.processlist_top;
-+---------+-------------+------+-----+---------+-------+
-| Field   | Type        | Null | Key | Default | Extra |
-+---------+-------------+------+-----+---------+-------+
-| ID      | bigint(4)   | NO   |     | 0       |       |
-| USER    | varchar(16) | NO   |     |         |       |
-| HOST    | varchar(64) | NO   |     |         |       |
-| DB      | varchar(64) | YES  |     | NULL    |       |
-| COMMAND | varchar(16) | NO   |     |         |       |
-| TIME    | int(7)      | NO   |     | 0       |       |
-| STATE   | varchar(64) | YES  |     | NULL    |       |
-| INFO    | longtext    | YES  |     | NULL    |       |
-+---------+-------------+------+-----+---------+-------+
++---------------------+---------------+------+-----+---------+-------+
+| Field               | Type          | Null | Key | Default | Extra |
++---------------------+---------------+------+-----+---------+-------+
+| ID                  | bigint(4)     | NO   |     | 0       |       |
+| USER                | varchar(16)   | NO   |     |         |       |
+| HOST                | varchar(64)   | NO   |     |         |       |
+| DB                  | varchar(64)   | YES  |     | NULL    |       |
+| COMMAND             | varchar(16)   | NO   |     |         |       |
+| TIME                | int(7)        | NO   |     | 0       |       |
+| STATE               | varchar(64)   | YES  |     | NULL    |       |
+| INFO                | longtext      | YES  |     | NULL    |       |
+| sql_kill_query      | varbinary(31) | NO   |     |         |       |
+| sql_kill_connection | varbinary(25) | NO   |     |         |       |
++---------------------+---------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
 
-<p>Structure of this view is identical to that of <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a> table</p>
+<p>Structure of this view is based to that of <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a> table</p>
+
+<p>Additional columns are:
+	<ul>
+		<li>
+			<strong>sql_kill_query</strong>: a <strong>KILL QUERY</strong> statement for current thread.
+			<br/>Use with <a href="eval.html">eval()</a> to apply statement.	
+		</li>
+		<li>
+			<strong>sql_kill_connection</strong>: a <strong>KILL</strong> statement for current thread.
+			<br/>Use with <a href="eval.html">eval()</a> to apply statement.	
+		</li>
+	</ul>
+</p>
 
 <p>On Percona Server, this additional info is included:
 	<ul>
@@ -54,17 +69,17 @@ mysql&gt; DESC common_schema.processlist_top;
 <h3>EXAMPLES</h3>
 <p>Show all active processes:</p>
 <blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_top;
-+----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
-| ID       | USER        | HOST         | DB        | COMMAND     | TIME    | STATE                                                            | INFO                                                                                                                  | TIME_MS    |
-+----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
-|  3598334 | system user |              | NULL      | Connect     | 4281883 | Waiting for master to send event                                 | NULL                                                                                                                  | 4281883102 |
-|  3598469 | replica     | sql01:51157  | NULL      | Binlog Dump | 4281878 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 4281877707 |
-| 31066726 | replica     | sql02:48924  | NULL      | Binlog Dump | 1041758 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 1041758134 |
-|  3598335 | system user |              | NULL      | Connect     |  195747 | Has read all relay log; waiting for the slave I/O thread to upda | NULL                                                                                                                  |          0 |
-| 39946702 | store       | app03:46795  | datastore | Query       |       0 | Writing to net                                                   | SELECT * FROM store_location                                                                                          |         27 |
-| 39946693 | store       | app05:51090  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 5  |         54 |
-| 39946692 | store       | sql01:47849  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 34 |        350 |
-+----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+---------------------+---------------------+
+| ID       | USER        | HOST         | DB        | COMMAND     | TIME    | STATE                                                            | INFO                                                                                                                  | TIME_MS    | sql_kill_query      | sql_kill_connection |
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+---------------------+---------------------+
+|  3598334 | system user |              | NULL      | Connect     | 4281883 | Waiting for master to send event                                 | NULL                                                                                                                  | 4281883102 | KILL QUERY 3598334  | KILL 3598334        |
+|  3598469 | replica     | sql01:51157  | NULL      | Binlog Dump | 4281878 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 4281877707 | KILL QUERY 3598469  | KILL 3598469        |
+| 31066726 | replica     | sql02:48924  | NULL      | Binlog Dump | 1041758 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 1041758134 | KILL QUERY 31066726 | KILL 31066726       |
+|  3598335 | system user |              | NULL      | Connect     |  195747 | Has read all relay log; waiting for the slave I/O thread to upda | NULL                                                                                                                  |          0 | KILL QUERY 3598335  | KILL 3598335        |
+| 39946702 | store       | app03:46795  | datastore | Query       |       0 | Writing to net                                                   | SELECT * FROM store_location                                                                                          |         27 | KILL QUERY 39946702 | KILL 39946702       |
+| 39946693 | store       | app05:51090  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 5  |         54 | KILL QUERY 39946693 | KILL 39946693       |
+| 39946692 | store       | sql01:47849  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 34 |        350 | KILL QUERY 39946692 | KILL 39946692       |
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+---------------------+---------------------+
 </pre></blockquote>
 <p>In the above example the last three processes seem to be running for 0 seconds. However, with Percona Server's <strong>TIME_MS</strong> we see the sub-second
 runtime for each process. As it turns out, these three processes are not strictly order from oldest to newest. This is because we order them
