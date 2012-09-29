@@ -40,7 +40,7 @@ _proc_body: begin
   
     PREPARE st FROM @_execute_query;
     EXECUTE st;
-    set @common_schema_rowcount := ROW_COUNT();
+    set @common_schema_rowcount := ROW_COUNT(), @common_schema_found_rows := FOUND_ROWS();
     DEALLOCATE PREPARE st;    
   end if;
 end $$

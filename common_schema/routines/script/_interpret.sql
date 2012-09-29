@@ -107,6 +107,7 @@ main_body: begin
   -- We happen to know tokens in _sql_tokens begin at "1". So "0" is a safe 
   -- place not to step on anyone's toes.
   call _declare_local_variable(0, 0, id_to, 0, '$rowcount', '@query_script_rowcount', FALSE);
+  call _declare_local_variable(0, 0, id_to, 0, '$found_rows', '@query_script_found_rows', FALSE);
   
   -- First, do syntax validation: go through the code, but execute nothing:
   call _consume_statement(id_from, id_to, FALSE, id_to, 0, FALSE);

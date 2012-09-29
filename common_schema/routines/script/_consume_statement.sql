@@ -102,6 +102,7 @@ main_body: begin
 
               call exec_single(mysql_statement);
               set @query_script_rowcount := @common_schema_rowcount;
+              set @query_script_found_rows := @common_schema_found_rows;
             end if;
   	        set consumed_to_id := id_end_statement;
           end;
