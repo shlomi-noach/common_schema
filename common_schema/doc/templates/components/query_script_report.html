@@ -1,0 +1,109 @@
+
+<p>
+<strong>report</strong>: display a line of text as result set.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>report h1 'My title';
+report 'concatenated ', 'text, numbers, ', @user_variables, ' and ', $local_variables;
+report p 'Starting paragraph, ', @name, ' review'; 
+report li $x, ' is validated, bullet';
+report code 'SET $x := 5';
+report hr;
+</pre></blockquote>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p> 
+	<i>report</i> builds a fancy report throughout execution of the script. The report itself
+	is only presented as the script terminates gracefully (without error). Thus,
+	invocation of <i>report</i> statements aggregate report messages in the background, and
+	do not immediately prompt or otherwise affect execution and output of script. 
+</p>
+<p>
+	<i>report</i> concatenates its arguments into a single string. Anything that is
+	valid within a <a href="http://dev.mysql.com/doc/refman/5.1/en/string-functions.html#function_concat">CONCAT()</a>
+	function is accepted by <i>report</i>. This includes user defined variables, local variables
+	and expanded variables.
+</p>
+<p>
+	Line breaks (<strong>\n</strong>) will make for distinct rows in the resulting report.
+</p>
+<p>
+	<i>report</i> accepts formatting hints, in an HTML-like format. These are:
+	<ul>
+		<li><strong>h1</strong>: title. Prettified by underline</li>
+		<li><strong>p</strong>: begin paragraph</li>
+		<li><strong>li</strong>: bullet (prefix with "- ")</li>
+		<li><strong>code</strong>: source code (prefixed with "> ")</li>
+		<li><strong>hr</strong>: horizontal line</li>
+	</ul>
+	The formatting hint is optional, and only one hint per <i>report</i> statement is accepted.
+</p>
+
+<h3>EXAMPLES</h3>
+
+<p>A built-in report in <i>common_schema</i> is <a href="security_audit.html">security_audit</a>.</p>
+
+<p>
+Analyze and report some <i>common_schema</i> objects:
+<blockquote><pre>
+report h1 'common_schema overview';
+
+report p 'common_schema offers:';
+
+var $num_public_prodecures, $num_public_functions;
+select 
+  SUM(routine_type = 'PROCEDURE'), SUM(routine_type = 'FUNCTION') 
+FROM 
+  information_schema.ROUTINES 
+WHERE 
+  routine_schema='common_schema' AND routine_name NOT LIKE '\_%'
+INTO 
+  $num_public_prodecures, $num_public_functions;
+
+report li $num_public_prodecures, ' public procedures';
+report li $num_public_functions, ' public functions';
+
+var $num_public_tables, $num_public_views;
+select 
+  SUM(table_type='base table'), SUM(table_type='view') 
+FROM 
+  information_schema.TABLES
+WHERE 
+  table_schema='common_schema' AND table_name NOT LIKE '\_%'
+INTO 
+  $num_public_tables, $num_public_views;
+
+report li $num_public_tables, ' public tables';
+report li $num_public_views, ' public views';
+
+
++------------------------------------------+
+| report                                   |
++------------------------------------------+
+|                                          |
+| common_schema overview                   |
+| ======================                   |
+|                                          |
+| common_schema offers:                    |
+| - 19 public procedures                   |
+| - 32 public functions                    |
+| - 3 public tables                        |
+| - 34 public views                        |
+| ---                                      |
+| Report generated on '2012-09-29 08:53:35 |
++------------------------------------------+
+</pre></blockquote>
+</p>
+
+
+<h3>SEE ALSO</h3>
+<a href="query_script_echo.html">echo</a>,
+<a href="query_script_statements.html">Statements</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+
