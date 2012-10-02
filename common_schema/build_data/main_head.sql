@@ -48,6 +48,7 @@
 -- DROP DATABASE IF EXISTS common_schema;
 
 CREATE DATABASE IF NOT EXISTS common_schema;
+ALTER DATABASE common_schema DEFAULT CHARACTER SET 'utf8' DEFAULT COLLATE 'utf8_general_ci';
 
 USE common_schema;
 
