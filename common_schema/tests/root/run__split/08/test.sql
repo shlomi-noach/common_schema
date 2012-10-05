@@ -2,7 +2,7 @@
 SET @s := '
   split(test_cs.test_split)
   {
-    select $split_step, $split_rowcount;
+    select $split_step;
   }
   ';
 call run(@s);
