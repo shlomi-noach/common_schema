@@ -1,36 +1,12 @@
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_0 ADD COLUMN col_10 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_0 ADD COLUMN col_11 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_0 ADD COLUMN col_12 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_1 ADD COLUMN col_10 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_1 ADD COLUMN col_11 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_1 ADD COLUMN col_12 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_2 ADD COLUMN col_10 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_2 ADD COLUMN col_11 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_2 ADD COLUMN col_12 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_3 ADD COLUMN col_10 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_3 ADD COLUMN col_11 INT
-SET @query_script_rowcount := NULL
-SET @query_script_rowcount := NULL
-ALTER TABLE test_cs.t_3 ADD COLUMN col_12 INT
-SET @query_script_rowcount := NULL
+0	10
+0	11
+0	12
+1	10
+1	11
+1	12
+2	10
+2	11
+2	12
+3	10
+3	11
+3	12
