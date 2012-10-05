@@ -1,0 +1,1 @@
+sql_accounts: verify user is non blocked, has non empty password

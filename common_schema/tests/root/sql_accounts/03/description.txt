@@ -1,0 +1,1 @@
+sql_accounts: test sql_release_account for non-blocked account
