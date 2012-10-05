@@ -85,7 +85,7 @@ We don't always get all we want...
 
 
 <p>See which transactions are blocking, and how many are being blocked:
-<blockquote><pre>mysql&gt; SELECT locking_trx_id, COUNT(*) FROM innodb_locked_transactions GROUP BY locking_trx_id HAVING COUNT(*) > 0;
+<blockquote><pre>mysql&gt; SELECT locking_trx_id, COUNT(*) FROM innodb_locked_transactions GROUP BY locking_trx_id;
 +----------------+----------+
 | locking_trx_id | COUNT(*) |
 +----------------+----------+
@@ -96,7 +96,7 @@ We don't always get all we want...
 </p>
 
 
-<p>Kill transactions blocking cause other transactions to block for <strong>30</strong> seconds or more:
+<p>Kill transactions causing other transactions to block for <strong>30</strong> seconds or more:
 <blockquote><pre>mysql&gt; CALL eval('SELECT sql_kill_blocking_query FROM innodb_locked_transactions WHERE trx_wait_seconds >= 30 GROUP BY sql_kill_blocking_query');
 </pre></blockquote>
 </p>

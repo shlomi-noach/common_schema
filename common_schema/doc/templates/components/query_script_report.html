@@ -1,6 +1,6 @@
 
 <p>
-<strong>report</strong>: display a line of text as result set.
+<strong>report</strong>: generate formatted report at end of script execution 
 </p>
 
 <h3>SYNOPSIS</h3>
@@ -33,7 +33,7 @@ report hr;
 <p>
 	<i>report</i> accepts formatting hints, in an HTML-like format. These are:
 	<ul>
-		<li><strong>h1</strong>: title. Prettified by underline</li>
+		<li><strong>h1</strong>: title (prettified by underline)</li>
 		<li><strong>p</strong>: begin paragraph</li>
 		<li><strong>li</strong>: bullet (prefix with "- ")</li>
 		<li><strong>code</strong>: source code (prefixed with "> ")</li>
@@ -54,6 +54,7 @@ report h1 'common_schema overview';
 report p 'common_schema offers:';
 
 var $num_public_prodecures, $num_public_functions;
+
 select 
   SUM(routine_type = 'PROCEDURE'), SUM(routine_type = 'FUNCTION') 
 FROM 
@@ -65,6 +66,7 @@ INTO
 
 report li $num_public_prodecures, ' public procedures';
 report li $num_public_functions, ' public functions';
+
 
 var $num_public_tables, $num_public_views;
 select 
@@ -79,6 +81,8 @@ INTO
 report li $num_public_tables, ' public tables';
 report li $num_public_views, ' public views';
 
+report li (select count(*) from help_content), ' help pages';
+
 
 +------------------------------------------+
 | report                                   |
@@ -92,8 +96,9 @@ report li $num_public_views, ' public views';
 | - 32 public functions                    |
 | - 3 public tables                        |
 | - 34 public views                        |
+| - 131 help pages                         |
 | ---                                      |
-| Report generated on '2012-09-29 08:53:35 |
+| Report generated on '2012-09-29 13:42:11 |
 +------------------------------------------+
 </pre></blockquote>
 </p>
