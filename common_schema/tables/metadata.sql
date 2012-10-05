@@ -44,5 +44,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   ('project_repository', 'https://common-schema.googlecode.com/svn/trunk/'),
   ('project_repository_type', 'svn'),
   ('revision', 'revision.placeholder'),
-  ('version', '1.1')
+  ('version', '1.2')
 ;  
