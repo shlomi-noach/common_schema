@@ -33,6 +33,30 @@ main_body: begin
   set tokens_array_id := NULL;
   
   case script_statement
+	when 'start' then begin
+	    call _expect_token(statement_id_from, statement_id_to, 'transaction', false, @_common_schema_dummy, @_common_schema_dummy);
+        if should_execute_statement then
+          start transaction;
+        end if;
+	  end;
+	when 'begin' then begin
+		call _expect_nothing(statement_id_from, statement_id_to);
+        if should_execute_statement then
+          start transaction;
+        end if;
+	  end;
+	when 'commit' then begin
+		call _expect_nothing(statement_id_from, statement_id_to);
+        if should_execute_statement then
+          commit;
+        end if;
+	  end;
+	when 'rollback' then begin
+		call _expect_nothing(statement_id_from, statement_id_to);
+        if should_execute_statement then
+          rollback;
+        end if;
+	  end;
 	when 'echo' then begin
         if should_execute_statement then
           select trim_wspace(statement_arguments) as echo;
