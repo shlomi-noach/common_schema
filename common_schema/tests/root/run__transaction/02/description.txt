@@ -1,0 +1,1 @@
+Start and rollback transaction. Expect no error
