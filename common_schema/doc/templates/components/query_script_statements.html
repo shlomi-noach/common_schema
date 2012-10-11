@@ -38,13 +38,16 @@ Among the SQL statements which are in particular <i>not allowed</i> within Query
 	<li>Plugin statements (INSTALL, UNINSTALL)</li>
 	<li>Stored routines statements (DECLARE, LOOP, ...), for which QueryScript provides substitutes.</li>
 </ul> 
-Any SQL statement which is not allowed to be executed via dynamic SQL cannot be executed via
+Transaction statements are handled by the QueryScript engine, as described following.
+</p>
+<p>
+
+Otherwise, any SQL statement which is not allowed to be executed via dynamic SQL cannot be executed via
 QueryScript.
 </p>
 <p>
-Execution of a SQL statement modifies the <strong>@query_script_rowcount</strong> variable. The value 
-held by this variable is the value of <a href="http://dev.mysql.com/doc/refman/5.1/en/information-functions.html#function_row-count"><strong>ROW_COUNT()</strong></a>
-resulting from the statement. 
+Execution of a SQL statement modifies the <strong>$rowcount</strong> and <strong>$found_rows</strong> variable. 
+See <a href="query_script_variables.html#builtin">built-in variables</a>.
 </p>
 
 <a name="qs_statements"></a>
@@ -67,6 +70,9 @@ And the following flow control statements :
 	<li><a href="query_script_break.html">break</a></li>
 	<li><a href="query_script_return.html">return</a></li>
 </ul>
+In addition, the transaction statements <strong>start transaction</strong>, 
+<strong>begin</strong>, <strong>commit</strong>, <strong>rollback</strong>
+are managed by QueryScript and delegated immediately to MySQL.
 </p>
 
 
