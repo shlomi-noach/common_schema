@@ -21,6 +21,9 @@ begin
   declare current_key TEXT CHARSET utf8 DEFAULT ''; 
   declare current_value TEXT CHARSET utf8 DEFAULT ''; 
   
+  if options is null then
+    return null;
+  end if;
   set options := trim_wspace(options);
   if not options RLIKE '^{.*}$' then
     return NULL;
