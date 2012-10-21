@@ -1,3 +1,4 @@
+SET @@auto_increment_increment := 1;
 SET @s := '
   foreach($a : {US, NZ, UK})
   {

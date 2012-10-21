@@ -1,4 +1,7 @@
 USE test_cs;
+
+SET @@auto_increment_increment := 1;
+
 drop table if exists test_sql_range_partitions_quarter_maxvalue;
 CREATE TABLE test_sql_range_partitions_quarter_maxvalue (
     report_id INT NOT NULL,

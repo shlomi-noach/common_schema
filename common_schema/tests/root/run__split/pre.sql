@@ -1,4 +1,7 @@
 USE test_cs;
+
+SET @@auto_increment_increment := 1;
+
 drop table if exists test_split;
 create table test_split(
   id int auto_increment primary key, 
