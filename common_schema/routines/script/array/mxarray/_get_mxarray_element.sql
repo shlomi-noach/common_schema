@@ -16,8 +16,10 @@ no sql
 sql security invoker
 
 main_body: begin
+  declare xpath varchar(64) charset utf8;
   if _mxarray_key_exists(array_id, array_key) then
-    return decode_xml(ExtractValue(@_common_schema_mx_array, CONCAT('/ma/a[@id="', array_id, '"]/e[@key="', encode_xml(array_key), '"][1]')));
+    set xpath := CONCAT('/ma/a[@id="', array_id, '"]/e[@key="', encode_xml(array_key), '"][1]');
+    return decode_xml(ExtractValue(@_common_schema_mx_array, xpath));
   end if;
   return null;
 end;

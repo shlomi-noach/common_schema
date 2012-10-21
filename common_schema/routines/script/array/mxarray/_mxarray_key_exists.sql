@@ -16,7 +16,9 @@ no sql
 sql security invoker
 
 main_body: begin
-  return (IFNULL(ExtractValue(@_common_schema_mx_array, CONCAT('count(/ma/a[@id="', array_id, '"]/e[@key="', encode_xml(array_key), '"][1])')), 0) > 0);
+  declare xpath varchar(64) charset utf8;
+  set xpath := CONCAT('count(/ma/a[@id="', array_id, '"]/e[@key="', encode_xml(array_key), '"][1])');
+  return (IFNULL(ExtractValue(@_common_schema_mx_array, xpath), 0) > 0);
 end;
 //
 
