@@ -104,7 +104,7 @@ SQL SECURITY INVOKER
 VIEW _sql_range_partitions_analysis AS
   select
     _sql_range_partitions_summary.*,
-    case
+    substring_index(case
       when diff_year_from_unixtime != 0 then unix_timestamp(from_unixtime(max_partition_description) + interval diff_year_from_unixtime year)
       when diff_month_from_unixtime != 0 then unix_timestamp(from_unixtime(max_partition_description) + interval diff_month_from_unixtime month)
       when diff_week_from_unixtime != 0 then unix_timestamp(from_unixtime(max_partition_description) + interval diff_week_from_unixtime week)
@@ -119,8 +119,8 @@ VIEW _sql_range_partitions_analysis AS
       when diff_day != 0 then max_partition_description + interval diff_day day
       when diff != 0 then max_partition_description + diff
       else NULL
-    end as next_partition_description,
-    case
+    end, '.', 1) as next_partition_description,
+    substring_index(case
       when diff_year_from_unixtime != 0 then (from_unixtime(max_partition_description) + interval diff_year_from_unixtime year)
       when diff_month_from_unixtime != 0 then (from_unixtime(max_partition_description) + interval diff_month_from_unixtime month)
       when diff_week_from_unixtime != 0 then (from_unixtime(max_partition_description) + interval diff_week_from_unixtime week)
@@ -135,7 +135,7 @@ VIEW _sql_range_partitions_analysis AS
       when diff_day != 0 then max_partition_description + interval diff_day day
       when diff != 0 then max_partition_description + diff
       else NULL
-    end as next_partition_human_description
+    end, '.', 1) as next_partition_human_description
   from
     _sql_range_partitions_diff
     join _sql_range_partitions_summary using (table_schema, table_name)
