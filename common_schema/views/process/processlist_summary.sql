@@ -1,6 +1,8 @@
+
 -- 
 -- Summary of processlist: number of connected, sleeping, running connections and slow query count
 -- 
+
 CREATE OR REPLACE
 ALGORITHM = UNDEFINED
 SQL SECURITY INVOKER
@@ -46,4 +48,4 @@ VIEW processlist_summary AS
     INFORMATION_SCHEMA.PROCESSLIST 
   WHERE 
     id != CONNECTION_ID()
-\G
+;
