@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -71,8 +71,14 @@ mysql&gt; DESC common_schema.sql_foreign_keys;
 	<li><strong>TABLE_SCHEMA</strong>: schema of constraint's table</li>
 	<li><strong>TABLE_NAME</strong>: table on which constraint is defined (this is child/dependent side of relation)</li>
 	<li><strong>CONSTRAINT_NAME</strong>: name of foreign key constraint (unique within its schema)</li>
-	<li><strong>drop_statement</strong>: A SQL statement which drops the constraint from this table (via ALTER TABLE)</li>
-	<li><strong>create_statement</strong>: A SQL statement which creates this constraint (via ALTER TABLE)</li>
+	<li><strong>drop_statement</strong>: 
+		A SQL statement which drops the constraint from this table (via ALTER TABLE)
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+	<li><strong>create_statement</strong>: 
+		A SQL statement which creates this constraint (via ALTER TABLE)
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
 </ul>
 
 <p>The SQL statements are not terminated by ';'.</p>
@@ -128,7 +134,9 @@ Either CONCAT() these beforehand, or use <i>sed</i>/<i>awk</i> afterwards.</p>
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
-<a href="sql_alter_table.html">sql_alter_table</a>
+<a href="eval.html">eval()</a>,
+<a href="sql_alter_table.html">sql_alter_table</a>,
+<a href="sql_range_partitions.html">sql_range_partitions</a>
 <h3>AUTHOR</h3>
 Shlomi Noach
 				<br/>

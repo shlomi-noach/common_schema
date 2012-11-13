@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -25,6 +25,7 @@ Security routines: stored functions managing security and privileges information
 	<li><a href="killall.html">killall()</a>: Kill connections with by matching GRANTEE, user or host.</li>
 	<li><a href="match_grantee.html">match_grantee()</a>: Match an existing account based on user+host.</li>
 	<li><a href="mysql_grantee.html">mysql_grantee()</a>: Return a qualified MySQL grantee (account) based on user and host.</li>
+	<li><a href="security_audit.html">security_audit()</a>: Generate a server's security audit report.</li>
 </ul>
 </p>
 
@@ -33,6 +34,86 @@ Security routines: stored functions managing security and privileges information
 		Kill all connections made by the <strong>'analytics`</strong> user:
 	</p>
 	<blockquote><pre>mysql&gt; CALL killall('analytics');
+</pre></blockquote>
+
+	<p>
+		Audit server's security:
+	</p>
+	<blockquote><pre>mysql&gt; CALL security_audit();
++------------------------------------------------------------------------------+
+| report                                                                       |
++------------------------------------------------------------------------------+
+|                                                                              |
+| Checking for non-local root accounts                                         |
+| ====================================                                         |
+| Recommendation: limit following root accounts to local machines              |
+| &gt; rename 'root'@'central' to 'root'@'localhost'                              |
+|                                                                              |
+| Checking for anonymous users                                                 |
+| ============================                                                 |
+| OK                                                                           |
+|                                                                              |
+| Looking for accounts accessible from any host                                |
+| =============================================                                |
+| Recommendation: limit following accounts to specific hosts/subnet            |
+| &gt; rename user 'apps'@'%' to 'apps'@'&lt;specific host&gt;'                         |
+| &gt; rename user 'world_user'@'%' to 'world_user'@'&lt;specific host&gt;'             |
+|                                                                              |
+| Checking for accounts with empty passwords                                   |
+| ==========================================                                   |
+| Recommendation: set a decent password to these accounts.                     |
+| &gt; set password for 'apps'@'%' = PASSWORD(...)                                |
+| &gt; set password for 'world_user'@'localhost' = PASSWORD(...)                  |
+| &gt; set password for 'wu'@'localhost' = PASSWORD(...)                          |
+|                                                                              |
+| Looking for accounts with identical (non empty) passwords                    |
+| =========================================================                    |
+| Different users should not share same password.                              |
+| Recommendation: Change passwords for accounts listed below.                  |
+|                                                                              |
+| The following accounts share the same password:                              |
+| 'temp'@'10.0.%'                                                              |
+| 'temp'@'10.0.0.%'                                                            |
+| 'gromit'@'localhost'                                                         |
+|                                                                              |
+| The following accounts share the same password:                              |
+| 'replication'@'10.0.0.%'                                                     |
+| 'shlomi'@'localhost'                                                         |
+|                                                                              |
+| The following accounts share the same password:                              |
+| 'shlomi'@'127.0.0.1'                                                         |
+| 'monitoring_user'@'localhost'                                                |
+|                                                                              |
+| Looking for (non-root) accounts with admin privileges                        |
+| =====================================================                        |
+| Normal users should not have admin privileges, such as                       |
+| SUPER, SHUTDOWN, RELOAD, PROCESS, CREATE USER, REPLICATION CLIENT.           |
+| Recommendation: limit privileges to following accounts.                      |
+| &gt; GRANT &lt;non-admin-privileges&gt; ON *.* TO 'monitoring_user'@'localhost'       |
+| &gt; GRANT &lt;non-admin-privileges&gt; ON *.* TO 'shlomi'@'localhost'                |
+|                                                                              |
+| Looking for (non-root) accounts with global DDL privileges                   |
+| ==========================================================                   |
+| OK                                                                           |
+|                                                                              |
+| Looking for (non-root) accounts with global DML privileges                   |
+| ==========================================================                   |
+| OK                                                                           |
+|                                                                              |
+| Testing sql_mode                                                             |
+| ================                                                             |
+| Server's sql_mode does not include NO_AUTO_CREATE_USER.                      |
+| This means users can be created with empty passwords.                        |
+| Recommendation: add NO_AUTO_CREATE_USER to sql_mode,                         |
+| both in config file as well as dynamically.                                  |
+| &gt; SET @@global.sql_mode := CONCAT(@@global.sql_mode, ',NO_AUTO_CREATE_USER') |
+|                                                                              |
+| Testing old_passwords                                                        |
+| =====================                                                        |
+| OK                                                                           |
+| ---                                                                          |
+| Report generated on '2012-09-21 11:49:52                                     |
++------------------------------------------------------------------------------+
 </pre></blockquote>
 				<br/>
 			</div>

@@ -11,26 +11,32 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
 				<h2><a href="innodb_transactions.html">innodb_transactions</a></h2>	
 <h3>NAME</h3>
-innodb_transactions: Listing of active (InnoDB Plugin) transactions, which are currently performing queries
+innodb_transactions: Listing of open (InnoDB Plugin) transactions
 <h3>TYPE</h3>
 View
 
 <h3>DESCRIPTION</h3>
 <p></p>
 
-<p><i>innodb_transactions</i> is a simplification of INFORMATION_SCHEMA.INNODB_TRX. 
-It only lists those transactions which are executing queries at the moment. "Sleeping" transactions are not listed.
+<p>
+	<i>innodb_transactions</i> is a simplification of INFORMATION_SCHEMA.INNODB_TRX. 
 </p>
 
 <p>
-The connection calling upon this view is never listed.
+	<strong>CHANGE:</strong> up to common_schema <strong>1.1</strong>, this view would only show
+	transactions that are executing statements. It now lists all open transactions, and offers the
+	<strong>trx_idle_seconds</strong> columns to help finding sleeping open transactions.
+</p>
+
+<p>
+	The connection calling upon this view is never listed.
 </p>
 
 <h3>STRUCTURE</h3>
@@ -48,24 +54,62 @@ mysql&gt; DESC common_schema.innodb_transactions;
 | trx_weight            | bigint(21) unsigned | NO   |     | 0                   |       |
 | trx_mysql_thread_id   | bigint(21) unsigned | NO   |     | 0                   |       |
 | trx_query             | varchar(1024)       | YES  |     | NULL                |       |
+| INFO                  | longtext            | YES  |     | NULL                |       |
+| trx_runtime_seconds   | bigint(21)          | YES  |     | NULL                |       |
+| trx_wait_seconds      | bigint(21)          | YES  |     | NULL                |       |
+| trx_idle_seconds      | bigint(11)          | YES  |     | NULL                |       |
+| sql_kill_query        | varbinary(31)       | NO   |     |                     |       |
+| sql_kill_connection   | varbinary(25)       | NO   |     |                     |       |
 +-----------------------+---------------------+------+-----+---------------------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
 
-<p>Structure of this view is identical to that of <a href="http://dev.mysql.com/doc/innodb-plugin/1.0/en/innodb-information-schema-innodb_trx.html">INFORMATION_SCHEMA.INNODB_TRX</a> table</p>
+<p>Structure of this view derives from that of <a href="http://dev.mysql.com/doc/innodb-plugin/1.0/en/innodb-information-schema-innodb_trx.html">INFORMATION_SCHEMA.INNODB_TRX</a> table.</p>
+
+<p>Additional columns are:
+	<ul>
+		<li><strong>INFO</strong>: Query being executed right now by this transaction, 
+			as seen on <strong>PROCESSLIST</strong>.</li>
+		<li><strong>trx_runtime_seconds</strong>: number of seconds elapsed since beginning of this transaction.</li>
+		<li>
+			<strong>trx_wait_seconds</strong>: number of seconds this transaction is waiting on lock, 
+			or <strong>NULL</strong> if not currently waiting.
+		</li>
+		<li><strong>trx_idle_seconds</strong>: number of seconds this transaction is idle. <strong>0</strong> if not idle.</li>
+		<li>
+			<strong>sql_kill_query</strong>: a <strong>KILL QUERY</strong> statement for current thread.
+			<br/>Use with <a href="eval.html">eval()</a> to apply statement.	
+		</li>
+		<li>
+			<strong>sql_kill_connection</strong>: a <strong>KILL</strong> statement for current thread.
+			<br/>Use with <a href="eval.html">eval()</a> to apply statement.	
+		</li>
+	</ul>
+</p>
 
 <h3>EXAMPLES</h3>
 
-<p>Show all active transactions:</p>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_top;
-+-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+--------------------------------------------------------------------------------+
-| trx_id    | trx_state | trx_started         | trx_requested_lock_id | trx_wait_started | trx_weight | trx_mysql_thread_id | trx_query                                                                      |
-+-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+--------------------------------------------------------------------------------+
-| 313AF223E | RUNNING   | 2011-07-01 07:28:18 | NULL                  | NULL             |          0 |            11548882 | SELECT * FROM dep_maps                                                         |
-| 313AF2237 | RUNNING   | 2011-07-01 07:28:18 | NULL                  | NULL             |          0 |            11548884 | SELECT * FROM deps_changes WHERE deps_condition = 'stateless' ORDER BY deps_id |
-+-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+--------------------------------------------------------------------------------+
+<p>Show all active transactions:
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_transactions;
++-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+-----------+-----------------------------------------------------------------------------------+---------------------+------------------+------------------+-------------------+---------------------+
+| trx_id    | trx_state | trx_started         | trx_requested_lock_id | trx_wait_started | trx_weight | trx_mysql_thread_id | trx_query | INFO                                                                              | trx_runtime_seconds | trx_wait_seconds | trx_idle_seconds | sql_kill_query    | sql_kill_connection |
++-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+-----------+-----------------------------------------------------------------------------------+---------------------+------------------+------------------+-------------------+---------------------+
+| 9AA6213B4 | RUNNING   | 2012-09-27 15:46:36 | NULL                  | NULL             |         13 |              858223 | NULL      | DELETE FROM tbl_lock WHERE id = 'planner' AND expiryTime < '2012-09-27 15:46:36'  |                   0 |             NULL |                0 | KILL QUERY 858223 | KILL 858223         |
+| 9AA6213B2 | RUNNING   | 2012-09-27 15:46:36 | NULL                  | NULL             |          3 |              858216 | NULL      | NULL                                                                              |                   0 |             NULL |                0 | KILL QUERY 858216 | KILL 858216         |
+| 9AA6213B2 | RUNNING   | 2012-09-27 15:46:36 | NULL                  | NULL             |          3 |              858219 | NULL      | UPDATE tbl_scount SET count = count + 1 WHERE element='php'                       |                   0 |             NULL |                0 | KILL QUERY 858219 | KILL 858219         |
++-----------+-----------+---------------------+-----------------------+------------------+------------+---------------------+-----------+-----------------------------------------------------------------------------------+---------------------+------------------+------------------+-------------------+---------------------+
 </pre></blockquote>
+In the above no transaction is waiting and no transaction is idle.
+</p>
+
+
+<p>Kill transactions idle for <strong>30</strong> seconds or more:
+<blockquote><pre>mysql&gt; CALL eval("SELECT sql_kill_query FROM common_schema.innodb_transactions WHERE trx_idle_seconds >= 30");
+</pre></blockquote>
+In the above no transaction is waiting and no transaction is idle.
+</p>
+
 
 <h3>ENVIRONMENT</h3>
 MySQL 5.1 with InnoDB Plugin installed (with InnoDB INFORMATION_SCHEMA plugins enabled), or MySQL >= 5.5

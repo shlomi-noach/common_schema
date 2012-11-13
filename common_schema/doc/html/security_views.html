@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -23,6 +23,7 @@
 Security views: views providing information on grants and privileges.
 <ul>
 	<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a>: INFORMATION_SCHEMA-like view on routines privileges</li>
+	<li><a title="sql_accounts" href="sql_accounts.html">sql_accounts</a>: Generate SQL statements to block/release accounts. Provide info on accounts</li>
 	<li><a title="sql_grants" href="sql_grants.html">sql_grants</a>: Generate SQL GRANT/REVOKE statements for existing accounts; provide with GRANT metadata</li>
 	<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a>: Generate complete accounts SHOW GRANTS FOR -like output</li>
 </ul>
@@ -43,6 +44,10 @@ Closely related are <a title="Security routines" href="security_routines.html">S
 *************************** 1. row ***************************
 sql_grants: GRANT USAGE ON *.* TO 'world_user'@'localhost' IDENTIFIED BY PASSWORD '';
 GRANT ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE ON `world`.* TO 'world_user'@'localhost';
+</pre></blockquote>
+
+<p>Block all accounts for user <strong>'gromit'</strong>:</p>
+<blockquote><pre>mysql&gt; CALL eval("SELECT sql_block_account FROM sql_accounts WHERE USER = 'gromit'");
 </pre></blockquote>
 				<br/>
 			</div>

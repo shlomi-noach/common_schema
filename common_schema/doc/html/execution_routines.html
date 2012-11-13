@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -68,12 +68,9 @@ frameworks will, by default, invoke queries using prepared statements regardless
 	  0);
 </pre></blockquote>
 
-<p>Use <i>eval()</i> to dynamically evaluate and execute generated queries; in this example, we
-kill all processes running for over 20 seconds (NOTE: this is a very simplified example; 
-you would usually want to avoid killing replication processes, SUPER processes and sleeping processes):
+<p>Use <i>eval()</i> to kill transactions being idle for over <strong>30</strong> seconds:
 </p>
-</p>
-	<blockquote><pre>mysql&gt; call eval('SELECT CONCAT(\'KILL \',id) FROM INFORMATION_SCHEMA.PROCESSLIST WHERE TIME > 20');
+<blockquote><pre>mysql&gt; call eval("SELECT sql_kill_query FROM common_schema.innodb_transactions WHERE trx_idle_seconds > 30");
 </pre></blockquote>
 				<br/>
 			</div>

@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -37,15 +37,18 @@ or particular hosts from where heavy weight queries are executed.
 
 <blockquote><pre>
 mysql&gt; DESC common_schema.processlist_per_userhost;
-+---------------------+---------------+------+-----+---------+-------+
-| Field               | Type          | Null | Key | Default | Extra |
-+---------------------+---------------+------+-----+---------+-------+
-| user                | varchar(16)   | NO   |     |         |       |
-| host                | varchar(64)   | YES  |     | NULL    |       |
-| count_processes     | bigint(21)    | NO   |     | 0       |       |
-| active_processes    | decimal(23,0) | YES  |     | NULL    |       |
-| average_active_time | decimal(14,4) | YES  |     | NULL    |       |
-+---------------------+---------------+------+-----+---------+-------+
++--------------------------+---------------+------+-----+---------+-------+
+| Field                    | Type          | Null | Key | Default | Extra |
++--------------------------+---------------+------+-----+---------+-------+
+| user                     | varchar(16)   | NO   |     |         |       |
+| host                     | varchar(64)   | YES  |     | NULL    |       |
+| count_processes          | bigint(21)    | NO   |     | 0       |       |
+| active_processes         | decimal(23,0) | YES  |     | NULL    |       |
+| median_active_time       | decimal(10,2) | YES  |     | NULL    |       |
+| median_95pct_active_time | decimal(10,2) | YES  |     | NULL    |       |
+| max_active_time          | bigint(20)    | YES  |     | NULL    |       |
+| average_active_time      | decimal(14,4) | YES  |     | NULL    |       |
++--------------------------+---------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
@@ -56,6 +59,9 @@ mysql&gt; DESC common_schema.processlist_per_userhost;
 	<li><strong>host</strong>: connection host of origin. This excludes the connection port</li>
 	<li><strong>count_processes</strong>: number of connections for current user/host</li>
 	<li><strong>active_processes</strong>: number of connections executing queries for current user/host</li>
+	<li><strong>median_active_time</strong>: longest run time for an active process of this user/host</li>
+	<li><strong>median_95pct_active_time</strong>: run time at 95% point (95% processes run at this time or less) for active processes of this user/host</li>
+	<li><strong>max_active_time</strong>: longest run time for an active process of this user/host</li>
 	<li><strong>average_active_time</strong>: average time of currently executing queries for current user/host (excludes sleeping processes)</li>
 </ul>
 
@@ -65,21 +71,27 @@ Read <a href="http://code.openark.org/blog/mysql/mysql-terminology-processes-thr
 
 <h3>EXAMPLES</h3>
 <blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_per_userhost;
-+-------------+-----------+-----------------+------------------+---------------------+
-| user        | host      | count_processes | active_processes | average_active_time |
-+-------------+-----------+-----------------+------------------+---------------------+
-| maatkit     | apps00    |               1 |                0 |                NULL |
-| web_user    | sql00     |               1 |                0 |                NULL |
-| web_user    | apps02    |               3 |                0 |                NULL |
-| web_user    | apps05    |              11 |                4 |              1.2500 |
-| web_user    | apps04    |              10 |                1 |              0.0000 |
-| web_user    | sql01     |               1 |                0 |                NULL |
-| web_user    | apps01    |               3 |                0 |                NULL |
-| mytop       | localhost |               1 |                0 |                NULL |
-| replicator  | sql01     |               1 |                1 |        4326195.0000 |
-| replicator  | sql02     |               1 |                1 |        1086075.0000 |
-| system user |           |               2 |                2 |        2283132.0000 |
-+-------------+-----------+-----------------+------------------+---------------------+
++------------+-----------+-----------------+------------------+--------------------+--------------------------+-----------------+---------------------+
+| user       | host      | count_processes | active_processes | median_active_time | median_95pct_active_time | max_active_time | average_active_time |
++------------+-----------+-----------------+------------------+--------------------+--------------------------+-----------------+---------------------+
+| web_user   | apps01    |               9 |                4 |               0.00 |                     2.00 |               2 |              0.5000 |
+| web_user   | apps05    |               5 |                0 |               NULL |                     NULL |            NULL |                NULL |
+| web_user   | apps04    |              11 |                4 |               0.00 |                     0.00 |               0 |              0.0000 |
+| web_user   | sql00     |               1 |                0 |               NULL |                     NULL |            NULL |                NULL |
+| web_user   | sql01     |               1 |                0 |               NULL |                     NULL |            NULL |                NULL |
+| web_user   | sql02     |               3 |                1 |               0.00 |                     0.00 |               0 |              0.0000 |
+| web_user   | apps08    |              17 |               15 |               0.00 |                     1.00 |               2 |              0.4667 |
+| web_user   | apps03    |               2 |                0 |               NULL |                     NULL |            NULL |                NULL |
+| web_user   | apps06    |              12 |                5 |               2.00 |                     2.00 |               2 |              1.4000 |
+| web_user   | apps07    |               9 |                3 |               0.00 |                     2.00 |               2 |              0.6667 |
+| monitor    | localhost |               1 |                0 |               NULL |                     NULL |            NULL |                NULL |
+| monitor    | sql00     |               1 |                1 |               0.00 |                     0.00 |               0 |              0.0000 |
+| monitor    | sql01     |               1 |                1 |               0.00 |                     0.00 |               0 |              0.0000 |
+| monitor    | sql02     |               1 |                1 |               0.00 |                     0.00 |               0 |              0.0000 |
+| openarkkit | sql02     |               8 |                8 |               0.00 |                     3.00 |               3 |              0.8750 |
+| replicator | sql00     |               1 |                1 |           41571.00 |                 41571.00 |           41571 |          41571.0000 |
+| replicator | sql02     |               1 |                1 |           41571.00 |                 41571.00 |           41571 |          41571.0000 |
++------------+-----------+-----------------+------------------+--------------------+--------------------------+-----------------+---------------------+
 </pre></blockquote>
 
 <h3>ENVIRONMENT</h3>
@@ -87,6 +99,7 @@ MySQL 5.1 or newer.
 
 <h3>SEE ALSO</h3>
 <a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_states.html">processlist_states</a>,
 <a href="processlist_summary.html">processlist_summary</a>,
 <a href="processlist_top.html">processlist_top</a>
 

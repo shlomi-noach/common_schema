@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -150,7 +150,10 @@ mysql&gt; DESC common_schema.redundant_keys;
 	<li><strong>dominant_index_columns</strong>: column covered by dominant index, comma separated, by order of definitions</li>
 	<li><strong>dominant_index_non_unique</strong>: <strong>0</strong> if dominant index is UNIQUE; <strong>1</strong> if non-unique</li>
 	<li><strong>subpart_exists</strong>: <strong>1</strong> if either redundant or dominant keys use string subpart (indexing a prefix of a textual column); this calls for triple-check on the nature of both keys.</li>
-	<li><strong>sql_drop_index</strong>: SQL statement to drop redundant index</li>
+	<li><strong>sql_drop_index</strong>: 
+		SQL statement to drop redundant index.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
 </ul>
 
 <h3>EXAMPLES</h3>

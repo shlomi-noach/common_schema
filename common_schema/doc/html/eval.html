@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -42,16 +42,24 @@ Procedure
 	read-to-invoke statements. Consider
 	<a href="processlist_grantees.html">processlist_grantees</a>, 
 	<a href="redundant_keys.html">redundant_keys</a>, 
+	<a href="sql_accounts.html">sql_accounts</a>, 
 	<a href="sql_alter_table.html">sql_alter_table</a>, 
 	<a href="sql_foreign_keys.html">sql_foreign_keys</a>, 
-	<a href="sql_grants.html">sql_grants</a> and more.
-	It is possible, this, to invoke <i>eval()</i> directly on such views, see examples below.	
+	<a href="sql_grants.html">sql_grants</a>,
+	<a href="sql_range_partitions.html">sql_range_partitions</a>
+	and more. 
+	Thus, it is possible to invoke <i>eval()</i> directly on such views, see examples below.	
 </p>
 
 <p>
 	<i>common_schema</i> offers alternatives to <i>eval()</i>, on popular use cases.
 	In particular, see QueryScript's <a href="query_script_foreach.html">foreach</a> statement
 	for many operations that can be produced via INFORMATION_SCHEMA.TABLES. 
+</p>
+
+<p>
+	QueryScript also offers the <a href="query_script_eval.html">eval</a> statement, built into
+	the language, which uses exact same logic as this routine (and in fact relies on it).
 </p>
 
 <h3>SYNOPSIS</h3>
@@ -102,28 +110,24 @@ mysql&gt; SHOW PROCESSLIST;
 	</p>
 
 	<p>
-		Convert all MyISAM tables to Innodb:
+		Automatically add partition to a <strong>RANGE</strong> partition table
+		(see <a href="sql_range_partitions.html">sql_range_partitions</a>):
 	</p>
-	<blockquote><pre>mysql&gt; SELECT TABLE_NAME, ENGINE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='world';
-+-----------------+--------+
-| TABLE_NAME      | ENGINE |
-+-----------------+--------+
-| City            | MyISAM |
-| Country         | MyISAM |
-| CountryLanguage | MyISAM |
-+-----------------+--------+
-	
-mysql&gt; CALL eval('SELECT CONCAT(\'ALTER TABLE \', TABLE_SCHEMA, \'.\', TABLE_NAME, \' ENGINE=InnoDB\') FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=\'world\' AND ENGINE=\'MyISAM\'');
-
-mysql&gt; SELECT TABLE_NAME, ENGINE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='world';
-+-----------------+--------+
-| TABLE_NAME      | ENGINE |
-+-----------------+--------+
-| City            | InnoDB |
-| Country         | InnoDB |
-| CountryLanguage | InnoDB |
-+-----------------+--------+
+	<blockquote><pre>mysql&gt; CALL eval("SELECT sql_add_next_partition FROM sql_range_partitions WHERE table_name='quarterly_report_status'");
 </pre></blockquote>
+
+	<p>
+		Block accounts for user <strong>'gromit'</strong>
+		(see <a href="sql_accounts.html">sql_accounts</a>):
+	</p>
+	<blockquote><pre>mysql&gt; CALL eval("SELECT sql_block_account FROM sql_accounts WHERE USER = 'gromit'");
+</pre></blockquote>
+
+
+<p>Kill transactions idle for <strong>30</strong> seconds or more:
+<blockquote><pre>mysql&gt; CALL eval("SELECT sql_kill_query FROM common_schema.innodb_transactions WHERE trx_idle_seconds >= 30");
+</pre></blockquote>
+</p>
 
 
 <h3>ENVIRONMENT</h3>

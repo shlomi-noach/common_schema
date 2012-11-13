@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -31,7 +31,9 @@ var $v_pi := 3.14;
 var $table_name := 'rental';
 SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = $table_name;
 ALTER TABLE sakila.:$table_name ENGINE=InnoDB; 
-CREATE TABLE test.tmp_:${table_name}_tbl ENGINE=InnoDB; 
+CREATE TABLE test.tmp_:${table_name}_tbl (n INT) ENGINE=InnoDB;
+INSERT INTO test.tmp_:${table_name}_tbl SELECT n FROM numbers;
+SELECT $rowcount, $found_rows;
 </pre></blockquote>
 </p>
 
@@ -102,7 +104,7 @@ Note: current implementation uses MySQL's user defined variables, using variable
 unique within the script and the session in which they are declared.
 </p>
 
-<h4>Visibility</h4>
+<h4>Visibility & scope</h4>
 <p>
 A variable is only visible in the scope in which it is declared. In the above example,
 <strong>$x</strong> is recognized throughout the script, but <strong>$y</strong> may
@@ -125,9 +127,19 @@ sub-blocks of code:
 </pre></blockquote>
 </p>
 <p>
-It is not allowed to declare two variables of the same name in the same script, even if 
-they are not visible to each other. Thus, it would be an error to re-declare <strong>$x</strong>
-in the second block in the above example.
+One may declare two variables of the same name, as long as they are invisible to each other.
+In other words, they must be in non-overlapping scopes. For example, the following is valid:
+<blockquote><pre>{
+  var $a := 3;
+  var $b := 4;
+}
+var $a := 5;
+{
+  var $b := '6';
+} 
+</pre></blockquote>
+The second declaration point of <strong>$a</strong> appears after the first one went out of scope,
+which makes this a valid declaration. The same goes for <strong>$b</strong>.
 </p>
 
 <a name="expansion"></a>
@@ -203,6 +215,7 @@ SELECT Name FROM world.City ORDER BY Population DESC LIMIT :$x;
 | São Paulo       |
 +-----------------+
 </pre></blockquote>
+</p>
 
 <p>
 As another example, consider:
@@ -245,6 +258,34 @@ foreach($t: {City, Country, CountryLanguage})
 		<li>Expanded variables must not specify local variables. Expanding the variable
 			<strong>var $some_var := '$another_var'</strong> will result in a runtime
 			error. You may relate to MySQL's user defined variables.</li>
+	</ul>
+</p>
+
+<a name="builtin"></a>
+<h4>Built-in variables</h4>
+<p>
+	The following variables are built into the system:
+	<ul>
+		<li>
+			<strong>$found_rows</strong>: number of rows returned by previous 
+			<strong>SELECT</strong> statement, if any.
+			<br/>This value reflects MySQL's 
+			<a href="http://dev.mysql.com/doc/refman/5.1/en/information-functions.html#function_found-rows">FOUND_ROWS()</a>.
+			Due to the interpreted nature of QueryScript, the transient <i>FOUND_ROWS()</i> value is
+			lost by the time next statement executes. Hence the use of this variable.
+			<br/>This variable is transient, in that it only relates to the previously
+			executed statement. 
+		</li>
+		<li>
+			<strong>$rowcount</strong>: number of rows changed, deleted, or inserted by the last statement,
+			if applicable.
+			<br/>This value reflects MySQL's 
+			<a href="http://dev.mysql.com/doc/refman/5.1/en/information-functions.html#function_row-count">ROW_COUNT()</a>.
+			Due to the interpreted nature of QueryScript, the transient <i>ROW_COUNT()</i> value is
+			lost by the time next statement executes. Hence the use of this variable.
+			<br/>This variable is transient, in that it only relates to the previously
+			executed statement. 
+		</li>
 	</ul>
 </p>
 

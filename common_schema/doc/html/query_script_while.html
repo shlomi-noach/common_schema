@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -26,6 +26,8 @@ QueryScript Flow Control: <strong>while</strong> statement
 <p>
 <blockquote><pre>while (expression)
   statement;
+[otherwise
+  statement;]
 </pre></blockquote>
 </p>
 
@@ -47,6 +49,11 @@ The <i>while</i> loop terminates in the following cases:
 	<li>A <a href="query_script_return.html">return</a> statement is executed inside the loop</li>
 	<li>An uncaught error is raised (at the moment all errors are by default uncaught unless handled in user code)</li>
 </ul>
+</p>
+<p>
+	The <strong>otherwise</strong> clause is optional. It will execute once should no iteration
+	take place. That is, if at least one <strong>while</strong> iteration executes,
+	<strong>otherwise</strong> is skipped.
 </p>
 <p>
 Empty statements are not allowed in QueryScript. However, empty blocks are, and the 
@@ -104,6 +111,23 @@ SELECT @counter;
 </pre></blockquote>
 </p>
 
+<p>
+Use an <strong>otherwise</strong> clause:
+<blockquote><pre>
+set @count := 0;
+while (@count > 22)
+  set @count := @count-1;
+otherwise
+  echo 'not a single iteration';
+
++--------------------------+
+| echo                     |
++--------------------------+
+| 'not a single iteration' |
++--------------------------+
+</pre></blockquote>
+</p>
+
 
 <h3>SEE ALSO</h3>
 <a href="query_script_if_else.html">if-else</a>,
@@ -114,8 +138,6 @@ SELECT @counter;
 
 <h3>AUTHOR</h3>
 Shlomi Noach
-
-
 				<br/>
 			</div>
 			<div id="sidebarwrapper">

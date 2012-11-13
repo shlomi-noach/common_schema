@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> documentation
+			<h1>common_schema</h1> <strong>1.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -35,30 +35,29 @@ View
 </p>
 
 <p>
-This view provides with a quick look at replication status processlist-wise.
+	This view provides with a quick look at replication status processlist-wise.
 </p>
 
-<p>
-The output of this view is a row subset of INFORMATION_SCHEMA.PROCESSLIST.
-</p>
 <h3>STRUCTURE</h3>
 
 <blockquote><pre>
 mysql&gt; DESC common_schema.processlist_repl;
-+-----------+-------------+------+-----+---------+-------+
-| Field     | Type        | Null | Key | Default | Extra |
-+-----------+-------------+------+-----+---------+-------+
-| ID        | bigint(4)   | NO   |     | 0       |       |
-| USER      | varchar(16) | NO   |     |         |       |
-| HOST      | varchar(64) | NO   |     |         |       |
-| DB        | varchar(64) | YES  |     | NULL    |       |
-| COMMAND   | varchar(16) | NO   |     |         |       |
-| TIME      | int(7)      | NO   |     | 0       |       |
-| STATE     | varchar(64) | YES  |     | NULL    |       |
-| INFO      | longtext    | YES  |     | NULL    |       |
-| is_system | int(1)      | NO   |     | 0       |       |
-| is_slave  | int(1)      | NO   |     | 0       |       |
-+-----------+-------------+------+-----+---------+-------+
++---------------+-------------+------+-----+---------+-------+
+| Field         | Type        | Null | Key | Default | Extra |
++---------------+-------------+------+-----+---------+-------+
+| ID            | bigint(4)   | NO   |     | 0       |       |
+| USER          | varchar(16) | NO   |     |         |       |
+| HOST          | varchar(64) | NO   |     |         |       |
+| DB            | varchar(64) | YES  |     | NULL    |       |
+| COMMAND       | varchar(16) | NO   |     |         |       |
+| TIME          | int(7)      | NO   |     | 0       |       |
+| STATE         | varchar(64) | YES  |     | NULL    |       |
+| INFO          | longtext    | YES  |     | NULL    |       |
+| is_system     | int(1)      | NO   |     | 0       |       |
+| is_io_thread  | int(1)      | NO   |     | 0       |       |
+| is_sql_thread | int(1)      | NO   |     | 0       |       |
+| is_slave      | int(1)      | NO   |     | 0       |       |
++---------------+-------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
@@ -67,10 +66,15 @@ mysql&gt; DESC common_schema.processlist_repl;
 <p>Additional columns are:
 	<ul>
 		<li><strong>is_system</strong>: <strong>1</strong> if this is the system user (SQL or IO slave threads); <strong>0</strong> otherwise.</li>
-		<li><strong>is_slave</strong>: <strong>1</strong> if this is a replicating slave; <strong>0</strong> otherwise.</li>
+		<li><strong>is_io_thread</strong>: <strong>1</strong> if this is the slave IO thread, <strong>0</strong> otherwise.</li>
+		<li><strong>is_sql_thread</strong>: <strong>1</strong> if this is the slave SQL thread, <strong>0</strong> otherwise.</li>
+		<li><strong>is_slave</strong>: <strong>1</strong> if this is a replicating slave connection; <strong>0</strong> otherwise.</li>
 	</ul>
 <strong>is_system</strong> and <strong>is_slave</strong> are mutually exclusive. 
-In this view every process is either <strong>is_system</strong> or <strong>is_slave</strong>. 
+In this view every process is either <strong>is_system</strong> or <strong>is_slave</strong>.
+<br/>
+An <strong>is_system</strong> process is either a slave IO thread or SQL thread, as denoted by
+<strong>is_io_thread</strong> and <strong>is_sql_thread</strong>, respectively. 
 </p>
 
 <p>On Percona Server, this additional info is included:
@@ -81,16 +85,16 @@ In this view every process is either <strong>is_system</strong> or <strong>is_sl
 <h3>EXAMPLES</h3>
 <p>Show all replication processes</p>
 <blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_repl;
-+----------+-------------+-------------+------+-------------+---------+------------------------------------------------------------------+------+------------+
-| ID       | USER        | HOST        | DB   | COMMAND     | TIME    | STATE                                                            | INFO | TIME_MS    |
-+----------+-------------+-------------+------+-------------+---------+------------------------------------------------------------------+------+------------+
-| 31066726 | repl_user   | sql02:48924 | NULL | Binlog Dump | 1205439 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL | 1205438922 |
-|  3598469 | repl_user   | sql01:51157 | NULL | Binlog Dump | 4445559 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL | 4445558495 |
-|  3598335 | system user |             | NULL | Connect     |  359428 | Has read all relay log; waiting for the slave I/O thread to upda | NULL |          3 |
-|  3598334 | system user |             | NULL | Connect     | 4445564 | Waiting for master to send event                                 | NULL | 4445563890 |
-+----------+-------------+-------------+------+-------------+---------+------------------------------------------------------------------+------+------------+
++--------+-------------+-------------+------+-------------+-------+------------------------------------------------------------------+------+----------+-----------+--------------+---------------+----------+
+| ID     | USER        | HOST        | DB   | COMMAND     | TIME  | STATE                                                            | INFO | TIME_MS  | is_system | is_io_thread | is_sql_thread | is_slave |
++--------+-------------+-------------+------+-------------+-------+------------------------------------------------------------------+------+----------+-----------+--------------+---------------+----------+
+| 805225 | system user |             | NULL | Connect     |     0 | Has read all relay log; waiting for the slave I/O thread to upda | NULL |        0 |         1 |            0 |             1 |        0 |
+| 805224 | system user |             | NULL | Connect     |     5 | Waiting for master to send event                                 | NULL |     4327 |         1 |            1 |             0 |        0 |
+| 425707 | repl_user   | sql02:46645 | NULL | Binlog Dump | 38273 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL | 38272802 |         0 |            0 |             0 |        1 |
+|     88 | repl_user   | sql00:46485 | NULL | Binlog Dump | 79071 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL | 79070732 |         0 |            0 |             0 |        1 |
++--------+-------------+-------------+------+-------------+-------+------------------------------------------------------------------+------+----------+-----------+--------------+---------------+----------+
 </pre></blockquote>
-<p>In the above example we see two slaves replicating from this server (sql02 & sql01), 
+<p>In the above example we see two slaves replicating from this server (sql02 & sql00), 
 and the two threads (IO thread, SQL thread) this server uses to replication from its master</p>
 
 <h3>ENVIRONMENT</h3>
@@ -99,7 +103,8 @@ MySQL 5.1 or newer. Percona Server yields a different schema.
 <h3>SEE ALSO</h3>
 <a href="processlist_per_userhost.html">processlist_per_userhost</a>,
 <a href="processlist_summary.html">processlist_summary</a>,
-<a href="processlist_top.html">processlist_top</a>
+<a href="processlist_top.html">processlist_top</a>,
+<a href="slave_status.html">slave_status</a>
 <h3>AUTHOR</h3>
 Shlomi Noach
 				<br/>
