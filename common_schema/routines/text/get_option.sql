@@ -21,18 +21,14 @@ begin
   declare current_key TEXT CHARSET utf8 DEFAULT ''; 
   declare current_value TEXT CHARSET utf8 DEFAULT ''; 
   
-  if options is null then
+  if not _is_options_format(options) then
     return null;
-  end if;
-  set options := trim_wspace(options);
-  if not options RLIKE '^{.*}$' then
-    return NULL;
   end if;
   
   set key_name := unquote(key_name);
 
   -- parse options into key:value pairs
-  set options := _retokenized_text(unwrap(options), ',', '"''`', TRUE, 'error');
+  set options := _retokenized_text(unwrap(trim_wspace(options)), ',', '"''`', TRUE, 'error');
   set options_delimiter := @common_schema_retokenized_delimiter;
   set num_options := @common_schema_retokenized_count;
   set options_counter := 1;
