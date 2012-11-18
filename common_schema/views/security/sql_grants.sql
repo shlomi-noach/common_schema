@@ -44,6 +44,7 @@ VIEW _sql_grants_components AS
       GRANTEE,
       '*.*' AS priv_level,
       'user' AS priv_level_name,
+      '' AS object_type,
       'USAGE' AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       1 AS result_order
@@ -58,6 +59,7 @@ VIEW _sql_grants_components AS
       GRANTEE,
       '*.*' AS priv_level,
       'user' AS priv_level_name,
+      '' AS object_type,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       2 AS result_order
@@ -74,6 +76,7 @@ VIEW _sql_grants_components AS
       GRANTEE,
       CONCAT('`', TABLE_SCHEMA, '`.*') AS priv_level,
       'schema' AS priv_level_name,
+      '' AS object_type,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       3 AS result_order
@@ -88,6 +91,7 @@ VIEW _sql_grants_components AS
       GRANTEE,
       CONCAT('`', TABLE_SCHEMA, '`.`', TABLE_NAME, '`') AS priv_level,
       'table' AS priv_level_name,
+      'table' AS object_type,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       4 AS result_order
@@ -102,6 +106,7 @@ VIEW _sql_grants_components AS
       GRANTEE,
       CONCAT('`', TABLE_SCHEMA, '`.`', TABLE_NAME, '`') AS priv_level,
       'column' AS priv_level_name,
+      '' AS object_type,
       GROUP_CONCAT(column_privileges ORDER BY column_privileges SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       5 AS result_order
@@ -116,6 +121,7 @@ VIEW _sql_grants_components AS
       GRANTEE,
       CONCAT('`', ROUTINE_SCHEMA, '`.`', ROUTINE_NAME, '`') AS priv_level,
       'routine' AS priv_level_name,
+      ROUTINE_TYPE AS object_type,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       6 AS result_order
@@ -143,7 +149,7 @@ VIEW sql_grants AS
     IS_GRANTABLE,
     CONCAT(
       'GRANT ', current_privileges, 
-      ' ON ', priv_level, 
+      ' ON ', IF(priv_level_name = 'routine', CONCAT(object_type, ' '), ''), priv_level, 
       ' TO ', GRANTEE,
       IF(priv_level = '*.*' AND current_privileges = 'USAGE', 
         CONCAT(' IDENTIFIED BY PASSWORD ''', user.password, ''''), ''),
