@@ -8,6 +8,7 @@ DROP PROCEDURE IF EXISTS _split $$
 CREATE PROCEDURE _split(
   split_table_schema varchar(128), 
   split_table_name varchar(128),
+  split_options varchar(2048) charset utf8,
   split_injected_action_statement TEXT CHARSET utf8, 
   split_injected_text TEXT CHARSET utf8,
   in   id_from      int unsigned,
@@ -34,7 +35,7 @@ main_body: begin
   call _split_generate_dependency_tables(split_table_schema, split_table_name);
   call _split_deduce_columns(split_table_schema, split_table_name);
   call _split_init_variables();
-  call _split_assign_min_max_variables(split_table_schema, split_table_name);
+  call _split_assign_min_max_variables(id_from, split_table_schema, split_table_name, split_options);
   
   call _split_is_empty_table(is_empty_table);
 

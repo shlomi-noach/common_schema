@@ -37,16 +37,21 @@ main_body: begin
     declare matched_token text charset utf8;
     
     declare loop_iteration_count bigint unsigned;
+    
     declare while_statement_id_from int unsigned;
     declare while_statement_id_to int unsigned;
     declare while_otherwise_statement_id_from int unsigned;
     declare while_otherwise_statement_id_to int unsigned;
+    
     declare foreach_statement_id_from int unsigned;
     declare foreach_statement_id_to int unsigned;
     declare foreach_otherwise_statement_id_from int unsigned;
     declare foreach_otherwise_statement_id_to int unsigned;
+    
     declare split_statement_id_from int unsigned;
     declare split_statement_id_to int unsigned;
+    declare split_options varchar(2048) charset utf8;
+
     declare if_statement_id_from int unsigned;
     declare if_statement_id_to int unsigned;
     declare else_statement_id_from int unsigned;
@@ -227,7 +232,7 @@ main_body: begin
             end if;
 	      end;
         when first_state = 'alpha' AND first_token = 'split' then begin
-	        call _consume_split_statement(id_from + 1, id_to, consumed_to_id, depth, split_table_schema, split_table_name, split_injected_action_statement, split_injected_text, should_execute_statement);
+	        call _consume_split_statement(id_from + 1, id_to, consumed_to_id, depth, split_table_schema, split_table_name, split_injected_action_statement, split_injected_text, split_options, should_execute_statement);
 
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
@@ -239,7 +244,7 @@ main_body: begin
             if should_execute_statement then
              begin end;
                -- call _split(split_table_schema, split_table_name);
-               call _split(split_table_schema, split_table_name, split_injected_action_statement, split_injected_text, split_statement_id_from, split_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+               call _split(split_table_schema, split_table_name, split_options, split_injected_action_statement, split_injected_text, split_statement_id_from, split_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
             end if;
 	      end;
         when first_state = 'alpha' AND first_token = 'if' then begin

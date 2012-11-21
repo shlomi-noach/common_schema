@@ -15,6 +15,7 @@ create procedure _consume_split_statement(
    out  split_table_name tinytext charset utf8,
    out  split_injected_action_statement text charset utf8,
    out  split_injected_text tinytext charset utf8,
+   out	split_options varchar(2048) charset utf8,
    in should_execute_statement tinyint unsigned
 )
 comment 'Reads split() expression'
@@ -27,11 +28,12 @@ main_body: begin
     declare expression_level int unsigned;
     declare id_end_action_statement int unsigned default NULL; 
     declare id_end_split_table_declaration int unsigned default NULL; 
-    declare peek_match_to int unsigned default NULL; 
-    declare table_array_id varchar(16);
+    declare query_type_supported tinyint unsigned;
+    declare tables_found varchar(32) charset ascii;
     declare colon_exists tinyint unsigned default false;
-    declare explicit_table_exists tinyint unsigned default false;
-    declare split_statement_exists tinyint unsigned default false;
+    declare found_explicit_table tinyint unsigned;
+    declare found_any_params tinyint unsigned;
+    declare found_possible_statement tinyint unsigned;
     
     call _skip_spaces(id_from, id_to);
     SELECT level, state FROM _sql_tokens WHERE id = id_from INTO expression_level, first_state;
@@ -55,59 +57,43 @@ main_body: begin
 	
     set id_from := id_from + 1;
 	
-	-- Expect schema.table:
-	-- call _peek_states_list(id_from, id_end_split_table_declaration-1, 'alpha|alphanum|quoted identifier,dot,alpha|alphanum|quoted identifier', true, @peek_result);
-	-- select @peek_result;
     set split_injected_text := '[:_query_script_split_injected_placeholder:]';
 	
+    set found_possible_statement := true;
     if colon_exists then
-      -- expect table_schema.table_name : statement
-      call _expect_exact_states_list(id_from, id_end_split_table_declaration-1, 'alpha|alphanum|quoted identifier,dot,alpha|alphanum|quoted identifier', table_array_id);
-      call _get_array_element(table_array_id, '1', split_table_schema);		
-      call _get_array_element(table_array_id, '3', split_table_name);
-      set split_table_schema := unquote(split_table_schema);
-      set split_table_name := unquote(split_table_name);
-      call _drop_array(table_array_id);
+      call _consume_split_statement_params(id_from, id_end_split_table_declaration-1, should_execute_statement, split_table_schema, split_table_name, split_options, found_explicit_table, found_any_params);
+      if not found_any_params then
+        call _throw_script_error(id_from, 'split: must indicate table or options before colon; otherwise drop colon');
+      end if;
 
       -- Get the action statement clause:
       set id_from := id_end_split_table_declaration + 1;
       call _skip_spaces(id_from, id_to);
-
-      call _inject_split_where_token(id_from, id_end_action_statement - 1, split_injected_text, split_injected_action_statement);
-      
-      set explicit_table_exists := true;
-      set split_statement_exists := true;
     else
-      begin
-        -- expect table_schema.table_name
-        -- OR statement
-        declare query_type_supported tinyint unsigned;
-        declare tables_found varchar(32) charset ascii;
-
-        call _create_array(table_array_id);
-        call _peek_states_list(id_from, id_end_split_table_declaration-1, 'alpha|alphanum|quoted identifier,dot,alpha|alphanum|quoted identifier', false, false, true, table_array_id, peek_match_to);
-        if peek_match_to > 0 then
-          -- we have table_schema.table_name, and no statement
-          call _get_array_element(table_array_id, '1', split_table_schema);		
-          call _get_array_element(table_array_id, '3', split_table_name);
-          set split_table_schema := unquote(split_table_schema);
-          set split_table_name := unquote(split_table_name);
-          set split_injected_action_statement := CONCAT('SELECT COUNT(NULL) FROM ', mysql_qualify(split_table_schema), '.', mysql_qualify(split_table_name), ' WHERE ', split_injected_text, ' INTO @_common_schema_dummy');
-          set explicit_table_exists := true;
-        else
-          -- Try and get a statement and extract table_schema.table_name
-          call _skip_spaces(id_from, id_end_action_statement - 1);
-          call _get_split_query_single_table(id_from, id_end_action_statement - 1, query_type_supported, tables_found, split_table_schema, split_table_name);
-          if split_table_schema is not null and split_table_name is not null then
-            -- Got it!
-            call _inject_split_where_token(id_from, id_end_action_statement - 1, split_injected_text, split_injected_action_statement);
-          else
-            -- Can't get single table name. Either multi table or using hints or subquery...
-            call _throw_script_error(id_from, 'split() cannot deduce split table name. Please specify explicitly');
-          end if;
+      -- colon does not exist
+      call _consume_split_statement_params(id_from, id_end_split_table_declaration-1, should_execute_statement, split_table_schema, split_table_name, split_options, found_explicit_table, found_any_params);
+      if found_any_params then
+        -- no statement
+        set found_possible_statement := false;
+      end if;
+    end if;
+    
+    if not (found_possible_statement or found_explicit_table) then
+      call _throw_script_error(id_from, 'split: no statement nor table provided. Provide at least either one');
+    end if;
+    
+    if found_possible_statement then
+      if not found_explicit_table then
+        call _skip_spaces(id_from, id_end_action_statement - 1);
+        call _get_split_query_single_table(id_from, id_end_action_statement - 1, query_type_supported, tables_found, split_table_schema, split_table_name);
+        if (split_table_schema is null) or (split_table_name is null) then
+          -- Can't get single table name. Either multi table or using hints or subquery...
+          call _throw_script_error(id_from, 'split() cannot deduce split table name. Please specify explicitly');
         end if;
-        call _drop_array(table_array_id);
-      end;
+      end if;
+      call _inject_split_where_token(id_from, id_end_action_statement - 1, split_injected_text, split_injected_action_statement);
+    else
+      set split_injected_action_statement := CONCAT('SELECT COUNT(NULL) FROM ', mysql_qualify(split_table_schema), '.', mysql_qualify(split_table_name), ' WHERE ', split_injected_text, ' INTO @_common_schema_dummy');
     end if;
     
     set consumed_to_id := id_end_action_statement;
