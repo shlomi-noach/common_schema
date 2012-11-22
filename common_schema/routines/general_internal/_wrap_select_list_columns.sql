@@ -10,7 +10,7 @@ create procedure _wrap_select_list_columns(
 )
 my_proc: begin
     declare v_from, v_old_from int unsigned;
-    declare v_token text;
+    declare v_token text charset utf8;
     declare v_level int unsigned;
     declare v_state varchar(32);
     declare v_whitespace varchar(1) default '';
@@ -45,12 +45,14 @@ my_proc: begin
     end repeat;
     
     -- part two: rewrite columns
-    my_loop: repeat 
+    columns_loop: repeat 
         set v_old_from = v_from;
         call _get_sql_token(p_text, v_from, v_level, v_token, FALSE, v_state);
         if v_state = 'error' then
             set p_error = 'Tokenizer returned error state';
             leave my_main;
+        elseif (v_column_number = 0) and ((v_state, v_token) = ('alpha', 'distinct')) then
+            set v_statement = concat(v_statement, 'distinct');
         elseif v_column_number < p_column_count then
             if  v_level = 0 and (
                 (v_state, v_token) in (
@@ -73,8 +75,8 @@ my_proc: begin
                     ,   v_substr_length = character_length(v_expression)
                     -- substract length that makes up the alias (and AS keyword if applicable)
                     ,   v_substr_length = v_substr_length - case 
-                            when v_handle = 'AS' then    -- handle indicates an explicit alias.
-                                2 + character_length(substring_index(v_expression, 'AS', -1))
+                            when UPPER(v_handle) = 'AS' then    -- handle indicates an explicit alias.
+                                2 + character_length(substring_index(v_expression, v_handle, -1))
                             when coalesce(v_handle, '') not in (  -- if the handle is not a keyword then the last token must be an alias. chop it off 
                                 '', 'AND', 'BINARY', 'COLLATE', 'DIV', 'ESCAPE', 'IS', 'LIKE', 'MOD', 'NOT', 'OR', 'REGEXP', 'RLIKE', 'XOR'
                             ,   '+', '-', '/', '*', '%'
