@@ -13,7 +13,7 @@
 -- mysql> SOURCE '/path/to/common_schema.sql';
 -- 
 -- - From shell, execute:
--- bash$ mysql < '/path/to/common_schema.sql'
+-- bash$ mysql < /path/to/common_schema.sql
 -- 
 -- - Use your favorite MySQL GUI editor, copy+paste file content, execute.
 -- 
