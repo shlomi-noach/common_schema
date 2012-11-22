@@ -12,7 +12,7 @@ SQL SECURITY INVOKER
 COMMENT 'Returns DATETIME of beginning of round hour of given DATETIME.'
 
 BEGIN
-  RETURN (CAST(txt AS DATETIME) is not null);
+  RETURN (txt + interval 0 second is not null);
 END $$
 
 DELIMITER ;
