@@ -1,0 +1,1 @@
+SELECT distinct id AS col1, name AS col2, NULL as col3 from world.City
