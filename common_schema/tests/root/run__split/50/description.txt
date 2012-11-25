@@ -1,0 +1,1 @@
+split: auto-detect table as expanded variable, count iterations

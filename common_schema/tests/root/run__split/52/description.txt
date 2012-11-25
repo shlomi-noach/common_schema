@@ -1,0 +1,1 @@
+split: auto-detect table & schema as expanded variables, long format, count iterations
