@@ -42,12 +42,11 @@ main_body: begin
         ((state = 'left parenthesis') and (level = statement_level + 1))
       )
       into multi_table_indicator_id;
-     
+      
     if multi_table_indicator_id is not null then
        set tables_found := 'multi';
        leave main_body;
     end if;
-
     -- Got here: there is one single table.
     -- It should be in the following format: [schema_name.]tbl_name [[AS] alias]
     -- (valid SQL)
@@ -57,7 +56,7 @@ main_body: begin
     -- allow aliases, so we actually expect table_schema.table_name
 
     call _skip_tokens_and_spaces(id_from, id_to, 'ignore,low_priority');
-    call _peek_states_list(id_from, id_to, 'alpha|alphanum|quoted identifier,dot,alpha|alphanum|quoted identifier', false, false, true, tokens_array_id, peek_match_to);
+    call _peek_states_list(id_from, id_to, 'alpha|alphanum|quoted identifier|expanded query_script variable,dot,alpha|alphanum|quoted identifier|expanded query_script variable', false, false, true, tokens_array_id, peek_match_to);
     if peek_match_to > 0 then
       call _get_array_element(tokens_array_id, '1', table_schema);		
       call _get_array_element(tokens_array_id, '3', table_name);

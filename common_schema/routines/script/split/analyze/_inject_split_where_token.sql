@@ -9,7 +9,8 @@ drop procedure if exists _inject_split_where_token //
 create procedure _inject_split_where_token(
    in   id_from      int unsigned,
    in   id_to      int unsigned,
-   in  split_injected_text tinytext charset utf8,
+   in   split_injected_text tinytext charset utf8,
+   in   should_execute_statement tinyint unsigned,
    out  split_injected_action_statement text charset utf8
 )
 comment 'Injects a magical token into the WHERE statement'
@@ -61,24 +62,12 @@ main_body: begin
         INTO id_where_clause_end;
       if id_where_clause_end is NULL then
         -- No "WHERE", no following clause... Just invent a new "WHERE" clause...
-        select 
-            group_concat(token order by id separator '') 
-          from _sql_tokens 
-          where id between id_from and id_to
-          into query_part_prefix;
+        call _expand_statement_variables(id_from, id_to, query_part_prefix, @common_schema_dummy, should_execute_statement);
       else
         -- No "WHERE", but we found a following clause. Invent a new "WHERE"
         -- clause before that clause...
-        select 
-            group_concat(token order by id separator '') 
-          from _sql_tokens 
-          where id between id_from and id_where_clause_end - 1
-          into query_part_prefix;
-        select 
-            group_concat(token order by id separator '') 
-          from _sql_tokens 
-          where id between id_where_clause_end and id_to
-          into query_part_suffix;
+        call _expand_statement_variables(id_from, id_where_clause_end - 1, query_part_prefix, @common_schema_dummy, should_execute_statement);
+        call _expand_statement_variables(id_where_clause_end, id_to, query_part_suffix, @common_schema_dummy, should_execute_statement);
       end if;
       -- Must invent/inject a "WHERE" clause
       set split_injected_action_statement := CONCAT(
@@ -86,11 +75,7 @@ main_body: begin
         );
     else
       -- "WHERE" clause found.
-      select 
-          group_concat(token order by id separator '') 
-        from _sql_tokens 
-        where id between id_from and id_where_clause
-        into query_part_prefix;
+      call _expand_statement_variables(id_from, id_where_clause, query_part_prefix, @common_schema_dummy, should_execute_statement);
       -- Search for end of "WHERE" clause
       SELECT 
         MIN(id) FROM _sql_tokens 
@@ -103,22 +88,10 @@ main_body: begin
       if id_where_clause_end is NULL then
         -- Nothing after the "WHERE" clause. So the "WHERE" clause 
         -- terminates at id_to
-        select 
-            group_concat(token order by id separator '') 
-          from _sql_tokens 
-          where id between id_where_clause + 1 and id_to
-          into query_part_where_clause;
+        call _expand_statement_variables(id_where_clause + 1, id_to, query_part_where_clause, @common_schema_dummy, should_execute_statement);
       else
-        select 
-            group_concat(token order by id separator '') 
-          from _sql_tokens 
-          where id between id_where_clause + 1 and id_where_clause_end - 1
-          into query_part_where_clause;
-        select 
-            group_concat(token order by id separator '') 
-          from _sql_tokens 
-          where id between id_where_clause_end and id_to
-          into query_part_suffix;
+        call _expand_statement_variables(id_where_clause + 1, id_where_clause_end - 1, query_part_where_clause, @common_schema_dummy, should_execute_statement);
+        call _expand_statement_variables(id_where_clause_end, id_to, query_part_suffix, @common_schema_dummy, should_execute_statement);
       end if;
       -- inject text in exsiting WHERE clause
       set split_injected_action_statement := CONCAT(

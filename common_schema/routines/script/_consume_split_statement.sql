@@ -86,12 +86,14 @@ main_body: begin
       if not found_explicit_table then
         call _skip_spaces(id_from, id_end_action_statement - 1);
         call _get_split_query_single_table(id_from, id_end_action_statement - 1, query_type_supported, tables_found, split_table_schema, split_table_name);
-        if (split_table_schema is null) or (split_table_name is null) then
+        call _expand_single_variable(id_from, id_end_action_statement - 1, split_table_schema, should_execute_statement);
+        call _expand_single_variable(id_from, id_end_action_statement - 1, split_table_name, should_execute_statement);
+        if should_execute_statement and ((split_table_schema is null) or (split_table_name is null)) then
           -- Can't get single table name. Either multi table or using hints or subquery...
           call _throw_script_error(id_from, 'split() cannot deduce split table name. Please specify explicitly');
         end if;
       end if;
-      call _inject_split_where_token(id_from, id_end_action_statement - 1, split_injected_text, split_injected_action_statement);
+      call _inject_split_where_token(id_from, id_end_action_statement - 1, split_injected_text, should_execute_statement, split_injected_action_statement);
     else
       set split_injected_action_statement := CONCAT('SELECT COUNT(NULL) FROM ', mysql_qualify(split_table_schema), '.', mysql_qualify(split_table_name), ' WHERE ', split_injected_text, ' INTO @_common_schema_dummy');
     end if;

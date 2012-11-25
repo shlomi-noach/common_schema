@@ -55,6 +55,10 @@ main_body: begin
       -- Read a single state, one of current expected states.
       if allow_spaces_between_states then
         call _skip_spaces(id_from, id_to);
+      else
+        -- empty spaces are result of common_schema/QueryScript internal hacks
+        -- when tokenizing :${t} variables.
+        call _skip_empty_spaces(id_from, id_to);
       end if;
       set expected_states := split_token(expected_states_list, ',', states_index);
 

@@ -49,8 +49,11 @@ main_body: begin
       )
       and (id_from between _qs_variables.declaration_id and _qs_variables.scope_end_id)
     )
-  where (id between id_from and id_to) 
-  INTO expanded_statement;
+  where 
+    (id between id_from and id_to) 
+  INTO 
+    expanded_statement;
+  set expanded_statement := trim_wspace(expanded_statement);
 end;
 //
 
