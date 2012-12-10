@@ -12,9 +12,7 @@ CREATE TABLE numbers (
 --
 -- Populate numbers table, values range [0...4095]
 --
-INSERT IGNORE
-  INTO numbers (n)
-SELECT
+INSERT IGNORE INTO numbers (n) SELECT
   @counter := @counter+1 AS counter 
 FROM
   (

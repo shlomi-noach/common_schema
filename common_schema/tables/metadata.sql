@@ -13,9 +13,7 @@ CREATE TABLE metadata (
 --
 -- 
 --
-INSERT 
-  INTO metadata (attribute_name, attribute_value)
-VALUES
+INSERT INTO metadata (attribute_name, attribute_value) VALUES
   ('author', 'Shlomi Noach'),
   ('author_url', 'http://code.openark.org/blog/shlomi-noach'),
   ('install_success', false),
@@ -44,5 +42,5 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   ('project_repository', 'https://common-schema.googlecode.com/svn/trunk/'),
   ('project_repository_type', 'svn'),
   ('revision', 'revision.placeholder'),
-  ('version', '1.2.2')
+  ('version', '1.3')
 ;  
