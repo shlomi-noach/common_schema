@@ -13,7 +13,7 @@ VIEW routine_privileges AS
     Db AS ROUTINE_SCHEMA,
     Routine_name AS ROUTINE_NAME,
     Routine_type AS ROUTINE_TYPE,
-    UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(Proc_priv, ',', n+1), ',', -1)) AS PRIVILEGE_TYPE,
+    REPLACE(UPPER(SUBSTRING_INDEX(SUBSTRING_INDEX(Proc_priv, ',', n+1), ',', -1)), '\0', ' ') AS PRIVILEGE_TYPE,
     IF(find_in_set('Grant', Proc_priv) > 0, 'YES', 'NO') AS IS_GRANTABLE
   FROM
     mysql.procs_priv
