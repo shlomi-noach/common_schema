@@ -36,6 +36,11 @@ Function
 	</ul>
 </p>
 
+<p>
+	NOTE: this function is CPU intensive. This solution should ideally be implemented through
+	built-in functions, not stored routines.
+</p>
+
 <h3>SYNOPSIS</h3>
 <p>
 <blockquote><pre>json_to_xml(
@@ -99,7 +104,8 @@ xml: &lt;menu&gt;&lt;id&gt;file&lt;/id&gt;&lt;value&gt;File&lt;/value&gt;&lt;pop
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
-<a href="encode_xml.html">encode_xml()</a>
+<a href="encode_xml.html">encode_xml()</a>,
+<a href="extract_json_value.html">extract_json_value()</a>
 
 <h3>AUTHOR</h3>
 Shlomi Noach

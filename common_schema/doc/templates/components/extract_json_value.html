@@ -1,0 +1,84 @@
+<h3>NAME</h3>
+extract_json_value(): Extract value from JSON notation via XPath
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	<i>extract_json_value()</i> accepts text in <a href="http://www.json.org/">JSON</a> format,
+	and an <a href="http://www.w3.org/TR/xpath/">XPath</a> expression, and extracts
+	data from JSON matching path.
+</p>
+<p>
+	While XPath was originally developed for XML, its usage in other fields became quickly widespread,
+	including searching through object oriented structures.
+	XPath easily applies to JSON.
+</p>
+<p>
+	This function internally relies on <a href="json_to_xml.html">json_to_xml()</a>:
+	it first converts the JSON data to XML, then uses 
+	<a href="http://dev.mysql.com/doc/refman/5.1/en/xml-functions.html#function_extractvalue">ExtractValue</a>
+	to apply XPath.
+</p>
+
+<p>
+	NOTE: this function is CPU intensive. This solution should ideally be implemented through
+	built-in functions, not stored routines.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>extract_json_value(
+    json_text TEXT CHARSET utf8
+    xpath TEXT CHARSET utf8
+) RETURNS TEXT CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>json_text</strong>: a valid JSON formatted text.</li>
+    <li><strong>xpath</strong>: a valid XPath notation.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Extract JSON data:</p>
+<blockquote><pre>mysql&gt; SET @json := '
+{
+  "menu": {
+    "id": "file",
+    "value": "File",
+    "popup": {
+      "menuitem": [
+        {"value": "New", "onclick": "CreateNewDoc()"},
+        {"value": "Open", "onclick": "OpenDoc()"},
+        {"value": "Close", "onclick": "CloseDoc()"}
+      ]
+    }
+  }
+}
+';
+
+mysql&gt; SELECT extract_json_value(@json, '//id') AS result;
++--------+
+| result |
++--------+
+| file   |
++--------+
+
+mysql&gt; SELECT extract_json_value(@json, 'count(/menu/popup/menuitem)') AS count_items;
++-------------+
+| count_items |
++-------------+
+| 3           |
++-------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="json_to_xml.html">json_to_xml()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
