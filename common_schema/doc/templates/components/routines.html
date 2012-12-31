@@ -1,0 +1,75 @@
+<h3>NAME</h3>
+routines: Complement INFORMATION_SCHEMA.ROUTINES missing info.
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p><i>routines</i> complements the INFORMATION_SCHEMA.ROUTINES view by adding the missing 
+<strong>param_list</strong> column in version <strong>5.1</strong>. 
+This column denotes the parameters provided to the routine.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC routines;
++----------------------+---------------+------+-----+---------------------+-------+
+| Field                | Type          | Null | Key | Default             | Extra |
++----------------------+---------------+------+-----+---------------------+-------+
+| SPECIFIC_NAME        | varchar(64)   | NO   |     |                     |       |
+| ROUTINE_CATALOG      | varchar(512)  | YES  |     | NULL                |       |
+| ROUTINE_SCHEMA       | varchar(64)   | NO   |     |                     |       |
+| ROUTINE_NAME         | varchar(64)   | NO   |     |                     |       |
+| ROUTINE_TYPE         | varchar(9)    | NO   |     |                     |       |
+| DTD_IDENTIFIER       | varchar(64)   | YES  |     | NULL                |       |
+| ROUTINE_BODY         | varchar(8)    | NO   |     |                     |       |
+| ROUTINE_DEFINITION   | longtext      | YES  |     | NULL                |       |
+| EXTERNAL_NAME        | varchar(64)   | YES  |     | NULL                |       |
+| EXTERNAL_LANGUAGE    | varchar(64)   | YES  |     | NULL                |       |
+| PARAMETER_STYLE      | varchar(8)    | NO   |     |                     |       |
+| IS_DETERMINISTIC     | varchar(3)    | NO   |     |                     |       |
+| SQL_DATA_ACCESS      | varchar(64)   | NO   |     |                     |       |
+| SQL_PATH             | varchar(64)   | YES  |     | NULL                |       |
+| SECURITY_TYPE        | varchar(7)    | NO   |     |                     |       |
+| CREATED              | datetime      | NO   |     | 0000-00-00 00:00:00 |       |
+| LAST_ALTERED         | datetime      | NO   |     | 0000-00-00 00:00:00 |       |
+| SQL_MODE             | varchar(8192) | NO   |     |                     |       |
+| ROUTINE_COMMENT      | varchar(64)   | NO   |     |                     |       |
+| DEFINER              | varchar(77)   | NO   |     |                     |       |
+| CHARACTER_SET_CLIENT | varchar(32)   | NO   |     |                     |       |
+| COLLATION_CONNECTION | varchar(32)   | NO   |     |                     |       |
+| DATABASE_COLLATION   | varchar(32)   | NO   |     |                     |       |
+| param_list           | blob          | NO   |     | NULL                |       |
++----------------------+---------------+------+-----+---------------------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view are identical to those of <a href="http://dev.mysql.com/doc/refman/5.1/en/routines-table.html">INFORMATION_SCHEMA.ROUTINES</a>,
+with the addition of the <strong>param_list</strong> column</p>
+<ul>
+	<li><strong>param_list</strong>: parameters passed to routine</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT ROUTINE_NAME, ROUTINE_TYPE, REPLACE(param_list, '\n', '') as params FROM routines WHERE ROUTINE_SCHEMA='sakila';
++----------------------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------+
+| ROUTINE_NAME               | ROUTINE_TYPE | params                                                                                                                                |
++----------------------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------+
+| film_in_stock              | PROCEDURE    | IN p_film_id INT, IN p_store_id INT, OUT p_film_count INT                                                                             |
+| film_not_in_stock          | PROCEDURE    | IN p_film_id INT, IN p_store_id INT, OUT p_film_count INT                                                                             |
+| get_customer_balance       | FUNCTION     | p_customer_id INT, p_effective_date DATETIME                                                                                          |
+| inventory_held_by_customer | FUNCTION     | p_inventory_id INT                                                                                                                    |
+| inventory_in_stock         | FUNCTION     | p_inventory_id INT                                                                                                                    |
+| rewards_report             | PROCEDURE    |     IN min_monthly_purchases TINYINT UNSIGNED    , IN min_dollar_amount_purchased DECIMAL(10,2) UNSIGNED    , OUT count_rewardees INT |
++----------------------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------+
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="routine_privileges.html">routine_privileges</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
