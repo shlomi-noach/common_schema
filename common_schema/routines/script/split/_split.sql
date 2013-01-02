@@ -24,8 +24,9 @@ COMMENT 'split values by columns...'
 
 main_body: begin
   declare is_overflow tinyint unsigned;
-  declare is_empty_table tinyint unsigned;
+  declare is_empty_range tinyint unsigned;
   declare deadlock_detected tinyint unsigned;
+  declare split_range_size int unsigned;
   declare comparison_clause text charset utf8;
   declare action_statement text charset utf8;
   declare continue handler for 1205 SET deadlock_detected = TRUE;
@@ -35,11 +36,11 @@ main_body: begin
   call _split_generate_dependency_tables(split_table_schema, split_table_name);
   call _split_deduce_columns(split_table_schema, split_table_name);
   call _split_init_variables();
-  call _split_assign_min_max_variables(id_from, split_table_schema, split_table_name, split_options);
+  call _split_assign_min_max_variables(id_from, split_table_schema, split_table_name, split_options, is_empty_range);
   
-  call _split_is_empty_table(is_empty_table);
+  -- call _split_is_empty_table(is_empty_table);
 
-  if is_empty_table then
+  if is_empty_range then
     leave main_body;
   end if;
   
@@ -57,12 +58,13 @@ main_body: begin
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_table_schema', '@query_script_split_table_schema', FALSE);
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_table_name', '@query_script_split_table_name', FALSE);
   
+  set split_range_size := least(10000, greatest(10, floor(ifnull(get_option(split_options, 'size'), 1000))));
   _split_step_loop: loop
     call _split_is_range_start_overflow(is_overflow);
     if is_overflow and not @_split_is_first_step_flag then
       leave _split_step_loop;
     end if;
-    call _split_assign_range_end_variables(split_table_schema, split_table_name);
+    call _split_assign_range_end_variables(split_table_schema, split_table_name, split_range_size);
     -- We now have a range start+end
     -- start split step operation
     call _split_get_step_comparison_clause(comparison_clause);

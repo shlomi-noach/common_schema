@@ -5,7 +5,11 @@
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS _split_assign_range_end_variables $$
-CREATE PROCEDURE _split_assign_range_end_variables(split_table_schema varchar(128), split_table_name varchar(128)) 
+CREATE PROCEDURE _split_assign_range_end_variables(
+  split_table_schema varchar(128),
+  split_table_name varchar(128),
+  split_range_size int unsigned
+  ) 
 READS SQL DATA
 SQL SECURITY INVOKER
 COMMENT ''
@@ -32,7 +36,7 @@ begin
       ' where ', as_of_range_start_comparison_clause,
       ' and ', limit_by_max_comparison_clause,
       ' order by ', columns_order_ascending_clause,
-      ' limit 1000 ',
+      ' limit ', split_range_size,
     ') sel_split_range ',
     ' order by ', columns_order_descending_clause,
     ' limit 1 ',
