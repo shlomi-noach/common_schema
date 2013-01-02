@@ -5,10 +5,21 @@
 		</classpath>
 	</taskdef>
 
-	<property name="mysql.user" value="root" />
-	<property name="mysql.password" value="" />
-	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
+		<property name="mysql.user" value="root" />
+		<property name="mysql.password" value="" />
+		<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
+	<!--
 
+	<property name="mysql.user" value="root" />
+	<property name="mysql.password" value="msandbox" />
+	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
+	
+	
+	<property name="mysql.user" value="root" />
+	<property name="mysql.password" value="msandbox" />
+	<property name="mysql.socket" value="/tmp/mysql_sandbox14701.sock" />
+	-->
+		
 	<property name="mysql.database" value="common_schema" />
 
 	<property name="build_data.dir" value="build_data" />
@@ -97,6 +108,7 @@
 			
 			<fileset dir="views/schema_analysis/" includes="*.sql" />
 			<fileset dir="views/data_dimension/" includes="*.sql" />
+			<fileset dir="views/i_s/" includes="*.sql" />
 			<fileset dir="views/meta/" includes="*.sql" />
 			<fileset dir="views/monitoring/" includes="*.sql" />
 			<fileset dir="views/process/" includes="*.sql" />
