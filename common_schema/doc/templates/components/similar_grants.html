@@ -1,0 +1,76 @@
+<h3>NAME</h3>
+similar_grants: listing GRANTEEs sharing the same set of privileges (i.e. share same role)
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p>
+	<i>similar_grants</i> analyzes the GRANTEEs on a server, and groups them by their set
+	of privileges. GRANTEEs with the <i>exact</i> same set of privileges will reside in same group.
+	Such groups are commonly referred to as "roles" (though MySQL does not provide with roles per se). 
+</p>
+
+<p>
+	The view merely presents the list of GRANTEEs within each role; for complete listing of
+	the privileges given to such GRANTEEs, join with 
+	<a href="sql_grants.html">sql_grants</a> or <a href="sql_show_grants.html">sql_show_grants</a>. 	
+</p>
+
+<p>
+	Passwords are not taken into account when comparing GRANTEEs. It is possible that GRANTEEs
+	sharing the exact same set of privileges will have different passwords.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC similar_grants;
++------------------+-------------+------+-----+---------+-------+
+| Field            | Type        | Null | Key | Default | Extra |
++------------------+-------------+------+-----+---------+-------+
+| sample_grantee   | varchar(81) | YES  |     | NULL    |       |
+| count_grantees   | bigint(21)  | NO   |     | 0       |       |
+| similar_grantees | longtext    | YES  |     | NULL    |       |
++------------------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>sample_grantee</strong>: a single, representative GRANTEE, in a group of GRANTEEs sharing same set of privileges.</li>
+	<li><strong>count_grantees</strong>: number of GRANTEEs in group.</li>
+	<li><strong>similar_grantees</strong>: 
+		list of GRANTEEs sharing exact same set of privileges. This includes the <strong>sample_grantee</strong>.
+	</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>List all similar grants on a server:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM similar_grants;
++-------------------------------+----------------+-------------------------------------------------------+
+| sample_grantee                | count_grantees | similar_grantees                                      |
++-------------------------------+----------------+-------------------------------------------------------+
+| 'root'@'127.0.0.1'            |              3 | 'root'@'127.0.0.1','root'@'myhost','root'@'localhost' |
+| 'repl'@'10.%'                 |              2 | 'repl'@'10.%','replication'@'10.0.0.%'                |
+| 'apps'@'%'                    |              1 | 'apps'@'%'                                            |
+| 'gromit'@'localhost'          |              1 | 'gromit'@'localhost'                                  |
+| 'monitoring_user'@'localhost' |              1 | 'monitoring_user'@'localhost'                         |
++-------------------------------+----------------+-------------------------------------------------------+
+</pre></blockquote>
+<p>
+	In the above, three <strong>root</strong> accounts have identical grants (set of privileges); 
+	two accounts, <strong>'repl'@'10.%'</strong> and <strong>'replication'@'10.0.0.%'</strong>, 
+	share identical	grants; three other accounts have a distinct set privileges. 
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="duplicate_grantee.html">duplicate_grantee()</a>,
+<a href="sql_grants.html">sql_grants</a>,
+<a href="sql_show_grants.html">sql_show_grants</a>
+<h3>AUTHOR</h3>
+Shlomi Noach

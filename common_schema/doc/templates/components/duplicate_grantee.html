@@ -1,0 +1,102 @@
+<h3>NAME</h3>
+duplicate_grantee(): Create new account (grantee), identical to given account
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Given an existing GRANTEE anda new one, duplicate existing GRANTEE, along with all
+	applied set of privileges and password, to new account, creating the new account if necessary.
+</p>
+<p>
+	This is essentially a Copy+Paste of an account.
+</p>
+<p>
+	The new account is generated via <strong>GRANT</strong> commands. For clarification, there
+	is no direct tampering with the <strong>mysql</strong> system tables (no DML used).
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>duplicate_grantee(
+    IN existing_grantee TINYTEXT CHARSET utf8,
+    IN new_grantee TINYTEXT CHARSET utf8
+  ) 
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li>
+    	<strong>existing_grantee</strong>: an existing account/GRANTEE name.
+    	An error is thrown when no such account is found.
+	</li>
+    <li>
+    	<strong>new_grantee</strong>: name for new account. 
+    	<br/>The new account is created, if not existing.
+    	<br/>In case this account already exists, it is <i>added</i> the set of privileges
+    	applying to <strong>existing_grantee</strong>, and its password is updated. 
+	</li>
+  </ul>
+  Both <strong>existing_grantee</strong> and <strong>new_grantee</strong> can be provided in
+  <i>relaxed</i> format: <strong>'web_user@10.0.0.%'</strong> is a valid input, and is
+  implicitly translated to "<strong>'web_user'@'10.0.0.%'</strong>", which is the fully
+  qualified account name.
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Duplicate an account, creating a new GRANTEE. Verify operation's result:
+	<blockquote><pre>mysql&gt; SELECT * FROM similar_grants WHERE sample_grantee like '%apps%';
++----------------+----------------+------------------+
+| sample_grantee | count_grantees | similar_grantees |
++----------------+----------------+------------------+
+| 'apps'@'%'     |              1 | 'apps'@'%'       |
++----------------+----------------+------------------+
+
+mysql&gt; call duplicate_grantee('apps@%', 'apps@myhost');
+Query OK, 0 rows affected (0.16 sec)
+
+mysql&gt; SELECT * FROM similar_grants WHERE sample_grantee like '%apps%';
++----------------+----------------+----------------------------+
+| sample_grantee | count_grantees | similar_grantees           |
++----------------+----------------+----------------------------+
+| 'apps'@'%'     |              2 | 'apps'@'%','apps'@'myhost' |
++----------------+----------------+----------------------------+
+
+mysql&gt; SHOW GRANTS FOR 'apps'@'%';
++---------------------------------------------------------------------------------------------------------------------+
+| Grants for apps@%                                                                                                   |
++---------------------------------------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO 'apps'@'%' IDENTIFIED BY PASSWORD '*6BB4837EB74329105EE4568DDA7DC67ED2CA2AD9'                 |
+| GRANT SELECT, INSERT, UPDATE, DELETE ON `test`.* TO 'apps'@'%'                                                      |
+| GRANT SELECT (title, description, film_id), UPDATE (description) ON `sakila`.`film` TO 'apps'@'%' WITH GRANT OPTION |
++---------------------------------------------------------------------------------------------------------------------+
+3 rows in set (0.00 sec)
+
+mysql&gt; SHOW GRANTS FOR 'apps'@'myhost';
++--------------------------------------------------------------------------------------------------------------------------+
+| Grants for apps@myhost                                                                                                   |
++--------------------------------------------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO 'apps'@'myhost' IDENTIFIED BY PASSWORD '*6BB4837EB74329105EE4568DDA7DC67ED2CA2AD9'                 |
+| GRANT SELECT, INSERT, UPDATE, DELETE ON `test`.* TO 'apps'@'myhost'                                                      |
+| GRANT SELECT (title, description, film_id), UPDATE (description) ON `sakila`.`film` TO 'apps'@'myhost' WITH GRANT OPTION |
++--------------------------------------------------------------------------------------------------------------------------+
+</pre></blockquote>
+	</p>
+
+
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="match_grantee.html">match_grantee()</a>,
+<a href="mysql_grantee.html">mysql_grantee()</a>,
+<a href="similar_grants.html">similar_grants</a>,
+<a href="sql_accounts.html">sql_accounts</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
