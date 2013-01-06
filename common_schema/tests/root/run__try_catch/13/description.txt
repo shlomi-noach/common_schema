@@ -1,0 +1,1 @@
+Test "start slave; stop slave", catch exception
