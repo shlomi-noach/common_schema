@@ -1,0 +1,1 @@
+columns, no enforcement on num columns
