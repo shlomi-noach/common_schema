@@ -1,5 +1,6 @@
 --
---
+-- A statement has been identified as a SQL or Script statement.
+-- Resolve which, and consume (possibly execute) it.
 --
 
 delimiter //

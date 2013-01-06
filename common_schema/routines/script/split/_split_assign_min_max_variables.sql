@@ -24,6 +24,7 @@ begin
   declare min_variables_names text default _split_get_min_variables_names();
   declare columns_order_descending_clause text default _split_get_columns_order_descending_clause();
   declare max_variables_names text default _split_get_max_variables_names();
+  declare columns_count tinyint unsigned default _split_get_columns_count();
   
   set is_empty_range := false;
 
@@ -46,7 +47,7 @@ begin
   call exec_single(query);
   
   if get_option(split_options, 'start') is not null then
-    if _split_get_columns_count() = 1 then
+    if columns_count = 1 then
       set query := CONCAT(
         'set ', min_variables_names, ' := GREATEST(', min_variables_names, ', ', get_option(split_options, 'start'), ')'
       );
@@ -57,7 +58,7 @@ begin
     end if;
   end if;
   if get_option(split_options, 'stop') is not null then
-    if _split_get_columns_count() = 1 then
+    if columns_count = 1 then
       set query := CONCAT(
         'set ', max_variables_names, ' := LEAST(', max_variables_names, ', ', get_option(split_options, 'stop'), ')'
       );
@@ -103,6 +104,31 @@ begin
   if @_split_is_empty_range_result then
     set is_empty_range := true;
   end if;
+
+  
+  set @_query_script_split_min := TRIM(TRAILING ',' FROM CONCAT_WS(',',
+  	IF(columns_count >= 1, QUOTE((SELECT @_split_column_variable_min_1)), ''),
+  	IF(columns_count >= 2, QUOTE((SELECT @_split_column_variable_min_2)), ''),
+  	IF(columns_count >= 3, QUOTE((SELECT @_split_column_variable_min_3)), ''),
+  	IF(columns_count >= 4, QUOTE((SELECT @_split_column_variable_min_4)), ''),
+  	IF(columns_count >= 5, QUOTE((SELECT @_split_column_variable_min_5)), ''),
+  	IF(columns_count >= 6, QUOTE((SELECT @_split_column_variable_min_6)), ''),
+  	IF(columns_count >= 7, QUOTE((SELECT @_split_column_variable_min_7)), ''),
+  	IF(columns_count >= 8, QUOTE((SELECT @_split_column_variable_min_8)), ''),
+  	IF(columns_count >= 9, QUOTE((SELECT @_split_column_variable_min_9)), '')
+  ));
+  set @_query_script_split_max := TRIM(TRAILING ',' FROM CONCAT_WS(',',
+  	IF(columns_count >= 1, QUOTE((SELECT @_split_column_variable_max_1)), ''),
+  	IF(columns_count >= 2, QUOTE((SELECT @_split_column_variable_max_2)), ''),
+  	IF(columns_count >= 3, QUOTE((SELECT @_split_column_variable_max_3)), ''),
+  	IF(columns_count >= 4, QUOTE((SELECT @_split_column_variable_max_4)), ''),
+  	IF(columns_count >= 5, QUOTE((SELECT @_split_column_variable_max_5)), ''),
+  	IF(columns_count >= 6, QUOTE((SELECT @_split_column_variable_max_6)), ''),
+  	IF(columns_count >= 7, QUOTE((SELECT @_split_column_variable_max_7)), ''),
+  	IF(columns_count >= 8, QUOTE((SELECT @_split_column_variable_max_8)), ''),
+  	IF(columns_count >= 9, QUOTE((SELECT @_split_column_variable_max_9)), '')
+  ));
+  
 end $$
 
 DELIMITER ;
