@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS _script_statements;
 
 CREATE TABLE _script_statements (
   statement varchar(16) CHARACTER SET ascii NOT NULL,
-  statement_type enum('sql', 'script', 'unknown') DEFAULT NULL,
+  statement_type enum('sql', 'script', 'script,sql', 'unknown') DEFAULT NULL,
   PRIMARY KEY (statement)
 ) ENGINE=InnoDB ;
 
@@ -58,7 +58,11 @@ INSERT INTO _script_statements VALUES ('throw', 'script');
 INSERT INTO _script_statements VALUES ('var', 'script');
 INSERT INTO _script_statements VALUES ('input', 'script');
 INSERT INTO _script_statements VALUES ('report', 'script');
-INSERT INTO _script_statements VALUES ('start', 'script');
 INSERT INTO _script_statements VALUES ('begin', 'script');
 INSERT INTO _script_statements VALUES ('commit', 'script');
 INSERT INTO _script_statements VALUES ('rollback', 'script');
+
+--
+-- Both SQL and Script statements (ambiguous resolve)
+--
+INSERT INTO _script_statements VALUES ('start', 'script,sql');
