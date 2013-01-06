@@ -45,6 +45,8 @@ VIEW _sql_grants_components AS
       '*.*' AS priv_level,
       'user' AS priv_level_name,
       '' AS object_type,
+      NULL AS object_schema,
+      NULL AS object_name,
       'USAGE' AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       1 AS result_order
@@ -60,6 +62,8 @@ VIEW _sql_grants_components AS
       '*.*' AS priv_level,
       'user' AS priv_level_name,
       '' AS object_type,
+      NULL AS object_schema,
+      NULL AS object_name,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       2 AS result_order
@@ -77,6 +81,8 @@ VIEW _sql_grants_components AS
       CONCAT('`', TABLE_SCHEMA, '`.*') AS priv_level,
       'schema' AS priv_level_name,
       '' AS object_type,
+      NULL AS object_schema,
+      TABLE_SCHEMA AS object_name,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       3 AS result_order
@@ -92,6 +98,8 @@ VIEW _sql_grants_components AS
       CONCAT('`', TABLE_SCHEMA, '`.`', TABLE_NAME, '`') AS priv_level,
       'table' AS priv_level_name,
       'table' AS object_type,
+      TABLE_SCHEMA AS object_schema,
+      TABLE_NAME AS object_name,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       4 AS result_order
@@ -107,6 +115,8 @@ VIEW _sql_grants_components AS
       CONCAT('`', TABLE_SCHEMA, '`.`', TABLE_NAME, '`') AS priv_level,
       'column' AS priv_level_name,
       '' AS object_type,
+      TABLE_SCHEMA AS object_schema,
+      TABLE_NAME AS object_name,
       GROUP_CONCAT(column_privileges ORDER BY column_privileges SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       5 AS result_order
@@ -122,6 +132,8 @@ VIEW _sql_grants_components AS
       CONCAT('`', ROUTINE_SCHEMA, '`.`', ROUTINE_NAME, '`') AS priv_level,
       'routine' AS priv_level_name,
       ROUTINE_TYPE AS object_type,
+      ROUTINE_SCHEMA AS object_schema,
+      ROUTINE_NAME AS object_name,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
       MAX(IS_GRANTABLE) AS IS_GRANTABLE, 
       6 AS result_order
@@ -145,6 +157,8 @@ VIEW sql_grants AS
     user.host,
     priv_level,
     priv_level_name,
+    object_schema,
+    object_name,
     current_privileges,
     IS_GRANTABLE,
     CONCAT(
@@ -198,3 +212,52 @@ VIEW sql_show_grants AS
   GROUP BY
     GRANTEE, user, host
 ;
+
+-- 
+-- _bare_grantee_grants: just the grants per grantee, exluding the grantee name and password from statements  
+-- 
+CREATE OR REPLACE
+ALGORITHM = TEMPTABLE
+SQL SECURITY INVOKER
+VIEW _bare_grantee_grants AS
+  SELECT
+    GRANTEE,
+    user,
+    host,
+    GROUP_CONCAT(
+      CONCAT(
+        SUBSTRING_INDEX(
+          REPLACE(sql_grant, GRANTEE, ''), 
+          'IDENTIFIED BY PASSWORD', 
+          1), 
+        ';')
+      ORDER BY sql_grant
+      SEPARATOR '\n'
+      ) AS sql_grants
+  FROM
+    sql_grants
+  GROUP BY
+    GRANTEE, user, host
+;
+
+
+-- 
+-- _bare_grantee_grants: just the grants per grantee, exluding USAGE (which is shared by all), and exluding the grantee name from statement  
+-- 
+CREATE OR REPLACE
+ALGORITHM = TEMPTABLE
+SQL SECURITY INVOKER
+VIEW similar_grants AS
+  SELECT
+    MIN(GRANTEE) AS sample_grantee,
+    COUNT(GRANTEE) AS count_grantees,
+    GROUP_CONCAT(GRANTEE ORDER BY GRANTEE) AS similar_grantees
+  FROM
+    _bare_grantee_grants
+  GROUP BY
+    sql_grants
+  ORDER BY
+    COUNT(*) DESC
+;
+
+
