@@ -48,6 +48,7 @@ main_body: begin
   set @_query_script_split_total_rowcount := 0;
   set @query_script_split_start_time := SYSDATE();
   
+  call _declare_local_variable(id_from, id_from, id_to, depth, '$split_columns', '@query_script_split_columns', FALSE);
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_min', '@query_script_split_min', FALSE);
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_max', '@query_script_split_max', FALSE);
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_clause', '@query_script_split_comparison_clause', FALSE);
@@ -90,6 +91,7 @@ main_body: begin
       set @query_script_split_table_name := split_table_name;
       set @query_script_split_min := @_query_script_split_min;
       set @query_script_split_max := @_query_script_split_max;
+      set @query_script_split_columns := @_query_script_split_columns;
       call _split_set_step_clause_and_ranges_local_variables(comparison_clause);
     
       call _consume_statement(id_from, id_to, expect_single, consumed_to_id, depth, should_execute_statement);

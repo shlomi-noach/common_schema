@@ -48,6 +48,12 @@ begin
       numbers
     where 
       n between 1 and split_num_column;
+  select
+    group_concat(mysql_qualify(column_name) order by column_order)
+  from
+    _split_column_names_table
+  into
+    @_query_script_split_columns;
 end $$
 
 DELIMITER ;
