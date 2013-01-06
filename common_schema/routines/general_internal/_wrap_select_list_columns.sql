@@ -53,7 +53,7 @@ my_proc: begin
             leave my_main;
         elseif (v_column_number = 0) and ((v_state, v_token) = ('alpha', 'distinct')) then
             set v_statement = concat(v_statement, 'distinct');
-        elseif v_column_number < p_column_count then
+        elseif (v_column_number < p_column_count) or (p_column_count = 0)  then
             if  v_level = 0 and (
                 (v_state, v_token) in (
                     ('alpha', 'from')
