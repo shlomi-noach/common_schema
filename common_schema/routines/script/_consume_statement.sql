@@ -25,13 +25,11 @@ main_body: begin
     declare statement_level int unsigned;
     declare id_end_statement int unsigned; 
     
-    declare mysql_statement TEXT CHARSET utf8;
     declare statement_delimiter_found tinyint unsigned;
     
     declare expression text charset utf8;
     declare expression_statement text charset utf8;
     declare expression_result tinyint unsigned;
-    declare expanded_variables_found tinyint unsigned;
     
     declare peek_match tinyint unsigned;
     declare matched_token text charset utf8;
@@ -98,22 +96,10 @@ main_body: begin
 	        call _consume_statement(id_from+1, id_end_statement-1, FALSE, @_common_schema_dummy, depth+1, should_execute_statement);
 	        set consumed_to_id := id_end_statement;
           end;
-        when first_state = 'alpha' AND first_token in (SELECT statement FROM _script_statements WHERE statement_type = 'sql') then begin
+        when first_state = 'alpha' AND (SELECT COUNT(*) = 1 FROM _script_statements WHERE _script_statements.statement = first_token) then begin
 	        -- This is a SQL statement
 	        call _validate_statement_end(id_from, id_to, id_end_statement, statement_delimiter_found);
-            if should_execute_statement then
-              -- Construct the original statement, send it for execution.
-              call _expand_statement_variables(id_from, id_end_statement, mysql_statement, expanded_variables_found, should_execute_statement);
-
-              call exec_single(mysql_statement);
-              set @query_script_rowcount := @common_schema_rowcount;
-              set @query_script_found_rows := @common_schema_found_rows;
-            end if;
-  	        set consumed_to_id := id_end_statement;
-          end;
-        when first_state = 'alpha' AND first_token in (SELECT statement FROM _script_statements WHERE statement_type = 'script') then begin
-	        call _validate_statement_end(id_from, id_to, id_end_statement, statement_delimiter_found);	        
-	        call _consume_script_statement(id_from, id_to, id_from + 1, id_end_statement - IF(statement_delimiter_found, 1, 0), depth, first_token, should_execute_statement);
+	        call _resolve_and_consume_sql_or_script_statement(id_from, id_to, id_from + 1, id_end_statement - IF(statement_delimiter_found, 1, 0), depth, first_token, should_execute_statement);
   	        set consumed_to_id := id_end_statement;
           end;
         when first_state = 'alpha' AND first_token = 'while' then begin
