@@ -39,5 +39,5 @@ create table test_split_complex_unique(
 ) engine=innodb;
 
 insert into test_split_complex_unique
-  select id, CONCAT('name_', id), TIMESTAMP('2000-01-01') + interval 1 second, CONCAT('textval_', id)
+  select id, CONCAT('name_', id), TIMESTAMP('2000-01-01') + interval id second, CONCAT('textval_', id)
   from test_split;
