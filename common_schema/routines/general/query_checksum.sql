@@ -6,7 +6,7 @@ DELIMITER $$
 
 DROP PROCEDURE IF EXISTS query_checksum $$
 CREATE PROCEDURE query_checksum(in query TEXT CHARSET utf8) 
-MODIFIES SQL DATA
+READS SQL DATA
 SQL SECURITY INVOKER
 COMMENT 'Checksum resultset of given query (max 9 columns)'
 
@@ -15,6 +15,7 @@ begin
   declare sql_query_num_columns TINYINT UNSIGNED DEFAULT 9;
   declare result_checksum CHAR(40) CHARSET ascii DEFAULT '';
   
+  set @query_checksum_result := NULL;
   if not _is_select_query(query) then
     call throw('query_checksum input must be SELECT query');
   end if;
@@ -56,7 +57,7 @@ begin
     
   DROP TEMPORARY TABLE IF EXISTS _tmp_query_checksum;
   
-  SELECT result_checksum AS `checksum`;
+  SELECT (@query_checksum_result := result_checksum) AS `checksum`;
 end $$
 
 DELIMITER ;

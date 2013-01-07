@@ -1,0 +1,86 @@
+<h3>NAME</h3>
+query_checksum(): checksum the result set of a query
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Given a query, this procedure produces a deterministic checksum on the query's result set.
+</p>
+<p>
+	The query is subject to the following limitations:
+	<ul>
+		<li>It must be a <strong>SELECT</strong></li>
+		<li>It is limited to <strong>9</strong> columns</li>
+		<li>Columns must be explicitly indicated; thus, the "star" form (e.g. <strong>SELECT * FROM ...</strong>) is not allowed</li>
+		<li>Columns are limited to <strong>64K</strong> characters (values are translated as text)</li>
+	</ul>
+	Otherwise the query may produce any type of columns, use expressions, functions, etc. Resulting values may be <strong>NULL</strong>.
+</p>
+<p>
+	The routine produces a checksum that is calculated via repetitive usage of the <strong>MD5</strong> algorithm. While the 
+	operation is deterministic, it uses some internal heuristics (such as converting <strong>NULL</strong>s to <strong>'\0'</strong>
+	so as to be able to process the <strong>MD5</strong> calculation). Knowing the internal heuristics it is possible to intentionally produce
+	two different results sets which lead to same resulting checksum. The incidental appearance of such queries, though, is unlikely. 
+	Moral is that this routine is useful in checking for data integrity in terms of possible errors, and is not suitable as a security
+	threat elimination.
+</p>
+<p>
+	The resulting checksum is also written to the <strong>@query_checksum_result</strong> session variable.
+</p>
+
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>query_checksum(in query TEXT CHARSET utf8) 
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>query</strong>: query to execute; checksum run on result set
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Checksum three queries. The first two return the exact same result:</p>
+<blockquote><pre>mysql&gt; call query_checksum('select distinct n from (select cast(n/10 as unsigned) as n from numbers) s1 order by n');
++----------------------------------+
+| checksum                         |
++----------------------------------+
+| 314c86787aab14525759b29f81ac9664 |
++----------------------------------+
+
+mysql&gt; call query_checksum('select n from (select cast(n/10 as unsigned) as n from numbers) s1 group by n order by n');
++----------------------------------+
+| checksum                         |
++----------------------------------+
+| 314c86787aab14525759b29f81ac9664 |
++----------------------------------+
+
+mysql&gt; call query_checksum('select distinct n+1 from (select cast(n/10 as unsigned) as n from numbers) s1 order by n');
++----------------------------------+
+| checksum                         |
++----------------------------------+
+| f4ea2e7f04d6edd28e9dd3e9419ec92c |
++----------------------------------+
+
+mysql&gt; select @query_checksum_result;
++----------------------------------+
+| @query_checksum_result           |
++----------------------------------+
+| f4ea2e7f04d6edd28e9dd3e9419ec92c |
++----------------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="crc64.html">crc64()</a>,
+<a href="exec.html">exec()</a>,
+<a href="random_hash.html">random_hash()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
