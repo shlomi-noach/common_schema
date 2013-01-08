@@ -11,11 +11,8 @@ VIEW auto_increment_columns AS
     COLUMN_NAME, 
     DATA_TYPE,
     COLUMN_TYPE,
-    IF(
-      LOCATE('unsigned', COLUMN_TYPE) > 0,
-      1,
-      0
-    ) AS is_signed,
+    (LOCATE('unsigned', COLUMN_TYPE) = 0) AS is_signed,
+    (LOCATE('unsigned', COLUMN_TYPE) > 0) AS is_unsigned,
     (
       CASE DATA_TYPE
         WHEN 'tinyint' THEN 255
