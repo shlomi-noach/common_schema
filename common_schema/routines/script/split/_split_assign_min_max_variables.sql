@@ -49,7 +49,7 @@ begin
   if get_option(split_options, 'start') is not null then
     if columns_count = 1 then
       set query := CONCAT(
-        'set ', min_variables_names, ' := GREATEST(', min_variables_names, ', ', get_option(split_options, 'start'), ')'
+        'set ', min_variables_names, ' := GREATEST(', min_variables_names, ', ', QUOTE(get_option(split_options, 'start')), ')'
       );
       call exec_single(query);
       set manual_min_max_params_used := true;
@@ -60,7 +60,7 @@ begin
   if get_option(split_options, 'stop') is not null then
     if columns_count = 1 then
       set query := CONCAT(
-        'set ', max_variables_names, ' := LEAST(', max_variables_names, ', ', get_option(split_options, 'stop'), ')'
+        'set ', max_variables_names, ' := LEAST(', max_variables_names, ', ', QUOTE(get_option(split_options, 'stop')), ')'
       );
       call exec_single(query);
       set manual_min_max_params_used := true;
