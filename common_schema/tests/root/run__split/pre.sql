@@ -15,6 +15,13 @@ call common_schema.run('
     insert into test_cs.test_split (id) select null from test_cs.test_split;
   ');
 
+create table test_split_text(
+  id varchar(12) primary key, 
+  nval int unsigned, 
+  textval varchar(32)
+) engine=myisam;
+insert into test_split_text (id, nval, textval) select id, nval, textval from test_split;
+
 drop table if exists test_split_sparse;
 create table test_split_sparse(
   id int auto_increment primary key, 
