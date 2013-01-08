@@ -39,13 +39,15 @@ mysql&gt; DESC common_schema.sql_grants;
 | GRANTEE            | varchar(81)  | NO   |     |         |       |
 | user               | char(16)     | NO   |     |         |       |
 | host               | char(60)     | NO   |     |         |       |
-| priv_level         | varchar(133) | YES  |     | NULL    |       |
-| priv_level_name    | varchar(6)   | NO   |     |         |       |
+| priv_level         | varchar(133) | NO   |     |         |       |
+| priv_level_name    | varchar(7)   | NO   |     |         |       |
+| object_schema      | varchar(64)  | YES  |     | NULL    |       |
+| object_name        | varchar(64)  | YES  |     | NULL    |       |
 | current_privileges | mediumtext   | YES  |     | NULL    |       |
 | IS_GRANTABLE       | varchar(3)   | YES  |     | NULL    |       |
 | sql_grant          | longtext     | YES  |     | NULL    |       |
 | sql_revoke         | longtext     | YES  |     | NULL    |       |
-| sql_drop_user      | varchar(91)  | YES  |     | NULL    |       |
+| sql_drop_user      | varchar(91)  | NO   |     |         |       |
 +--------------------+--------------+------+-----+---------+-------+
 </pre></blockquote>
 
@@ -58,6 +60,8 @@ mysql&gt; DESC common_schema.sql_grants;
 	<li><strong>host</strong>: account host part</li>
 	<li><strong>priv_level</strong>: the domain on which the privileges are set (e.g. <strong>*.*</strong>, <strong>sakila.*</strong>)</li>
 	<li><strong>priv_level_name</strong>: description of priv_level: <strong>'user'</strong>, <strong>'schema'</strong>, <strong>'table'</strong>, <strong>'column'</strong>, <strong>'routine'</strong></li>
+	<li><strong>object_schema</strong>: name of schema in which object lies. Applies for table, column, routine; otherwise NULL</li>
+	<li><strong>object_name</strong>: name of object for which grants apply. Applies for schema, table, column, routine; otherwise NULL</li>
 	<li><strong>current_privileges</strong>: comma delimited list of privileges assigned to account on current privilege level</li>
 	<li><strong>IS_GRANTABLE</strong>: does current account have the GRANT privileges on this domain? <strong>'Yes'</strong> or <strong>'NO'</strong></li>
 	<li><strong>sql_grant</strong>: 
@@ -85,10 +89,12 @@ mysql&gt; DESC common_schema.sql_grants;
               host: %
         priv_level: *.*
    priv_level_name: user
+     object_schema: NULL
+       object_name: NULL
 current_privileges: USAGE
       IS_GRANTABLE: NO
          sql_grant: GRANT USAGE ON *.* TO 'apps'@'%' IDENTIFIED BY PASSWORD ''
-        sql_revoke:
+        sql_revoke: 
      sql_drop_user: DROP USER 'apps'@'%'
 *************************** 2. row ***************************
            GRANTEE: 'apps'@'%'
@@ -96,6 +102,8 @@ current_privileges: USAGE
               host: %
         priv_level: `test`.*
    priv_level_name: schema
+     object_schema: NULL
+       object_name: test
 current_privileges: DELETE, INSERT, SELECT, UPDATE
       IS_GRANTABLE: NO
          sql_grant: GRANT DELETE, INSERT, SELECT, UPDATE ON `test`.* TO 'apps'@'%'
@@ -107,6 +115,8 @@ current_privileges: DELETE, INSERT, SELECT, UPDATE
               host: %
         priv_level: `sakila`.`film`
    priv_level_name: column
+     object_schema: sakila
+       object_name: film
 current_privileges: SELECT (description, film_id, title), UPDATE (description)
       IS_GRANTABLE: YES
          sql_grant: GRANT SELECT (description, film_id, title), UPDATE (description) ON `sakila`.`film` TO 'apps'@'%' WITH GRANT OPTION
@@ -141,6 +151,7 @@ MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
 <a href="routine_privileges.html">routine_privileges</a>,
+<a href="similar_grants.html">similar_grants</a>,
 <a href="sql_show_grants.html">sql_show_grants</a>
 <h3>AUTHOR</h3>
 Shlomi Noach
