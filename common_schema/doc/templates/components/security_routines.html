@@ -19,6 +19,13 @@ Security routines: stored functions managing security and privileges information
 </pre></blockquote>
 
 	<p>
+		Duplicate (Copy+Paste) an existing account into a new one:
+	</p>
+	<blockquote><pre>mysql&gt; CALL duplicate_grantee('apps@localhost', 'apps@10.0.0.%');
+</pre></blockquote>
+
+
+	<p>
 		Audit server's security:
 	</p>
 	<blockquote><pre>mysql&gt; CALL security_audit();
