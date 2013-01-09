@@ -1,0 +1,1 @@
+SELECT City.id AS col1, City . name AS col2, City . Population AS col3 from world.City

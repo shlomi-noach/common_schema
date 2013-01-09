@@ -83,6 +83,7 @@ my_proc: begin
                             ,   '||', '&&', '!' 
                             ,   '<', '<=', '=>', '>', '<=>', '=', '!=', ':='
                             ,   '|', '&', '~', '^', '<<', '>>'
+                            ,   '.'
                             ) and not (   -- what also counts as a keyword is a character set specifier. consider moving this into the tokenizer.
                                     v_handle = '_bin' 
                                 or  v_handle LIKE '_%'
