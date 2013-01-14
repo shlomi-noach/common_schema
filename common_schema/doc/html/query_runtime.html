@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> <strong>1.2</strong> documentation
+			<h1>common_schema</h1> <strong>1.3</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -95,6 +95,16 @@ Shlomi Noach
 				<br/>
 			</div>
 			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
 				<div id="menu">
 					<ul>
 						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
@@ -115,13 +125,13 @@ Shlomi Noach
 					<h3>ROUTINES</h3>
 					<ul>
 						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
-						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
-						<li><a title="Security" href="security_routines.html">Security</a></li>
 					</ul>
 					<h3>VIEWS</h3>
 					<ul>

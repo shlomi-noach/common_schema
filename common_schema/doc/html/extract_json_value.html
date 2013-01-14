@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>security_views: common_schema documentation</title>
-	<meta name="description" content="security_views: common_schema" />
-	<meta name="keywords" content="security_views: common_schema" />
+	<title>extract_json_value: common_schema documentation</title>
+	<meta name="description" content="extract_json_value: common_schema" />
+	<meta name="keywords" content="extract_json_value: common_schema" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
@@ -16,40 +16,91 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="security_views.html">security_views</a></h2>	
-<h3>SYNOPSIS</h3>
-
-<p>
-Security views: views providing information on grants and privileges.
-<ul>
-	<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a>: INFORMATION_SCHEMA-like view on routines privileges</li>
-	<li><a title="similar_grants" href="similar_grants.html">similar_grants</a>: similar_grants: Listing GRANTEEs sharing the same set of privileges (i.e. share same role)</li>
-	<li><a title="sql_accounts" href="sql_accounts.html">sql_accounts</a>: Generate SQL statements to block/release accounts. Provide info on accounts</li>
-	<li><a title="sql_grants" href="sql_grants.html">sql_grants</a>: Generate SQL GRANT/REVOKE statements for existing accounts; provide with GRANT metadata</li>
-	<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a>: Generate complete accounts SHOW GRANTS FOR -like output</li>
-</ul>
-</p>
+				<h2><a href="extract_json_value.html">extract_json_value</a></h2>	
+<h3>NAME</h3>
+extract_json_value(): Extract value from JSON notation via XPath
+<h3>TYPE</h3>
+Function
 
 <h3>DESCRIPTION</h3>
 <p>
-There are several inconsistencies and missing pieces with regard to security related information in MySQL. 
-These views compensate for: missing INFORMATION_SCHEMA routines privileges; missing SHOW GRANTS for all accounts; SQL generation for GRANT and REVOKE statements.
+	<i>extract_json_value()</i> accepts text in <a href="http://www.json.org/">JSON</a> format,
+	and an <a href="http://www.w3.org/TR/xpath/">XPath</a> expression, and extracts
+	data from JSON matching path.
 </p>
 <p>
-Closely related are <a title="Security routines" href="security_routines.html">Security routines</a> and <a title="processlist_grantees" href="processlist_grantees.html">processlist_grantees</a>.
+	While XPath was originally developed for XML, its usage in other fields became quickly widespread,
+	including searching through object oriented structures.
+	XPath easily applies to JSON.
+</p>
+<p>
+	This function internally relies on <a href="json_to_xml.html">json_to_xml()</a>:
+	it first converts the JSON data to XML, then uses 
+	<a href="http://dev.mysql.com/doc/refman/5.1/en/xml-functions.html#function_extractvalue">ExtractValue</a>
+	to apply XPath.
+</p>
+
+<p>
+	NOTE: this function is CPU intensive. This solution should ideally be implemented through
+	built-in functions, not stored routines.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>extract_json_value(
+    json_text TEXT CHARSET utf8
+    xpath TEXT CHARSET utf8
+) RETURNS TEXT CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>json_text</strong>: a valid JSON formatted text.</li>
+    <li><strong>xpath</strong>: a valid XPath notation.</li>
+  </ul>
 </p>
 
 <h3>EXAMPLES</h3>
-<p>Show grants for users called 'world_user':</p>
-<blockquote><pre>mysql&gt; SELECT sql_grants FROM common_schema.sql_show_grants WHERE user='world_user' \G
-*************************** 1. row ***************************
-sql_grants: GRANT USAGE ON *.* TO 'world_user'@'localhost' IDENTIFIED BY PASSWORD '';
-GRANT ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE ON `world`.* TO 'world_user'@'localhost';
+<p>Extract JSON data:</p>
+<blockquote><pre>mysql&gt; SET @json := '
+{
+  "menu": {
+    "id": "file",
+    "value": "File",
+    "popup": {
+      "menuitem": [
+        {"value": "New", "onclick": "CreateNewDoc()"},
+        {"value": "Open", "onclick": "OpenDoc()"},
+        {"value": "Close", "onclick": "CloseDoc()"}
+      ]
+    }
+  }
+}
+';
+
+mysql&gt; SELECT extract_json_value(@json, '//id') AS result;
++--------+
+| result |
++--------+
+| file   |
++--------+
+
+mysql&gt; SELECT extract_json_value(@json, 'count(/menu/popup/menuitem)') AS count_items;
++-------------+
+| count_items |
++-------------+
+| 3           |
++-------------+
 </pre></blockquote>
 
-<p>Block all accounts for user <strong>'gromit'</strong>:</p>
-<blockquote><pre>mysql&gt; CALL eval("SELECT sql_block_account FROM sql_accounts WHERE USER = 'gromit'");
-</pre></blockquote>
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="json_to_xml.html">json_to_xml()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
 				<br/>
 			</div>
 			<div id="sidebarwrapper">

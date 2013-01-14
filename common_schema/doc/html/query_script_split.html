@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> <strong>1.2</strong> documentation
+			<h1>common_schema</h1> <strong>1.3</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -24,16 +24,20 @@ QueryScript Flow Control: <strong>split</strong> statement
 
 <h3>SYNOPSIS</h3>
 <p>
-Single table operations, autodetect mode:
+Single table operations, <a href="#autodetect">autodetect</a> mode:
 <blockquote><pre>split (<i>statement operating on single table</i>)
   statement;
 </pre></blockquote>
-Multiple tables operations; explicit declaration of <i>splitting table</i>:
+Multiple tables operations; <a href="#explicit">explicit declaration</a> of <i>splitting table</i>:
 <blockquote><pre>split (schema_name.table_name: <i>statement operating on multiple tables</i>)
   statement;
 </pre></blockquote>
-Statementless split, manual mode:
+Statementless split, <a href="#statementless">manual</a> mode:
 <blockquote><pre>split (schema_name.table_name)
+  statement;
+</pre></blockquote>
+Provide <a href="#parameters">parameters</a> to split operation:
+<blockquote><pre>split ({foo:bar}: <i>statement</i>)
   statement;
 </pre></blockquote>
 Discussion on the various flavors of <i>split</i> <a href="#flavors">follows</a>.
@@ -93,7 +97,12 @@ As with looping constructs, it respects, among others, the following statements:
 </p>
 
 <p>
-At current, <i>split</i> breaks into chunks of <strong>1,000</strong> (hard coded) rows each.
+	<i>split</i> defaults to chunks of <strong>1,000</strong> rows each. This can be configured via the size <a href="#parameters">parameter</a>.
+</p>
+
+<p>
+	Use of <a href="query_script_variables.html#expansion">expanded variables</a> is allowed within the split statement, as well as within
+	the table definition and the query params. See EXAMPLES for more on this. 
 </p>
 
 <a name="magic_variables"></a>
@@ -101,17 +110,53 @@ At current, <i>split</i> breaks into chunks of <strong>1,000</strong> (hard code
 <p>
 <i>split</i> introduces magic variables, which are available within a <i>split</i> iteration statement. These are:
 <ul>
-	<li><strong>$split_step</strong>: iteration counter. 
+	<li>
+		<strong>$split_columns</strong>: comma separated list of columns by which the <i>split</i> 
+		algorithm splits the table.
+	</li>
+	<li>
+		<strong>$split_min</strong>: minimum values of <strong>$split_columns</strong>. This
+		is the starting point for the split operation.
+	</li>
+	<li>
+		<strong>$split_max</strong>: minimum values of <strong>$split_columns</strong>. This
+		is the ending point for the split operation.
+	</li>
+	<li>
+		<strong>$split_range_start</strong>: per chunk, values of <strong>$split_columns</strong>
+		indicating chunk's lower boundary.
+	</li>
+	<li>
+		<strong>$split_range_end</strong>: per chunk, values of <strong>$split_columns</strong>
+		indicating chunk's upper boundary.
+	</li>
+	<li>
+		<strong>$split_step</strong>: iteration counter. 
 		Value is <strong>1</strong> for <strong>1st iteration</strong>
 		<strong>2</strong> for <strong>2nd iteration</strong>, etc.
 	</li>
 	<li><strong>$split_rowcount</strong>: the number of rows affected by current <i>split</i> step.</li>
-	<li><strong>$split_total_rowcount</strong>: the total number of rows affected so far by the <i>split</i> statement.</li>
-	<li><strong>$split_clause</strong>: the computed filtering clause. See following discussion.</li>
-	<li><strong>$split_total_elapsed_time</strong>: total number of seconds elapsed since <i>split</i> operation started.
-		This includes possible <a href="query_script_throttle.html">throttling</a> or <a href="query_script_sleep.html">sleeping</a> time.</li>
-	<li><strong>$split_table_schema</strong>: schema for <i>splitting table</i>.</li>
-	<li><strong>$split_table_name</strong>: the <i>splitting table</i>, by which <i>split</i> works out the smaller steps.</li>
+	<li>
+		<strong>$split_total_rowcount</strong>: 
+		the total number of rows affected so far by the <i>split</i> statement.
+		<br/>This is an accumulation of <strong>$split_rowcount</strong>
+	</li>
+	<li>
+		<strong>$split_clause</strong>: 
+		the computed filtering clause. See following discussion.
+	</li>
+	<li>
+		<strong>$split_total_elapsed_time</strong>: 
+		total number of seconds elapsed since <i>split</i> operation started.
+		This includes possible <a href="query_script_throttle.html">throttling</a> 
+		or <a href="query_script_sleep.html">sleeping</a> time.
+	</li>
+	<li>
+		<strong>$split_table_schema</strong>: schema for <i>splitting table</i>.
+	</li>
+	<li>
+		<strong>$split_table_name</strong>: the <i>splitting table</i>, by which <i>split</i> works out the smaller steps.
+	</li>
 </ul>
 </p>
 
@@ -147,6 +192,9 @@ The user is always allowed to specify the splitting table, even on single table 
   SELECT $split_total_rowcount AS 'rows deleted so far';
 }
 </pre></blockquote>
+	The user may still specify the splitting table even when the statement operates on a single table; in which case the specified table
+	must indeed be the table being operated on. However, with statement operating on single table it is best to let split() figure out the
+	table name.
 </p>
 
 <a name="statementless"></a>
@@ -161,6 +209,44 @@ The user is always allowed to specify the splitting table, even on single table 
 <blockquote><pre>split (<strong>sakila.rental</strong>) {
   DELETE FROM sakila.rental WHERE rental_date < NOW() - INTERVAL 5 YEAR AND <strong>:${split_statement}</strong>;
 }
+</pre></blockquote>
+	In the above example, the user builds the splitting of the <strong>DELETE</strong> query manually.
+	<br/>In other use cases, the user may be interested in the metadata of the splitting process (see EXAMPLES).
+	The metadata is provided by <i>split</i>'s <a href="#magic_variables">magic variables</a>.
+</p>
+
+<a name="parameters"></a>
+<h4>Providing parameters</h4>
+<p>
+	<i>split</i> accepts parameters for operation. Normally, <i>split</i> does everything on its own, and does not require instruction.
+	However, the user is given the choice of fine tuning <i>split</i>'s operation by providing any combination of the following paramaters:
+	<ul>
+		<li><strong>size</strong>: number of rows used in each step (minimum: 100; maximum: 10,000; default: 1,000)</li>
+		<li>
+			<strong>start</strong>: in the specific case where the operation utilizes a single column for splitting 
+			(as will be the case for the common AUTO_INCREMENT PRIMARY KEYs), the operation will only begin with given value (inclusive).
+			<br/>An error is thrown when the splitting key uses two columns or more.
+			<br/>All data types are supported, including textual.
+		</li>
+		<li>
+			<strong>stop</strong>: in the specific case where the operation utilizes a single column for splitting 
+			(as will be the case for the common AUTO_INCREMENT PRIMARY KEYs), the operation will terminate with given value (inclusive).
+			<br/>An error is thrown when the splitting key uses two columns or more.
+			<br/>All data types are supported, including textual.
+		</li>
+		<li>
+			<strong>table</strong>: explicit table & schema name, when multiple statements are used.
+			This parameter is not required, though allowed, when the statement operates on a single table. 
+		</li>
+	</ul>
+</p>
+<p>
+	In the following example, the <strong>rental</strong> table has an 
+	AUTO_INCREMENT PRIMARY KEY column called <strong>rental_id</strong>.
+	The <i>split</i> operation starts with <strong>rental_id</strong> value of 1200, works
+	till the end of table, and uses chunks of <strong>500</strong> rows at a time.
+<blockquote><pre>split ({start: 1200, step: 500} : DELETE FROM sakila.rental WHERE rental_date < NOW() - INTERVAL 5 YEAR)
+  throttle 2;
 </pre></blockquote>
 In the above example, the user builds the splitting of the <strong>DELETE</strong> query manually.
 </p>
@@ -277,6 +363,67 @@ is exactly <strong>1,000</strong>, which makes for a single step.
 </p>
 
 
+<p>
+Walk through a table (no particular statement to execute); watch the <a href="#magic_variables">magic variables</a>:
+<blockquote><pre>call run("
+  <strong>split(sakila.film_actor) { 
+    select 
+      $split_step as step, $split_columns as columns, 
+      $split_min as min_value, $split_max as max_value, 
+      $split_range_start as range_start, $split_range_end as range_end
+  }</strong>
+");
+
++------+----------------------+-----------+-------------+-------------+------------+
+| step | columns              | min_value | max_value   | range_start | range_end  |
++------+----------------------+-----------+-------------+-------------+------------+
+|    1 | `actor_id`,`film_id` | '1','1'   | '200','993' | '1','1'     | '39','293' |
++------+----------------------+-----------+-------------+-------------+------------+
+
++------+----------------------+-----------+-------------+-------------+------------+
+| step | columns              | min_value | max_value   | range_start | range_end  |
++------+----------------------+-----------+-------------+-------------+------------+
+|    2 | `actor_id`,`film_id` | '1','1'   | '200','993' | '39','293'  | '76','234' |
++------+----------------------+-----------+-------------+-------------+------------+
+
++------+----------------------+-----------+-------------+-------------+-------------+
+| step | columns              | min_value | max_value   | range_start | range_end   |
++------+----------------------+-----------+-------------+-------------+-------------+
+|    3 | `actor_id`,`film_id` | '1','1'   | '200','993' | '76','234'  | '110','513' |
++------+----------------------+-----------+-------------+-------------+-------------+
+
++------+----------------------+-----------+-------------+-------------+-------------+
+| step | columns              | min_value | max_value   | range_start | range_end   |
++------+----------------------+-----------+-------------+-------------+-------------+
+|    4 | `actor_id`,`film_id` | '1','1'   | '200','993' | '110','513' | '146','278' |
++------+----------------------+-----------+-------------+-------------+-------------+
+
++------+----------------------+-----------+-------------+-------------+-------------+
+| step | columns              | min_value | max_value   | range_start | range_end   |
++------+----------------------+-----------+-------------+-------------+-------------+
+|    5 | `actor_id`,`film_id` | '1','1'   | '200','993' | '146','278' | '183','862' |
++------+----------------------+-----------+-------------+-------------+-------------+
+
++------+----------------------+-----------+-------------+-------------+-------------+
+| step | columns              | min_value | max_value   | range_start | range_end   |
++------+----------------------+-----------+-------------+-------------+-------------+
+|    6 | `actor_id`,`film_id` | '1','1'   | '200','993' | '183','862' | '200','993' |
++------+----------------------+-----------+-------------+-------------+-------------+
+</pre></blockquote>
+</p>
+
+<p>
+Use expanded variables as table & schema names in split statement. In this example we update all tables called <strong>rental</strong>
+in any database.
+<blockquote><pre>foreach($tbl, $scm: table like rental) {
+  split(update :${scm}.:${tbl} set rental_date = rental_date + interval 1 day) {
+    throttle 1;
+  }
+}
+</pre>
+</blockquote>
+</p>
+  
 <h3>SEE ALSO</h3>
 <a href="query_script_foreach.html">foreach</a>,
 <a href="query_script_break.html">break</a>,
@@ -290,6 +437,16 @@ Shlomi Noach
 				<br/>
 			</div>
 			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
 				<div id="menu">
 					<ul>
 						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
@@ -310,13 +467,13 @@ Shlomi Noach
 					<h3>ROUTINES</h3>
 					<ul>
 						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
-						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="General" href="general_routines.html">General</a></li>
 						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
 						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
-						<li><a title="Security" href="security_routines.html">Security</a></li>
 					</ul>
 					<h3>VIEWS</h3>
 					<ul>

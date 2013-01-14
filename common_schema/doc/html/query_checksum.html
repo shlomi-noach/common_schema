@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>security_views: common_schema documentation</title>
-	<meta name="description" content="security_views: common_schema" />
-	<meta name="keywords" content="security_views: common_schema" />
+	<title>query_checksum: common_schema documentation</title>
+	<meta name="description" content="query_checksum: common_schema" />
+	<meta name="keywords" content="query_checksum: common_schema" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
@@ -16,40 +16,93 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="security_views.html">security_views</a></h2>	
-<h3>SYNOPSIS</h3>
-
-<p>
-Security views: views providing information on grants and privileges.
-<ul>
-	<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a>: INFORMATION_SCHEMA-like view on routines privileges</li>
-	<li><a title="similar_grants" href="similar_grants.html">similar_grants</a>: similar_grants: Listing GRANTEEs sharing the same set of privileges (i.e. share same role)</li>
-	<li><a title="sql_accounts" href="sql_accounts.html">sql_accounts</a>: Generate SQL statements to block/release accounts. Provide info on accounts</li>
-	<li><a title="sql_grants" href="sql_grants.html">sql_grants</a>: Generate SQL GRANT/REVOKE statements for existing accounts; provide with GRANT metadata</li>
-	<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a>: Generate complete accounts SHOW GRANTS FOR -like output</li>
-</ul>
-</p>
+				<h2><a href="query_checksum.html">query_checksum</a></h2>	
+<h3>NAME</h3>
+query_checksum(): checksum the result set of a query
+<h3>TYPE</h3>
+Procedure
 
 <h3>DESCRIPTION</h3>
 <p>
-There are several inconsistencies and missing pieces with regard to security related information in MySQL. 
-These views compensate for: missing INFORMATION_SCHEMA routines privileges; missing SHOW GRANTS for all accounts; SQL generation for GRANT and REVOKE statements.
+	Given a query, this procedure produces a deterministic checksum on the query's result set.
 </p>
 <p>
-Closely related are <a title="Security routines" href="security_routines.html">Security routines</a> and <a title="processlist_grantees" href="processlist_grantees.html">processlist_grantees</a>.
+	The query is subject to the following limitations:
+	<ul>
+		<li>It must be a <strong>SELECT</strong></li>
+		<li>It is limited to <strong>9</strong> columns</li>
+		<li>Columns must be explicitly indicated; thus, the "star" form (e.g. <strong>SELECT * FROM ...</strong>) is not allowed</li>
+		<li>Columns are limited to <strong>64K</strong> characters (values are translated as text)</li>
+	</ul>
+	Otherwise the query may produce any type of columns, use expressions, functions, etc. Resulting values may be <strong>NULL</strong>.
+</p>
+<p>
+	The routine produces a checksum that is calculated via repetitive usage of the <strong>MD5</strong> algorithm. While the 
+	operation is deterministic, it uses some internal heuristics (such as converting <strong>NULL</strong>s to <strong>'\0'</strong>
+	so as to be able to process the <strong>MD5</strong> calculation). Knowing the internal heuristics it is possible to intentionally produce
+	two different results sets which lead to same resulting checksum. The incidental appearance of such queries, though, is unlikely. 
+	Moral is that this routine is useful in checking for data integrity in terms of possible errors, and is not suitable as a security
+	threat elimination.
+</p>
+<p>
+	The resulting checksum is also written to the <strong>@query_checksum_result</strong> session variable.
+</p>
+
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>query_checksum(in query TEXT CHARSET utf8) 
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>query</strong>: query to execute; checksum run on result set
+	</li>
+  </ul>
 </p>
 
 <h3>EXAMPLES</h3>
-<p>Show grants for users called 'world_user':</p>
-<blockquote><pre>mysql&gt; SELECT sql_grants FROM common_schema.sql_show_grants WHERE user='world_user' \G
-*************************** 1. row ***************************
-sql_grants: GRANT USAGE ON *.* TO 'world_user'@'localhost' IDENTIFIED BY PASSWORD '';
-GRANT ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE ON `world`.* TO 'world_user'@'localhost';
+<p>Checksum three queries. The first two return the exact same result:</p>
+<blockquote><pre>mysql&gt; call query_checksum('select distinct n from (select cast(n/10 as unsigned) as n from numbers) s1 order by n');
++----------------------------------+
+| checksum                         |
++----------------------------------+
+| 314c86787aab14525759b29f81ac9664 |
++----------------------------------+
+
+mysql&gt; call query_checksum('select n from (select cast(n/10 as unsigned) as n from numbers) s1 group by n order by n');
++----------------------------------+
+| checksum                         |
++----------------------------------+
+| 314c86787aab14525759b29f81ac9664 |
++----------------------------------+
+
+mysql&gt; call query_checksum('select distinct n+1 from (select cast(n/10 as unsigned) as n from numbers) s1 order by n');
++----------------------------------+
+| checksum                         |
++----------------------------------+
+| f4ea2e7f04d6edd28e9dd3e9419ec92c |
++----------------------------------+
+
+mysql&gt; select @query_checksum_result;
++----------------------------------+
+| @query_checksum_result           |
++----------------------------------+
+| f4ea2e7f04d6edd28e9dd3e9419ec92c |
++----------------------------------+
 </pre></blockquote>
 
-<p>Block all accounts for user <strong>'gromit'</strong>:</p>
-<blockquote><pre>mysql&gt; CALL eval("SELECT sql_block_account FROM sql_accounts WHERE USER = 'gromit'");
-</pre></blockquote>
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="crc64.html">crc64()</a>,
+<a href="exec.html">exec()</a>,
+<a href="random_hash.html">random_hash()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
 				<br/>
 			</div>
 			<div id="sidebarwrapper">

@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>security_views: common_schema documentation</title>
-	<meta name="description" content="security_views: common_schema" />
-	<meta name="keywords" content="security_views: common_schema" />
+	<title>json_to_xml: common_schema documentation</title>
+	<meta name="description" content="json_to_xml: common_schema" />
+	<meta name="keywords" content="json_to_xml: common_schema" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
@@ -16,40 +16,118 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="security_views.html">security_views</a></h2>	
-<h3>SYNOPSIS</h3>
-
-<p>
-Security views: views providing information on grants and privileges.
-<ul>
-	<li><a title="routine_privileges" href="routine_privileges.html">routine_privileges</a>: INFORMATION_SCHEMA-like view on routines privileges</li>
-	<li><a title="similar_grants" href="similar_grants.html">similar_grants</a>: similar_grants: Listing GRANTEEs sharing the same set of privileges (i.e. share same role)</li>
-	<li><a title="sql_accounts" href="sql_accounts.html">sql_accounts</a>: Generate SQL statements to block/release accounts. Provide info on accounts</li>
-	<li><a title="sql_grants" href="sql_grants.html">sql_grants</a>: Generate SQL GRANT/REVOKE statements for existing accounts; provide with GRANT metadata</li>
-	<li><a title="sql_show_grants" href="sql_show_grants.html">sql_show_grants</a>: Generate complete accounts SHOW GRANTS FOR -like output</li>
-</ul>
-</p>
+				<h2><a href="json_to_xml.html">json_to_xml</a></h2>	
+<h3>NAME</h3>
+json_to_xml(): Convert valid JSON to equivalent XML
+<h3>TYPE</h3>
+Function
 
 <h3>DESCRIPTION</h3>
 <p>
-There are several inconsistencies and missing pieces with regard to security related information in MySQL. 
-These views compensate for: missing INFORMATION_SCHEMA routines privileges; missing SHOW GRANTS for all accounts; SQL generation for GRANT and REVOKE statements.
+	<i>json_to_xml()</i> accepts text in <a href="http://www.json.org/">JSON</a> format,
+	and converts it to its XML equivalent.
 </p>
 <p>
-Closely related are <a title="Security routines" href="security_routines.html">Security routines</a> and <a title="processlist_grantees" href="processlist_grantees.html">processlist_grantees</a>.
+	Both JSON and XML are commonly used to describe objects and properties; both allow
+	for tree-like structure. Both are strict (to some level) in data definition.
+</p>
+<p>
+	<i>json_to_xml()</i> assumes a valid JSON input, and returns its XML equivalent, such that:
+	<ul>
+		<li>
+			Internal structural tests on JSON format apply. 
+			In any case of failure the function returns <strong>NULL</strong>
+		</li>
+		<li>
+			Produced XML is consisted of elements and text. No attributes generated.
+		</li>
+		<li>
+			Names are mapped to nodes. Simple values are mapped to text. Object values to
+			subnodes. Arrays to multiple nodes.
+		</li>
+		<li>
+			XML text is automatically encoded (e.g. the <strong>"&gt;"</strong> character converted to <strong>"&amp;gt;"</strong>). 
+			XML node names are not encoded.
+		</li>
+		<li>
+			Result XML is not beautified (no spaces or indentation between elements)
+		</li>
+	</ul>
+</p>
+
+<p>
+	NOTE: this function is CPU intensive. This solution should ideally be implemented through
+	built-in functions, not stored routines.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>json_to_xml(
+    json_text TEXT CHARSET utf8
+) RETURNS TEXT CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>json_text</strong>: a valid JSON formatted text.
+	</li>
+  </ul>
 </p>
 
 <h3>EXAMPLES</h3>
-<p>Show grants for users called 'world_user':</p>
-<blockquote><pre>mysql&gt; SELECT sql_grants FROM common_schema.sql_show_grants WHERE user='world_user' \G
+<p>Convert JSON to XML:</p>
+<blockquote><pre>mysql&gt; SET @json := '
+{
+  "menu": {
+    "id": "file",
+    "value": "File",
+    "popup": {
+      "menuitem": [
+        {"value": "New", "onclick": "CreateNewDoc()"},
+        {"value": "Open", "onclick": "OpenDoc()"},
+        {"value": "Close", "onclick": "CloseDoc()"}
+      ]
+    }
+  }
+}
+';
+
+mysql&gt; SELECT json_to_xml(@json) AS xml \G
 *************************** 1. row ***************************
-sql_grants: GRANT USAGE ON *.* TO 'world_user'@'localhost' IDENTIFIED BY PASSWORD '';
-GRANT ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE ON `world`.* TO 'world_user'@'localhost';
+xml: &lt;menu&gt;&lt;id&gt;file&lt;/id&gt;&lt;value&gt;File&lt;/value&gt;&lt;popup&gt;&lt;menuitem&gt;&lt;value&gt;New&lt;/value&gt;&lt;onclick&gt;CreateNewDoc()&lt;/onclick&gt;&lt;/menuitem&gt;&lt;menuitem&gt;&lt;value&gt;Open&lt;/value&gt;&lt;onclick&gt;OpenDoc()&lt;/onclick&gt;&lt;/menuitem&gt;&lt;menuitem&gt;&lt;value&gt;Close&lt;/value&gt;&lt;onclick&gt;CloseDoc()&lt;/onclick&gt;&lt;/menuitem&gt;&lt;/popup&gt;&lt;/menu&gt;
 </pre></blockquote>
 
-<p>Block all accounts for user <strong>'gromit'</strong>:</p>
-<blockquote><pre>mysql&gt; CALL eval("SELECT sql_block_account FROM sql_accounts WHERE USER = 'gromit'");
+<p>Beautified form of the above result:</p>
+<blockquote><pre>
+&lt;menu&gt;
+  &lt;id&gt;file&lt;/id&gt;
+  &lt;value&gt;File&lt;/value&gt;
+  &lt;popup&gt;
+    &lt;menuitem&gt;
+      &lt;value&gt;New&lt;/value&gt;
+      &lt;onclick&gt;CreateNewDoc()&lt;/onclick&gt;
+    &lt;/menuitem&gt;
+    &lt;menuitem&gt;
+      &lt;value&gt;Open&lt;/value&gt;
+      &lt;onclick&gt;OpenDoc()&lt;/onclick&gt;
+    &lt;/menuitem&gt;
+    &lt;menuitem&gt;
+      &lt;value&gt;Close&lt;/value&gt;
+      &lt;onclick&gt;CloseDoc()&lt;/onclick&gt;
+    &lt;/menuitem&gt;
+  &lt;/popup&gt;
+&lt;/menu&gt;
 </pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="encode_xml.html">encode_xml()</a>,
+<a href="extract_json_value.html">extract_json_value()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
 				<br/>
 			</div>
 			<div id="sidebarwrapper">
