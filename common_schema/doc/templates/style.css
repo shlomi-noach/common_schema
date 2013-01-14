@@ -42,10 +42,18 @@ body {
 	text-align: left;
 	float: left;
 }
+#sidebarwrapper div {
+	padding: 10px;
+}
+#search input[type=text] {
+	width: 180px;
+}
+#search input[type=submit] {
+	width: 30px;
+}
 #menu {
 	font-size: 8pt;
 	color:#606060;
-	padding: 10px;
 }
 #menu ul {
 	list-style:none outside;

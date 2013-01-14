@@ -5,19 +5,19 @@ QueryScript Flow Control: <strong>split</strong> statement
 
 <h3>SYNOPSIS</h3>
 <p>
-Single table operations, autodetect mode:
+Single table operations, <a href="#autodetect">autodetect</a> mode:
 <blockquote><pre>split (<i>statement operating on single table</i>)
   statement;
 </pre></blockquote>
-Statementless split, manual mode:
-<blockquote><pre>split (schema_name.table_name)
-  statement;
-</pre></blockquote>
-Multiple tables operations; explicit declaration of <i>splitting table</i>:
+Multiple tables operations; <a href="#explicit">explicit declaration</a> of <i>splitting table</i>:
 <blockquote><pre>split (schema_name.table_name: <i>statement operating on multiple tables</i>)
   statement;
 </pre></blockquote>
-Provide parameters to split operation:
+Statementless split, <a href="#statementless">manual</a> mode:
+<blockquote><pre>split (schema_name.table_name)
+  statement;
+</pre></blockquote>
+Provide <a href="#parameters">parameters</a> to split operation:
 <blockquote><pre>split ({foo:bar}: <i>statement</i>)
   statement;
 </pre></blockquote>
@@ -82,7 +82,7 @@ As with looping constructs, it respects, among others, the following statements:
 </p>
 
 <p>
-	Use of <a href="query_script_variables.html#expansion">expanded variables</a> are allowed within the split statement, as well as within
+	Use of <a href="query_script_variables.html#expansion">expanded variables</a> is allowed within the split statement, as well as within
 	the table definition and the query params. See EXAMPLES for more on this. 
 </p>
 
