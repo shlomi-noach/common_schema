@@ -9,9 +9,10 @@ CREATE FUNCTION is_datetime(txt TINYTEXT) RETURNS TINYINT UNSIGNED
 DETERMINISTIC
 NO SQL
 SQL SECURITY INVOKER
-COMMENT 'Returns DATETIME of beginning of round hour of given DATETIME.'
+COMMENT 'Checks whether given txt is a valid DATETIME.'
 
 BEGIN
+  declare continue handler for SQLEXCEPTION return false; 
   RETURN (txt + interval 0 second is not null);
 END $$
 
