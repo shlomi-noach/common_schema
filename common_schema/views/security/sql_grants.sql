@@ -131,7 +131,7 @@ VIEW _sql_grants_components AS
       GRANTEE,
       CONCAT('`', ROUTINE_SCHEMA, '`.`', ROUTINE_NAME, '`') AS priv_level,
       'routine' AS priv_level_name,
-      ROUTINE_TYPE AS object_type,
+      MAX(ROUTINE_TYPE) AS object_type,
       ROUTINE_SCHEMA AS object_schema,
       ROUTINE_NAME AS object_name,
       GROUP_CONCAT(PRIVILEGE_TYPE ORDER BY PRIVILEGE_TYPE SEPARATOR ', ') AS current_privileges,
