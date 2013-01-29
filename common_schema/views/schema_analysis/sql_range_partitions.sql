@@ -16,7 +16,7 @@ VIEW _sql_range_partitions_summary AS
     SUM(PARTITION_DESCRIPTION = 'MAXVALUE') as has_maxvalue,
     MAX(IF(PARTITION_DESCRIPTION = 'MAXVALUE', PARTITION_NAME, NULL)) as maxvalue_partition_name,
     MAX(IF(PARTITION_DESCRIPTION != 'MAXVALUE', 
-      IFNULL((unquote(PARTITION_DESCRIPTION) + interval 0 second), CAST(PARTITION_DESCRIPTION AS SIGNED)), 
+      IFNULL(_as_datetime(unquote(PARTITION_DESCRIPTION)), CAST(PARTITION_DESCRIPTION AS SIGNED)), 
       NULL)
       ) as max_partition_description
   from 
@@ -152,9 +152,9 @@ SQL SECURITY INVOKER
 VIEW _sql_range_partitions_beautified AS
   select
     *,
-    CONCAT('p_', IFNULL(DATE_FORMAT(next_partition_human_description, '%Y%m%d%H%i%s'), next_partition_human_description)) as next_partition_name,
-    ((next_partition_human_description + interval 0 second) is not null) as next_partition_human_description_is_datetime,
-    IFNULL(CONCAT(' /* ', (next_partition_human_description + interval 0 second), ' */ '), '') as next_partition_human_description_comment
+    CONCAT('p_', IFNULL(DATE_FORMAT(_as_datetime(next_partition_human_description), '%Y%m%d%H%i%s'), next_partition_human_description)) as next_partition_name,
+    (_as_datetime(next_partition_human_description) is not null) as next_partition_human_description_is_datetime,
+    IFNULL(CONCAT(' /* ', _as_datetime(next_partition_human_description), ' */ '), '') as next_partition_human_description_comment
   from
     _sql_range_partitions_analysis
 ;
