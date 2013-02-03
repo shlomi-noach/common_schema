@@ -38,6 +38,7 @@ main_body: begin
     when 'script,sql' then begin
         if statement_token = 'start' then
           -- can be script ("start transaction") or sql ("start slave" or anything else)
+          set @_common_schema_dummy := 0;
           call _consume_if_exists(statement_id_from, statement_id_to, @_common_schema_dummy, 'transaction', NULL, token_has_matched, @_common_schema_dummy);
           if token_has_matched then
             call _consume_script_statement(id_from, id_to, statement_id_from, statement_id_to, depth, statement_token, should_execute_statement);
