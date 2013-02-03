@@ -12,8 +12,7 @@ SQL SECURITY INVOKER
 COMMENT 'Checks whether given txt is a valid DATETIME.'
 
 BEGIN
-  declare continue handler for SQLEXCEPTION return false; 
-  RETURN (txt + interval 0 second is not null);
+  RETURN (_as_datetime(txt) is not null);
 END $$
 
 DELIMITER ;
