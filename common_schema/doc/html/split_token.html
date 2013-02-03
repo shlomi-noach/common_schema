@@ -25,7 +25,7 @@ Function
 <h3>DESCRIPTION</h3>
 <p>
 	This function splits the input text <strong>txt</strong> into tokens, according to 
-	given <strong>delimiter</strong>. It returns a single token,
+	given <strong>delimiter_text</strong>. It returns a single token,
 	indicated by the <strong>1</strong>-based <strong>token_index</strong>.
 </p>
 <p>
@@ -34,7 +34,7 @@ Function
 
 <h3>SYNOPSIS</h3>
 <p>
-<blockquote><pre>split_token(txt TEXT CHARSET utf8, delimiter VARCHAR(255) CHARSET utf8, token_index INT UNSIGNED) 
+<blockquote><pre>split_token(txt TEXT CHARSET utf8, delimiter_text VARCHAR(255) CHARSET utf8, token_index INT UNSIGNED) 
   RETURNS TEXT CHARSET utf8</pre></blockquote>
 </p>
 <p>
@@ -42,8 +42,8 @@ Function
   <ul>
     <li><strong>txt</strong>: text to be parsed. When <strong>NULL</strong>, the result is <strong>NULL</strong>.
 	</li>
-    <li><strong>delimiter</strong>: delimiter text; can be zero or more characters. 
-	    <br/>When <strong>delimiter</strong> is the empty text (zero characters), function's result is 
+    <li><strong>delimiter_text</strong>: delimiter text; can be zero or more characters. 
+	    <br/>When <strong>delimiter_text</strong> is the empty text (zero characters), function's result is 
 	    the character in the position of <strong>token_index</strong>.
 	</li>
     <li><strong>token_index</strong>: <strong>1</strong>-based index. At current, there is no

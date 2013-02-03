@@ -24,7 +24,7 @@ Function
 
 <h3>DESCRIPTION</h3>
 <p>
-	Assumes given text <strong>txt</strong> is tokenized by given <strong>delimiter</strong>, 
+	Assumes given text <strong>txt</strong> is tokenized by given <strong>delimiter_text</strong>, 
 	and returns the number of tokens in the split text.
 	Delimiter is assumed to be fixed text, of any length (not necessarily one character).
 </p>
@@ -34,7 +34,7 @@ Function
 
 <h3>SYNOPSIS</h3>
 <p>
-<blockquote><pre>get_num_tokens(txt TEXT CHARSET utf8, delimiter VARCHAR(255) CHARSET utf8)
+<blockquote><pre>get_num_tokens(txt TEXT CHARSET utf8, delimiter_text VARCHAR(255) CHARSET utf8)
   RETURNS INT UNSIGNED</pre></blockquote>
 </p>
 <p>
@@ -42,10 +42,10 @@ Function
   <ul>
     <li><strong>txt</strong>: text to be parsed. When <strong>NULL</strong>, the result is <strong>NULL</strong>.
 	</li>
-    <li><strong>delimiter</strong>: delimiter text; can be zero or more characters. 
-	    <br/>When <strong>delimiter</strong> is the empty text (zero characters), function's result is 
+    <li><strong>delimiter_text</strong>: delimiter text; can be zero or more characters. 
+	    <br/>When <strong>delimiter_text</strong> is the empty text (zero characters), function's result is 
 	    the number of characters in <strong>txt</strong>.
-	    <br/>When <strong>delimiter</strong> is not found in the text, function returns with <strong>1</strong>.
+	    <br/>When <strong>delimiter_text</strong> is not found in the text, function returns with <strong>1</strong>.
 	</li>
   </ul>
 </p>
