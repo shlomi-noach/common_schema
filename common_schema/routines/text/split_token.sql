@@ -13,17 +13,17 @@
 DELIMITER $$
 
 DROP FUNCTION IF EXISTS split_token $$
-CREATE FUNCTION split_token(txt TEXT CHARSET utf8, delimiter VARCHAR(255) CHARSET utf8, token_index INT UNSIGNED) RETURNS TEXT CHARSET utf8 
+CREATE FUNCTION split_token(txt TEXT CHARSET utf8, delimiter_text VARCHAR(255) CHARSET utf8, token_index INT UNSIGNED) RETURNS TEXT CHARSET utf8 
 DETERMINISTIC
 NO SQL
 SQL SECURITY INVOKER
 COMMENT 'Return substring by index in delimited text'
 
 begin
-  if CHAR_LENGTH(delimiter) = '' then
+  if CHAR_LENGTH(delimiter_text) = '' then
     return SUBSTRING(txt, token_index, 1);
   else
-    return SUBSTRING_INDEX(SUBSTRING_INDEX(txt, delimiter, token_index), delimiter, -1);
+    return SUBSTRING_INDEX(SUBSTRING_INDEX(txt, delimiter_text, token_index), delimiter_text, -1);
   end if;
 end $$
 
