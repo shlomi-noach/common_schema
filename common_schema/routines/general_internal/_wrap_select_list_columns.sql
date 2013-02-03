@@ -29,7 +29,7 @@ my_proc: begin
     -- part one: find the SELECT keyword.
     my_loop: repeat 
         set v_old_from = v_from;
-        call _get_sql_token(p_text, v_from, v_level, v_token, FALSE, v_state);
+        call _get_sql_token(p_text, v_from, v_level, v_token, 'sql', v_state);
         case 
             when v_state in ('whitespace', 'single line comment', 'multi line comment', 'conditional comment') then
                 iterate my_loop;
@@ -47,7 +47,7 @@ my_proc: begin
     -- part two: rewrite columns
     columns_loop: repeat 
         set v_old_from = v_from;
-        call _get_sql_token(p_text, v_from, v_level, v_token, FALSE, v_state);
+        call _get_sql_token(p_text, v_from, v_level, v_token, 'sql', v_state);
         if v_state = 'error' then
             set p_error = 'Tokenizer returned error state';
             leave my_main;

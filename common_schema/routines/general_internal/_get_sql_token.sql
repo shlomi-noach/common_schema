@@ -11,7 +11,7 @@ create procedure _get_sql_token(
 ,   inout   p_from      int unsigned
 ,   inout   p_level     int
 ,   out     p_token     text charset utf8
-,   in      allow_script_tokens int
+,   in      language_mode enum ('sql', 'script', 'routine')
 -- ,   inout   p_state     varchar(64)charset utf8
 ,   inout   p_state     enum(
                             'alpha'
@@ -74,6 +74,9 @@ begin
     declare v_no_ansi_quotes        bool default find_in_set('ANSI_QUOTES', @@sql_mode) = FALSE;
     declare v_char, v_lookahead, v_quote_char    char(1) charset utf8;
     declare v_from int unsigned;
+    declare allow_script_tokens tinyint unsigned;
+    
+    set allow_script_tokens := (language_mode = 'script');
 
     if p_from is null then
         set p_from = 1;
