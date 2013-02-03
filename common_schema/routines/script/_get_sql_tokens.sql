@@ -32,7 +32,7 @@ begin
     
     repeat 
         set v_old_from = v_from;
-        call _get_sql_token(p_text, v_from, v_level, v_token, 1, v_state);
+        call _get_sql_token(p_text, v_from, v_level, v_token, 'script', v_state);
         set _sql_tokens_id := _sql_tokens_id + 1;
         insert into _sql_tokens(id,start,level,token,state) 
         values (_sql_tokens_id, v_from, v_level, v_token, v_state);
