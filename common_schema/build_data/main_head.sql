@@ -22,7 +22,20 @@
 -- SELECT * FROM common_schema.status;
 --
 
+-- 
+-- REQUIREMENTS
+-- =======================================
+-- 
+-- On some MySQL versions a stack size of 256K is required (though may work for 192K as well).
+-- 256K is the default stack size as of 5.5.
+-- You should review/edit the following in your MySQL config file; change will only take
+-- place after MySQL restart
 --
+-- [mysqld]
+-- thread_stack = 256K
+--
+--
+
 -- LICENSE
 -- =======================================
 -- Released under the BSD license
