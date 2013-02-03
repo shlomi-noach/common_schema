@@ -48,7 +48,7 @@ my_main: begin
     
     my_loop: repeat 
         set v_old_from = v_from;
-        call _get_sql_token(p_sql, v_from, v_level, v_token, FALSE, v_state);
+        call _get_sql_token(p_sql, v_from, v_level, v_token, 'sql', v_state);
         set v_token = v_token collate utf8_general_ci;
         if v_state in ('whitespace', 'single line comment', 'multi line comment') then
             iterate my_loop;
@@ -69,9 +69,13 @@ my_main: begin
             when 'start' then
                 set v_schema_name = p_default_schema, v_object_name = null, v_object_type = null, v_definer = null;
                 if v_state = 'alpha' then
-                    if v_token in ('alter', 'call', 'create', 'delete', 'drop', 'insert', 'replace', 'select', 'truncate', 'update') then
+                    if v_token in ('alter', 'call', 'create', 'delete', 'drop', 'insert', 'replace', 'select', 'truncate') then
                         set v_action = lower(v_token) collate utf8_general_ci
                         ,   v_scan_state = v_action
+                        ;
+                    elseif v_token in ('update') then
+                        set v_action = lower(v_token) collate utf8_general_ci
+                        ,   v_scan_state = 'expect table'
                         ;
                     elseif v_token in ('join', 'from') then
                         set v_scan_state = 'expect table';
