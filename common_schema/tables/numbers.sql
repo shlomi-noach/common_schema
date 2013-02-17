@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS numbers;
 CREATE TABLE numbers (
   `n` smallint unsigned NOT NULL,
   PRIMARY KEY (`n`)
-)
+) ENGINE=InnoDB
 ;
 
 --

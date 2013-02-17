@@ -7,7 +7,7 @@ CREATE TABLE metadata (
   `attribute_name` VARCHAR(64) CHARSET ascii NOT NULL,
   `attribute_value` VARCHAR(2048) CHARSET utf8 NOT NULL,
   PRIMARY KEY (`attribute_name`)
-)
+) ENGINE=InnoDB
 ;
 
 --
