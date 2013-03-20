@@ -59,21 +59,23 @@ begin
       _split_unique_keys.COUNT_COLUMN_IN_INDEX AS count_column_in_index,
       _split_i_s_columns.DATA_TYPE AS data_type,
       _split_i_s_columns.CHARACTER_SET_NAME AS character_set_name,
-      (CASE IFNULL(CHARACTER_SET_NAME, '')
-          WHEN '' THEN 0
-          ELSE 1
-      END << 20
-      )
-      + (CASE LOWER(DATA_TYPE)
-        WHEN 'tinyint' THEN 0
-        WHEN 'smallint' THEN 1
-        WHEN 'int' THEN 2
-        WHEN 'timestamp' THEN 3
-        WHEN 'bigint' THEN 4
-        WHEN 'datetime' THEN 5
-        ELSE 9
-      END << 16
-      ) + (COUNT_COLUMN_IN_INDEX << 0
+      (if (has_nullable, 1, 0) << 21) 
+        +
+        (CASE IFNULL(CHARACTER_SET_NAME, '')
+            WHEN '' THEN 0
+            ELSE 1
+        END << 20
+        )
+        + (CASE LOWER(DATA_TYPE)
+          WHEN 'tinyint' THEN 0
+          WHEN 'smallint' THEN 1
+          WHEN 'int' THEN 2
+          WHEN 'timestamp' THEN 3
+          WHEN 'bigint' THEN 4
+          WHEN 'datetime' THEN 5
+          ELSE 9
+        END << 16
+        ) + (COUNT_COLUMN_IN_INDEX << 0
       ) AS candidate_key_rank_in_table  
     FROM 
       _split_i_s_columns
