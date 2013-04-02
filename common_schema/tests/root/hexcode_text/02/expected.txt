@@ -1,0 +1,4 @@
+41 20 71 75 69 63 6B 20 62 72 6F 77 6E 20 66 6F   A   q u i c k   b r o w n   f o
+78 20 6A 75 6D 70 73 20 6F 76 65 72 20 74 68 65   x   j u m p s   o v e r   t h e
+20 6C 61 7A 79 20 64 6F 67 2C 20 6C 6F 6E 67 20     l a z y   d o g ,   l o n g  
+65 6E 6F 75 67 68                                 e n o u g h                    

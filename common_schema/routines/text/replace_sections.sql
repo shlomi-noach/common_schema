@@ -2,8 +2,13 @@
 -- Replace sections denoted by section_start & section_end with given replacement_text
 -- Text is stripped of possibly multiple occurance of section_start...some..text...section_end
 -- Each such appearance is replaced with replacement_text.
--- replacement_text may include the \0 backtrace, which resovled to the text being replaced, not including boundaries.
+-- replacement_text may include the \0 back-reference, which resovles to the text being replaced, not including boundaries.
 -- 
+-- Example:
+-- SELECT replace_sections('<b>The</b> quick <b>brown</b> fox', '<b>', '</b>', '<span>\\0</span>')
+-- Returns: '<span>The</span> quick <span>brown</span> fox'
+--
+--
 
 DELIMITER $$
 

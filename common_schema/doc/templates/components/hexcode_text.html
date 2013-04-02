@@ -1,0 +1,48 @@
+<h3>NAME</h3>
+hexcode_text(): Present a Hexadecimal table for given text's characters
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Given a text, this procedure outputs the text's characters along with their
+	hexadecimal values, side by side, 16 characters per row.
+</p>
+<p>
+	It serves as a utility to detect special, missing or invisible characters throughout
+	one's text.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>hexcode_text(in txt TEXT CHARSET utf8) 
+  NO SQL</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: text to analyze and present
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Show the hexcodes of a text:</p>
+<blockquote><pre>mysql&gt; call hexcode_text('the quick brown fox jumps over the lazy dog');
++-----------------------------------------------------------------------------------+
+| &gt;0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f   0 1 2 3 4 5 6 7 8 9 a b c d e f |
++-----------------------------------------------------------------------------------+
+| 74 68 65 20 71 75 69 63 6B 20 62 72 6F 77 6E 20   t h e   q u i c k   b r o w n   |
+| 66 6F 78 20 6A 75 6D 70 73 20 6F 76 65 72 20 74   f o x   j u m p s   o v e r   t |
+| 68 65 20 6C 61 7A 79 20 64 6F 67                  h e   l a z y   d o g           |
++-----------------------------------------------------------------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="prettify_message.html">prettify_message()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
