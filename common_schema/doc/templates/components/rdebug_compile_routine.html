@@ -1,0 +1,130 @@
+<h3>NAME</h3>
+rdebug_compile_routine(): Rebuild a routine with/without debugging info.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_compile_routine()</i> modifies a routine code to include/exclude debug info.
+</p>
+
+<p>
+	<strong>rdebug</strong> works by injecting debug code into stored routines. In order
+	to debug a routine, one must first make sure it is "compiled with debug mode"
+	(though technically the routine is never <i>compiled</i>).
+</p>
+<p>
+	<i>rdebug_compile_routine()</i> works on the very code of one's routine, and injects
+	variables & statements to manage the debugging process. These variables and statements
+	do not modify the behavior of the routine: executed outside a debugging session, it
+	should act exactly the same way as a "normal" routine with no debug info.
+</p>
+<p>
+	This also makes for a routine's code bloat and possible slow down to to the fact it is
+	interpreted by MySQL (therefore more code to interpret).
+</p>
+<p>
+	Once the debugging session is complete, one wishes to remove the injected debug code
+	from the routine. <i>rdebug_compile_routine()</i> will strip down the debug code and
+	restore the routine to the exact same original code. 
+</p>
+<p>
+	Compiling a routine twice with debug info is valid, though the 2nd call makes no
+	difference. Likewise, Compiling the routine twice without debug info is fine,
+	and the second call makes no changes to the code.
+</p>
+<p>
+	Execution of this routine should take place outside a debugging session (typically
+	compiling with debug info beforehand, and compiling without debug info afterwards).
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_compile_routine(
+    in rdebug_routine_schema varchar(128) charset utf8,
+    in rdebug_routine_name   varchar(128) charset utf8,
+    in debug_info     bool
+  )
+  MODIFIES SQL DATA
+</pre></blockquote>
+</p>
+<p>
+  Input: 
+  <ul>
+    <li><strong>rdebug_routine_schema</strong>: schema where routine is located.</li>
+    <li><strong>rdebug_routine_name</strong>: name of routine to compile.</li>
+    <li><strong>debug_info</strong>: <strong>TRUE</strong> or <strong>1</strong> to inject
+    	debug code into the routine, <strong>FALSE</strong> or <strong>0</strong> to
+    	remove debug code from the routine and return to original code.
+	</li>
+  </ul>
+</p>
+
+
+<h3>EXAMPLES</h3>
+	<p>
+		Compile routine with debug info. Show routine before/after:
+	<blockquote><pre>mysql&gt; call rdebug_show_routine('test','analyze_continents');
++------------------------------------------------------------+
+| `test`.`analyze_continents` breakpoints                    |
++------------------------------------------------------------+
+| main_body: begin                                           |
+|   declare done bool default false;                         |
+|   declare current_continent varchar(32) default null;      |
+|   declare continents_cursor cursor for                     |
+|             select distinct continent from world.Country;  |
+|   declare continue handler for not found set done := true; |
+|                                                            |
+|   open continents_cursor;                                  |
+|   cursor_loop: while not done do                           |
+|     fetch continents_cursor into current_continent;        |
+|     if done then                                           |
+|       leave cursor_loop;                                   |
+|     end if;                                                |
+|     call analyze_continent_cities(current_continent);      |
+|   end while;                                               |
+|   close continents_cursor;                                 |
+| end                                                        |
++------------------------------------------------------------+
+
+mysql&gt; call rdebug_compile_routine('test','analyze_continents', true);
+
+mysql&gt; call rdebug_show_routine('test','analyze_continents');
++-------------------------------------------------------------+
+| `test`.`analyze_continents` breakpoints                     |
++-------------------------------------------------------------+
+| main_body: begin                                            |
+|   declare done bool default false;                          |
+|   declare current_continent varchar(32) default null;       |
+|   declare continents_cursor cursor for                      |
+|             select distinct continent from world.Country;   |
+|   declare continue handler for not found set done := true;  |
+|                                                             |
+|   [:80]open continents_cursor;                              |
+|   [:86]cursor_loop: while not done do                       |
+|     [:98]fetch continents_cursor into current_continent;    |
+|     [:108]if done then                                      |
+|       [:115]leave cursor_loop;                              |
+|     [:121]end if;                                           |
+|     [:127]call analyze_continent_cities(current_continent); |
+|   [:136]end while;                                          |
+|   [:142]close continents_cursor;                            |
+| [:147]end                                                   |
++-------------------------------------------------------------+
+</pre></blockquote>
+The actual injected routine code is far more complex and is not presented here.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_show_routine.html">rdebug_show_routine()</a>,
+<a href="rdebug_show_routine_statements.html">rdebug_show_routine_statements()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

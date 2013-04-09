@@ -1,0 +1,143 @@
+
+<h3>Workflow of an rdebug debugging session</h3>
+
+<p>
+	<strong>rdebug</strong></a> requires two connections:
+	<ul>
+		<li>
+			The <strong>worker</strong> connection: this is where one's 
+			stored routine is executed.
+		</li>
+		<li>
+			The <strong>debugger</strong> session: this session controls the flow
+			of the <i>worker</i>; this is the session that "steps-into", "steps-over",
+			watches variables, modifies them; looks at metadata.
+		</li>
+	</ul>
+</p>
+<p>
+	The <i>debugger</i> needs to attach itself to the <i>worker</i>. This is done by
+	figuring out the <i>worker</i>'s session ID. The relevant routines must be 
+	<a href="rdebug_compile_routine.html">compiled with debug mode</a> beforehand.
+	Both sessions are then ready for the <i>debugging session</i>.
+</p>
+<p>
+	The following illustrates the general workflow of a debugging session, looking at 
+	both the <i>debugger</i> and the <i>worker</i>. For this illustration, we assume
+	debugging the routine <strong>test.take_action()</strong>.
+</p>
+<h4>General workflow</h4>
+
+<p>
+	<strong>worker session:</strong> get connection ID.
+	<blockquote><pre>mysql [worker]&gt; SELECT CONNECTION_ID();
++-----------------+
+| CONNECTION_ID() |
++-----------------+
+|            2819 |
++-----------------+
+</pre></blockquote>
+</p>
+
+<p>
+	<strong>debugger session:</strong> compile routine with debug info.
+	<blockquote><pre>mysql [debugger]&gt; use common_schema;
+mysql [debugger]&gt; call rdebug_compile_routine('test', 'take_action', true);
+</pre></blockquote>
+	Start a debug session, attach to <i>worker</i> session using its connection ID:
+	<blockquote><pre>mysql [debugger]&gt; call rdebug_start(2819);
+</pre></blockquote>
+	Optionally set verbose mode <strong>on</strong>:
+	<blockquote><pre>mysql [debugger]&gt; call rdebug_set_verbose(true);
+</pre></blockquote>
+	Begin controlling the <i>worker</i>. In this worker we work by <i>stepping</i>
+	through the routine:
+	<blockquote><pre>mysql [debugger]&gt; call rdebug_step_over();
+(hangs)
+</pre></blockquote>
+	The debugger is now awaiting action to be taken by the <i>worker</i>.
+</p>
+
+
+<p>
+	<strong>worker session:</strong> issue the routine.
+	<blockquote><pre>mysql [worker]&gt; call test.take_action();
+(hangs)
+</pre></blockquote>
+</p>
+
+<p>
+	<strong>debugger session:</strong> at this time the <i>debugger</i> has
+	control over the <i>worker</i>. Due to verbose mode, it dumps
+	thread stack status, watches local variables, shows next statement to execute.
+	The <i>debugger</i> may further control the flow of the <i>worker</i>:
+	<blockquote><pre>
+(status dump)
+mysql [debugger]&gt; call rdebug_step_over();
+(status dump)
+mysql [debugger]&gt; call rdebug_step_over();
+(status dump)
+mysql [debugger]&gt; call rdebug_watch_variables();
+(variables dump)
+mysql [debugger]&gt; call rdebug_set_variable('my_local_variable', 'my_new_value');
+(status dump)
+mysql [debugger]&gt; call rdebug_step_over();
+(status dump)
+mysql [debugger]&gt; call rdebug_step_out();
+mysql [debugger]&gt; 
+</pre></blockquote>
+	At this workflow we finally exit via <a href="rdebug_step_out.html">rdebug_step_out()</a>,
+	or we may choose to keep running <a href="rdebug_step_over.html">rdebug_step_over()</a>
+	until <strong>test.take_action()</strong> completes. Either way, both worker and
+	debugger complete the debugging session.
+</p>
+
+<p>
+	<strong>debugger session:</strong> do proper cleanup:
+	<blockquote><pre>
+mysql [debugger]&gt; call rdebug_stop();
+</pre></blockquote>
+	At this point all debug-session info is cleared. However, the 
+	<strong>test.take_action()</strong> routine is still compiled with debug mode; 
+	you may choose to keep them that way (it will act as normal
+	when not under a <i>debugger</i> control, but will have excessive code). At some point
+	you will want to remove debugging info from the routine:
+	<blockquote><pre>
+mysql [debugger]&gt; call rdebug_compile_routine('test', 'take_action', false);
+</pre></blockquote>
+</p>
+
+<h3>Workflow variations</h3>
+<p>
+	One may choose to set a breakpoint on <strong>test.take_action()</strong>.
+	For that, one needs to know what breakpoints are available.
+	<strong>debugger session:</strong> detect breakpoint info:
+	<blockquote><pre>
+mysql [debugger]&gt; call rdebug_show_routine('test', 'take_action');
+(dump of routine code with special numbers -- breakpoint IDs)
+</pre></blockquote>
+	See <a href="rdebug_show_routine.html">rdebug_show_routine()</a> for an output sample.
+	Breakpoints can be set via:
+	<blockquote><pre>
+mysql [debugger]&gt; call rdebug_set_breakpoint('test', 'take_action', 126, null);
+</pre></blockquote>
+	(assuming <strong>126</strong> is a relevant breakpoint ID).
+</p>
+<p>
+	The <strong>test.take_action()</strong> routine can be executed until it reaches
+	said breakpoint:
+	<blockquote><pre>mysql [debugger]&gt; call rdebug_run();
+</pre></blockquote>
+</p>
+
+
+
+
+
+<h3>SEE ALSO</h3>
+<a href="rdebug.html">rdebug</a>,
+<a href="rdebug_api.html">rdebug API</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+

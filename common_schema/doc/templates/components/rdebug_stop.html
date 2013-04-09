@@ -1,0 +1,44 @@
+<h3>NAME</h3>
+rdebug_stop(): Clear debugging session; reset debugging data.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_stop()</i> terminates a debugging session. It clears all
+	debugging info accumulated throughout the session, and resets the
+	<i>debugger</i> - <i>worker</i> association. The current session stops
+	its role as the <i>debugger</i>, and the <i>worker</i> session is no
+	longer controlled by this session, and is free to be debugged by other sessions. 
+</p>
+
+<p>
+	<i>rdebug_stop()</i> does NOT remove debug code from stored routines. To clear
+	such code, invoke <a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>.
+</p>
+<p>
+	Calling <i>rdebug_stop()</i> in the middle of a debug session (e.g. the <i>worker</i>
+	holds on a breakpoint) releases the <i>worker</i> and allows it to run to completion.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_stop()
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>,
+<a href="rdebug_start.html">rdebug_start()</a>,
+<a href="rdebug_workflow.html">rdebug workflow</a>
+
+
+<h3>AUTHOR</h3>
+Shlomi Noach

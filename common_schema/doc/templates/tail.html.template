@@ -28,6 +28,12 @@
 						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
 						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
 					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
 					<h3>ROUTINES</h3>
 					<ul>
 						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>

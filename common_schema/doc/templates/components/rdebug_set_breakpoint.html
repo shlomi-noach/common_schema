@@ -1,0 +1,113 @@
+<h3>NAME</h3>
+rdebug_set_breakpoint(): Set/clear a breakpoint
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_set_breakpoint()</i> sets or clears a specific breakpoint in a specified
+	routine. 
+</p>
+
+<p>
+	A breakpoint is indicated by breakpoint/statement ID, as can be listed via
+	<a href="rdebug_show_routine.html">rdebug_show_routine()</a> or
+	<a href="rdebug_show_routine_statements.html">rdebug_show_routine_statements()</a>.
+</p>
+<p>
+	A breakpoint may be conditional <strong>[NOTE: as yet unsupported]</strong>, such that
+	it only applies when some condition evaluates as true 
+	(e.g. <strong>'my_loop_counter > 3'</strong>).
+</p>
+<p>
+	Current implementation <strong>[NOTE: subject to change]</strong> associates
+	breakpoints with debug sessions, so that concurrent debuggers can have different 
+	breakpoints on same routines, without affecting one another.
+	As result,
+	execution of this routine only makes sense on an active debugging session, i.e.
+	after calling <a href="rdebug_start.html">rdebug_start()</a> <strong>[NOTE: subject to change]</strong>.
+
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_set_breakpoint(
+    in rdebug_routine_schema varchar(128) charset utf8,
+    in rdebug_routine_name   varchar(128) charset utf8,
+    in rdebug_statement_id   int unsigned,
+    in rdebug_conditional_expression text charset utf8,
+    in breakpoint_enabled bool
+  )
+  READS SQL DATA
+</pre></blockquote>
+</p>
+<p>
+  Input: 
+  <ul>
+    <li><strong>rdebug_routine_schema</strong>: schema where routine is located.
+	</li>
+    <li><strong>rdebug_routine_name</strong>: name of routine schema.
+	</li>
+    <li><strong>rdebug_statement_id</strong>: name of routine where breakpoint applies.
+	</li>
+    <li><strong>rdebug_conditional_expression</strong>: 
+    	<strong>AS YET UNSUPPORTED</strong> - expression to evaluate upon reaching breakpoint.
+    	The breakpoint holds only when the expression evaluates to <strong>TRUE</strong> value; otherwise
+    	the breakpoint is skipped by such commands as <a href="rdebug_run.html">rdebug_run()</a>.
+	</li>
+    <li><strong>breakpoint_enabled</strong>: a <strong>TRUE/FALSE</strong> or <strong>1/0</strong> value
+    	to indicate whether the breakpoint should be set or cleared, respectively.
+	</li>
+  </ul>
+</p>
+
+
+<h3>EXAMPLES</h3>
+	<p>
+		Show routine code with breakpoint positions (IDs), then set a breakpoint:
+	<blockquote><pre>mysql&gt; call rdebug_show_routine('test','analyze_continents');
++-------------------------------------------------------------+
+| `test`.`analyze_continents` breakpoints                     |
++-------------------------------------------------------------+
+| main_body: begin                                            |
+|   declare done bool default false;                          |
+|   declare current_continent varchar(32) default null;       |
+|   declare continents_cursor cursor for                      |
+|             select distinct continent from world.Country;   |
+|   declare continue handler for not found set done := true;  |
+|                                                             |
+|   [:80]open continents_cursor;                              |
+|   [:86]cursor_loop: while not done do                       |
+|     [:98]fetch continents_cursor into current_continent;    |
+|     [:108]if done then                                      |
+|       [:115]leave cursor_loop;                              |
+|     [:121]end if;                                           |
+|     [:127]call analyze_continent_cities(current_continent); |
+|   [:136]end while;                                          |
+|   [:142]close continents_cursor;                            |
+| [:147]end                                                   |
++-------------------------------------------------------------+
+
+mysql&gt; call rdebug_set_breakpoint('test', 'analyze_continents', 127, null, TRUE);
+</pre></blockquote>
+</p>
+	<p>
+		Remove the above breakpoint:
+	<blockquote><pre>mysql&gt; call rdebug_set_breakpoint('test', 'analyze_continents', 127, null, FALSE);
+</pre></blockquote>
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_run.html">rdebug_run()</a>,
+<a href="rdebug_show_routine.html">rdebug_show_routine()</a>,
+<a href="rdebug_show_routine_statements.html">rdebug_show_routine_statements()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

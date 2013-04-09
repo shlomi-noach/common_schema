@@ -1,0 +1,46 @@
+<h3>NAME</h3>
+rdebug_step_into(): Enter next routine call (requires routine in debug mode); drill down the stack state.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_step_into()</i> executes the worker until it reaches next possible
+	stop-point at any level of the stack.
+</p>
+<p>
+	When worker's next statement to execute is a call to a stored routine, 
+	<i>rdebug_step_into()</i> drills down into that routine. This assumes said routine
+	is itself <a href="rdebug_compile_routine.html">compiled with debug mode</a>.
+	It is possible that said routine is not compiled in debug mode, yet in itself calls 
+	upon a routine which is -- in which case the worker will stop at this deeper
+	level routine. The rule says: "stop at your earliest opportunity, regardless of
+	stack depth".
+</p>
+<p>
+	Execution of this routine only makes sense on an active debugging session, i.e.
+	after calling <a href="rdebug_start.html">rdebug_start()</a>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_step_into()
+  READS SQL DATA</pre></blockquote>
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>,
+<a href="rdebug_run.html">rdebug_run()</a>,
+<a href="rdebug_start.html">rdebug_start()</a>,
+<a href="rdebug_step_out.html">rdebug_step_out()</a>,
+<a href="rdebug_step_over.html">rdebug_step_over()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

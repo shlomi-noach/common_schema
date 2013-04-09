@@ -1,0 +1,57 @@
+
+<h3>rdebug API</h3>
+
+<p>
+	<strong>rdebug</strong> provides a debugging API, via stored routine calls.
+</p>
+<p>
+	Essentially, one can debug her stored routines by directly invoking <i>rdebug</i>'s
+	functionality, or may use/write custom GUI tools to do that.
+</p>
+<p>
+	<i>rdebug</i> is in <strong>alpha</strong> stage, and API or functionality are
+	still subjected to change.
+</p>
+
+<a name="api"></a>
+<h4>API</h4>
+<p>
+	Initialization and attachment: 
+	<ul>
+		<li><a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>: Rebuild a routine with/without debugging info.</li>
+		<li><a href="rdebug_start.html">rdebug_start()</a>: Attach debugger to worker; begin a debugging session.</li>
+		<li><a href="rdebug_stop.html">rdebug_stop()</a>: Clear debugging session; reset debugging data.</li>
+	</ul>
+	Stepping/running/breakpoints:
+	<ul>
+		<li><a href="rdebug_run.html">rdebug_run()</a>: Run worker until next breakpoint.</li>
+		<li><a href="rdebug_set_breakpoint.html">rdebug_set_breakpoint()</a>: Set/clear a breakpoint</li>
+		<li><a href="rdebug_step_into.html">rdebug_step_into()</a>: Enter next routine call (requires routine in debug mode); drill down the stack state.</li>
+		<li><a href="rdebug_step_out.html">rdebug_step_out()</a>: Run current routine to completion, stop upon returning to calling routine.</li>
+		<li><a href="rdebug_step_over.html">rdebug_step_over()</a>: Execute next statement without drilling down to possible routine code.</li>
+	</ul>
+	Variable manipulation:
+	<ul>
+		<li><a href="rdebug_get_variable.html">rdebug_get_variable()</a>: Get value of local or user defined variable.</li>
+		<li><a href="rdebug_set_variable.html">rdebug_set_variable()</a>: Modify value of local or user defined variable.</li>
+		<li><a href="rdebug_watch_variables.html">rdebug_watch_variables()</a>: List user defined variables and local variables visible and used within current scope, with their current values.</li>
+	</ul>
+	Verbose, metadata:
+	<ul>
+		<li><a href="rdebug_set_verbose.html">rdebug_set_verbose()</a>: Turn verbose mode on/off</li>
+		<li><a href="rdebug_show_routine.html">rdebug_show_routine()</a>: Show a routine's code, along with the outline of breakpoint positions.</li>
+		<li><a href="rdebug_show_routine_statements.html">rdebug_show_routine_statements()</a>: Show statement (breakpoint) IDs for a given routine.</li>
+		<li><a href="rdebug_show_stack_state.html">rdebug_show_stack_state()</a>: Show worker's current stack state (applies to debugged routines only).</li>
+		<li><a href="rdebug_show_statement.html">rdebug_show_statement()</a>: Show next statement to be executed by worker</li>
+		<li><a href="rdebug_verbose.html">rdebug_verbose()</a>: Invoke dump of worker's status: stack, variables, statement</li>
+	</ul>
+</p>
+
+
+<h3>SEE ALSO</h3>
+<a href="query_script.html">Query Script</a>,
+<a href="rdebug.html">rdebug</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+

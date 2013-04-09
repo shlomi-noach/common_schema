@@ -1,0 +1,63 @@
+<h3>NAME</h3>
+rdebug_start(): Attach debugger to worker; begin a debugging session.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_start()</i> starts a debugging process by instruction the current
+	session (<i>the debugger</i>) to attach itself to another session 
+	(<i>the worker</i>).
+</p>
+
+<p>
+	The session/connection issuing <i>rdebug_start()</i> automatically assumes
+	the role of the <i>debugger</i>. A <i>debugger</i> may only debug one
+	<i>worker</i> at a time. A second call to <i>rdebug_start()</i> will override
+	the previous one and cancel any debug info the current session may possess,
+	starting afresh.
+</p>
+<p>
+	A <i>worker</i> session may only be debugger by a single <i>debugger</i>. An
+	error is thrown when attempting to debug an already attached <i>worker</i>.
+</p>
+<p>
+	One should call upon <i>rdebug_start()</i> after 
+	<a href="rdebug_compile_routine.html">compiling a routine or more with debug mode</a>,
+	and opening a <i>worker</i> connection. 
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_start(
+    recipient_id int unsigned
+  )
+  MODIFIES SQL DATA
+</pre></blockquote>
+</p>
+<p>
+  Input: 
+  <ul>
+    <li>
+    	<strong>recipient_id</strong>: ID of the session we wish to debug; the <i>worker</i>,
+    	which receives instructions from this <i>debugger</i> session.
+	</li>
+  </ul>
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>,
+<a href="rdebug_run.html">rdebug_run()</a>,
+<a href="rdebug_step_over.html">rdebug_step_over()</a>,
+<a href="rdebug_stop.html">rdebug_stop()</a>,
+<a href="rdebug_workflow.html">rdebug workflow</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

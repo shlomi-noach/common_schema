@@ -1,0 +1,66 @@
+
+<h3>rdebug is a debugger and a debugging API for MySQL stored routines</h3>
+
+<p>
+	<strong>rdebug</strong></a> is a pure SQL, server side debugging framework. Relying on
+	stored routines themselves, it allows for debugging of MySQL stored routines.
+</p>
+<p>
+	<i>rdebug</i> provides with an <a href="rdebug_api.html">API</a> that can be used by
+	all clients - from command line sessions to GUI tools. The API is based on stored
+	routine calls.
+</p>
+
+<p>
+	<i>rdebug</i> works by running two MySQL sessions: the <strong>worker</strong> session,
+	where one issues her stored routine, and the <strong>debugger</strong> session, which
+	attaches to the <i>worker</i> session and controls it.
+</p>
+<p>
+	<i>rdebug</i> relies on code injection: one must compile his stored procedure in 
+	<i>debug mode</i> so as to debug it. This process injects <i>rdebug</i> specific code
+	into the routine. This code can later be removed by compiling the routine again,
+	this time without debug info.
+</p>
+<p>
+	See <a href="rdebug_workflow.html">rdebug workflow</a> to find out how to set up and work out
+	a debugging session.
+</p>
+<p>
+	<i>rdebug</i> is in <strong>alpha</strong> - experimental - stage. It provides with
+	working functionality, with some known limitations.
+</p>
+
+<p>
+Known limitations in <i>rdebug - alpha</i>:
+<ul>
+	<li>Debugging limited to stored procedures. Support for stored functions is expected.
+		Support for triggers and events is not expected.
+	</li>
+	<li>
+		Conditional breakpoints (i.e. breakpoint where some condition holds true) 
+		are not yet supported
+	</li>
+	<li>
+		At this stage, breakpoints are declared per debugging session. Thus, a breakpoint
+		set by one debugger will not exist on a simultaneous second debugger. This design
+		is being reviewed and is subject to change.
+	</li>
+	<li><a href="rdebug_run.html">rdebug_run()</a> is known to hang when
+		the entire routine executes without at least once stopping on a breakpoint
+		or on a <i>step</i>.
+	</li>
+	<li>
+		Importing <i>common_schema</i> will terminate any running debugging session
+		(though will not interfere with the execution of the <i>worker</i>). 
+	</li>
+</ul>
+</p>
+
+<h3>SEE ALSO</h3>
+<a href="query_script.html">Query Script</a>,
+<a href="rdebug_api.html">rdebug API</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+

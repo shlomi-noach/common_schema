@@ -1,0 +1,97 @@
+<h3>NAME</h3>
+rdebug_get_variable(): Get value of local or user defined variable.
+
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	This function is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_get_variable()</i> returns the value of a single parameter or local 
+	or user defined variable currently visible by the <i>worker</i>.
+</p>
+
+<p>
+	Variables which are visible are those presented by
+	<a href="rdebug_watch_variables.html">rdebug_watch_variables()</a>. These are
+	the local variables in scope at the <i>worker's</i> currently executing routine,
+	and the user defined variables used anywhere by that routine. 
+</p>
+<p>
+	Calling <i>rdebug_get_variable()</i> should take place while the <i>worker</i>
+	is being suspended on a <a href="rdebug_set_breakpoint.html">breakpoint</a> or
+	by a step (<a href="rdebug_step_into.html">into</a>/<a 
+		href="rdebug_step_out.html">out</a>/<a 
+		href="rdebug_step_over.html">over</a>). 
+	During that time it is possible to call this routine multiple times for same
+	variables or for different variables.
+</p>
+<p>
+	This function is provided as convenience: it is sometimes desired to call upon a
+	function than to invoke a routine and read its result set.
+	It works similarly to <a href="rdebug_watch_variables.html">rdebug_watch_variables()</a>.
+	However, it does not return any metadata for the variable. 
+</p>
+<p>
+	Execution of this routine only makes sense on an active debugging session, i.e.
+	after calling <a href="rdebug_start.html">rdebug_start()</a>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_get_variable(
+    rdebug_variable_name varchar(128)
+  ) returns blob
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input: 
+  <ul>
+    <li><strong>rdebug_variable_name</strong>: name of local variable or user defined variable. 
+    	User defined variables are preceded by <strong>"@"</strong>.
+	</li>
+  </ul>
+</p>
+
+
+<h3>EXAMPLES</h3>
+	<p>
+		Compare usage of <a href="rdebug_watch_variables.html">rdebug_watch_variables()</a>
+		and <i>rdebug_get_variable()</i>:
+	<blockquote><pre>mysql&gt; call rdebug_watch_variables();
++----------------+--------------------------+-------------------+---------------+----------------+
+| routine_schema | routine_name             | variable_name     | variable_type | variable_value |
++----------------+--------------------------+-------------------+---------------+----------------+
+| test           | analyze_continent_cities | @avg_count_cities | user_defined  | 34.627450980   |
+| test           | analyze_continent_cities | @count_countries  | user_defined  | 51             |
+| test           | analyze_continent_cities | current_continent | param         | Asia           |
++----------------+--------------------------+-------------------+---------------+----------------+
+
+mysql&gt; select rdebug_get_variable('current_continent') as result_cont;
++-------------+
+| result_cont |
++-------------+
+| Asia        |
++-------------+
+
+mysql&gt; select rdebug_get_variable('@avg_count_cities') as result_avg;
++--------------+
+| result_avg   |
++--------------+
+| 34.627450980 |
++--------------+
+</pre></blockquote>
+</p>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_set_variable.html">rdebug_set_variable()</a>,
+<a href="rdebug_watch_variables.html">rdebug_watch_variables()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

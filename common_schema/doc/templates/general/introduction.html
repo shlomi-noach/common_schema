@@ -2,13 +2,22 @@
 <p><i>common_schema</i> is a framework for MySQL server administration.
 </p>
 <p>
-<i>common_schema</i> provides with query scripting, analysis & informational views, and a function library, allowing for 
-easier administration and diagnostics for MySQL. It introduces SQL based tools which simplify otherwise complex shell 
-and client scripts, allowing the DBA to be independent of operating system, installed packages and dependencies.
+	<i>common_schema</i> provides with query scripting, analysis & informational views, and a function library, allowing for 
+	easier administration and diagnostics for MySQL. It introduces SQL based tools which simplify otherwise complex shell 
+	and client scripts, allowing the DBA to be independent of operating system, installed packages and dependencies.
 </p>
 <p>
-It is a self contained <i>schema</i>, compatible with all MySQL >= 5.1 servers. Installed by importing the schema
-into the server, there is no need to configure nor compile. No special plugins are required, and no changes to your configuration.
+	<i>common_schema</i>'s components are:
+	<ul>
+		<li><strong>Views library</strong>: set of powerful views, typically operating and presenting server metadata</li>
+		<li><strong>Routines library</strong>: set of complementary routines to MySQL, including metadata handling</li>	
+		<li><strong><a href="query_script.html">QueryScript</a></strong>: programming language aimed for SQL scripting, seamlessly combining scripting power such as flow control & variables with standard SQL statements or RDBMS-specific commands. </li>
+		<li><strong><a href="rdebug.html">rdebug</a></strong>: debugger and debugging API for MySQL stored routines</li>
+	</ul>	
+</p>
+<p>
+	It is a self contained <i>schema</i>, compatible with all MySQL >= 5.1 servers. Installed by importing the schema
+	into the server, there is no need to configure nor compile. No special plugins are required, and no changes to your configuration.
 </p>
 
 <p>
@@ -102,18 +111,24 @@ SELECT redundant_index_name, sql_drop_index FROM redundant_keys;
 Please refer to the <a href="risks.html">risks</a> page.
 
 <h3>LICENSE</h3>
-<p>common_schema is released under the <a href="http://www.opensource.org/licenses/bsd-license.php">BSD license</a>.</p>
-<blockquote><pre>Copyright (c) 2011 - 2012, Shlomi Noach
-All rights reserved.
+	common_schema is released under the GPL license.
+<blockquote><pre>
+common_schema - DBA's Framework for MySQL
+Copyright (C) 2011-2013, Shlomi Noach
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-* Neither the name of the organization nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR 
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
-</blockquote>
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+A copy of the GNU General Public License is available at
+<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>
+</pre></blockquote>
+
 <h3>AUTHOR</h3>
 <p>Shlomi Noach</p>

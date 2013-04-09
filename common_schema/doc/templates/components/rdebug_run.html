@@ -1,0 +1,45 @@
+<h3>NAME</h3>
+rdebug_run(): Run worker until next breakpoint.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_run()</i> lets the worker run until it reaches a set breakpoint.
+</p>
+<p>
+	As opposed to <a href="rdebug_step_into.html">rdebug_step_into()</a> or
+	<a href="rdebug_step_over.html">rdebug_step_over()</a>, where the worker is advanced
+	one "step", <i>rdebug_run()</i> allows the worker to run freely until it reaches an
+	active breakpoint - such that has been set by
+	<a href="rdebug_set_breakpoint.html">rdebug_set_breakpoint()</a>. If not such breakpoint
+	is encountered, the worker is executed to full completion, and the debugging session
+	is terminated.
+</p>
+<p>
+	Execution of this routine only makes sense on an active debugging session, i.e.
+	after calling <a href="rdebug_start.html">rdebug_start()</a>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_run()
+  READS SQL DATA</pre></blockquote>
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_set_breakpoint.html">rdebug_set_breakpoint()</a>,
+<a href="rdebug_start.html">rdebug_start()</a>,
+<a href="rdebug_step_into.html">rdebug_step_into()</a>,
+<a href="rdebug_step_out.html">rdebug_step_out()</a>,
+<a href="rdebug_step_over.html">rdebug_step_over()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

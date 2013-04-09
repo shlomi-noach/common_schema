@@ -1,0 +1,91 @@
+<h3>NAME</h3>
+rdebug_watch_variables(): List user defined variables and local variables visible and used within current scope, with their current values.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_watch_variables()</i> lists the names, locations and most importantly
+	the <i>values</i> of local variables and user defined variables currently visible
+	on the <i>worker</i>. 
+</p>
+<p>
+	At any given time throughout the <i>worker's</i> execution, some variables are
+	visible, some not (not in scope, such as variables belonging to a routine that
+	called the currently executing routine). These would be routine parameters and
+	local variables. Also, user defined variables can be used by a routine.
+</p>
+<p>
+	Any local variable/parameter which is visible at the time of calling
+	<i>rdebug_watch_variables()</i>, and any user defined variable used by the
+	current executing <i>worker's</i> routine, are presented along with their values.
+	This excludes variables injected by <strong>rdebug</strong> itself, as these
+	only serve to the purpose of managing the debugging session.
+</p>
+<p>
+	Execution of this routine only makes sense on an active debugging session, i.e.
+	after calling <a href="rdebug_start.html">rdebug_start()</a>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_watch_variables()
+  READS SQL DATA
+</pre></blockquote>
+</p>
+<p>
+  Output: 
+  <ul>
+    <li><strong>routine_schema</strong>: schema of routine containing variable.</li>
+    <li><strong>routine_name</strong>: name of routine containing variable.</li>
+    <li><strong>variable_name</strong>: name of variable.</li>
+    <li><strong>variable_type</strong>: type of variable. Either:
+    	<ul>
+    		<li><strong>param</strong>: routine parameter</li>
+    		<li><strong>local</strong>: local routine variable</li>
+    		<li><strong>user_defined</strong>: user defined (session) variable</li>
+    	</ul>
+    </li>
+    <li><strong>variable_value</strong>: BLOB representation of current value.</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Watch variables on a routine with only local variables:
+	<blockquote><pre>mysql&gt; call rdebug_watch_variables();
++----------------+--------------------+-------------------+---------------+----------------+
+| routine_schema | routine_name       | variable_name     | variable_type | variable_value |
++----------------+--------------------+-------------------+---------------+----------------+
+| test           | analyze_continents | current_continent | local         | Europe         |
+| test           | analyze_continents | done              | local         | 0              |
++----------------+--------------------+-------------------+---------------+----------------+
+</pre></blockquote>
+</p>
+	<p>
+		Watch variables on a routine with a parameter and which uses a user defined variable:
+	<blockquote><pre>mysql&gt; call rdebug_watch_variables();
++----------------+--------------------------+-------------------+---------------+----------------+
+| routine_schema | routine_name             | variable_name     | variable_type | variable_value |
++----------------+--------------------------+-------------------+---------------+----------------+
+| test           | analyze_continent_cities | @avg_count_cities | user_defined  | 18.282608695   |
+| test           | analyze_continent_cities | @count_countries  | user_defined  | 46             |
+| test           | analyze_continent_cities | current_continent | param         | Europe         |
++----------------+--------------------------+-------------------+---------------+----------------+
+</pre></blockquote>
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_get_variable.html">rdebug_get_variable()</a>,
+<a href="rdebug_set_variable.html">rdebug_set_variable()</a>,
+<a href="rdebug_verbose.html">rdebug_verbose()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

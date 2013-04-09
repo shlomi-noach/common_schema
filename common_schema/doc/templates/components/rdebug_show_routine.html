@@ -1,0 +1,90 @@
+<h3>NAME</h3>
+rdebug_show_routine(): Show a routine's code, along with the outline of breakpoint positions.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_show_routine()</i> displays the body of a routine in 
+	<a href="prettify_message.html">prettified</a> format. It adds breakpoint positions/IDs
+	to the display.
+</p>
+
+<p>
+	A breakpoint is shown just at the beginning of the statement following it.
+	Thus, <a href="rdebug_set_breakpoint.html">setting a breakpoint</a> implies
+	the <i>worker</i> will stop just before executing said statement.
+</p>
+<p>
+	Execution of this routine is possible at any given time. When the specified routine 
+	has no debug info, <i>rdebug_show_routine()</i> simply shows its code.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_show_routine(
+    in rdebug_routine_schema varchar(128) charset utf8,
+    in rdebug_routine_name   varchar(128) charset utf8
+  )
+  READS SQL DATA
+</pre></blockquote>
+</p>
+<p>
+  Input: 
+  <ul>
+    <li><strong>rdebug_routine_schema</strong>: schema where routine is located.
+	</li>
+    <li><strong>rdebug_routine_name</strong>: name of routine to show.
+	</li>
+  </ul>
+</p>
+
+
+<h3>EXAMPLES</h3>
+	<p>
+		Show routine code with breakpoint positions (IDs):
+	<blockquote><pre>mysql&gt; call rdebug_show_routine('test','analyze_continents');
++-------------------------------------------------------------+
+| `test`.`analyze_continents` breakpoints                     |
++-------------------------------------------------------------+
+| main_body: begin                                            |
+|   declare done bool default false;                          |
+|   declare current_continent varchar(32) default null;       |
+|   declare continents_cursor cursor for                      |
+|             select distinct continent from world.Country;   |
+|   declare continue handler for not found set done := true;  |
+|                                                             |
+|   [:80]open continents_cursor;                              |
+|   [:86]cursor_loop: while not done do                       |
+|     [:98]fetch continents_cursor into current_continent;    |
+|     [:108]if done then                                      |
+|       [:115]leave cursor_loop;                              |
+|     [:121]end if;                                           |
+|     [:127]call analyze_continent_cities(current_continent); |
+|   [:136]end while;                                          |
+|   [:142]close continents_cursor;                            |
+| [:147]end                                                   |
++-------------------------------------------------------------+
+</pre></blockquote>
+	In the above routine there are <strong>9</strong> breakpoint positions; these can be
+	used as input for <a href="rdebug_set_breakpoint.html">rdebug_set_breakpoint()</a>.
+	<br/>
+	Compare the above with output from 
+	<a href="rdebug_show_routine_statements.html">rdebug_show_routine_statements()</a>.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>,
+<a href="rdebug_run.html">rdebug_run()</a>,
+<a href="rdebug_set_breakpoint.html">rdebug_set_breakpoint()</a>,
+<a href="rdebug_show_routine_statements.html">rdebug_show_routine_statements()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

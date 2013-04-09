@@ -52,7 +52,8 @@ Function
 </pre></blockquote>
 
 <p>Remove all HTML tags, assume "&lt;" & "&gt;" do not appear throughout text:</p>
-<blockquote><pre>mysql&gt; select replace_sections('The &lt;b&gt;quick&lt;/b&gt; brown &lt;b&gt;fox&lt;/b&gt;', '&lt;', '&gt;', '') as result;
+<blockquote><pre>mysql&gt; select replace_sections('The &lt;b&gt;quick&lt;/b&gt; brown &lt;b&gt;fox&lt;/b&gt;', 
+        '&lt;', '&gt;', '') as result;
 +---------------------+
 | result              |
 +---------------------+
@@ -61,12 +62,27 @@ Function
 </pre></blockquote>
 
 <p>Remove only &lt;b&gt; HTML tags, retain enclosed text:</p>
-<blockquote><pre>mysql&gt; select replace_sections('The &lt;b&gt;quick&lt;/b&gt; &lt;span&gt;brown&lt;/span&gt; &lt;b&gt;fox&lt;/b&gt;', '&lt;b&gt;', '&lt;/b&gt;', '\\0') as result;
+<blockquote><pre>mysql&gt; select replace_sections(
+        'The &lt;b&gt;quick&lt;/b&gt; &lt;span&gt;brown&lt;/span&gt; &lt;b&gt;fox&lt;/b&gt;', 
+        '&lt;b&gt;', '&lt;/b&gt;', 
+        '\\0') as result;
 +----------------------------------+
 | result                           |
 +----------------------------------+
 | The quick &lt;span&gt;brown&lt;/span&gt; fox |
 +----------------------------------+
+</pre></blockquote>
+
+<p>Convert <strong>b</strong> tags to <strong>span</strong> tags, retain enclosed text:</p>
+<blockquote><pre>mysql&gt; select replace_sections(
+        'The &lt;b&gt;quick&lt;/b&gt; brown &lt;b&gt;fox&lt;/b&gt;', 
+        '&lt;b&gt;', '&lt;/b&gt;', 
+        '&lt;span&gt;\\0&lt;/span&gt;') as result;
++-----------------------------------------------+
+| result                                        |
++-----------------------------------------------+
+| The &lt;span&gt;quick&lt;/span&gt; brown &lt;span&gt;fox&lt;/span&gt; |
++-----------------------------------------------+
 </pre></blockquote>
 
 <h3>ENVIRONMENT</h3>

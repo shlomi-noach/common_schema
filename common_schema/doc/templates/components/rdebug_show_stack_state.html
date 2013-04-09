@@ -1,0 +1,72 @@
+<h3>NAME</h3>
+rdebug_show_stack_state(): Show worker's current stack state (applies to debugged routines only).
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_show_stack_state()</i> shows the stack state of the worker: the stack of
+	routine called at the point in time at which <i>rdebug_show_stack_state()</i> is executed. 
+</p>
+
+<p>
+	A worker's routine may call upon a second routine, which, in turn, may call upon a 
+	third routine, and so forth. <i>rdebug_show_stack_state()</i> will present:
+	<ul>
+		<li>Routine name in the stack</li>
+		<li>Time at which each routine has been called</li>
+		<li>Current statement ID for each routine (see <a href="rdebug_show_routine_statements.html">rdebug_show_routine_statements()</a>).</li>
+	</ul>
+	In formation only applies to routines <a href="rdebug_compile_routine">compiled with debug mode</a>.
+	Any routine that is called, but which is not compiled with debug mode, does not appear
+	on <i>rdebug</i>'s stack and has no mention.
+</p>
+<p>
+	Execution of this routine only makes sense on an active debugging session, i.e.
+	after calling <a href="rdebug_start.html">rdebug_start()</a>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_show_stack_state()
+  READS SQL DATA
+</pre></blockquote>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Show the stack state of a running worker:
+	<blockquote><pre>mysql&gt; call rdebug_show_stack_state();
++-------------+----------------+--------------------------+--------------+---------------------+
+| stack_level | routine_schema | routine_name             | statement_id | entry_time          |
++-------------+----------------+--------------------------+--------------+---------------------+
+|           1 | test           | analyze_continents       |          127 | 2013-03-30 16:52:13 |
+|           2 | test           | analyze_continent_cities |           93 | 2013-03-30 16:52:16 |
++-------------+----------------+--------------------------+--------------+---------------------+
+</pre></blockquote>
+	In the above, <strong>analyze_continents()</strong> was invoked at 
+	<strong>2013-03-30 16:52:13</strong>. At <strong>2013-03-30 16:52:16</strong>,
+	and at statement ID <strong>127</strong> it called
+	upon <strong>analyze_continent_cities()</strong>, currently waiting on
+	statement ID <strong>93</strong>.
+	<br/>
+	To clarify, it is impossible to verify from the above whether additional routines are being
+	called, which have no debug info. <i>rdebug</i> does not know anything about such routines,
+	and only presents data for those routines compiled <i>with</i> debug mode.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>,
+<a href="rdebug_run.html">rdebug_run()</a>,
+<a href="rdebug_set_breakpoint.html">rdebug_set_breakpoint()</a>,
+<a href="rdebug_show_routine_statements.html">rdebug_show_routine_statements()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

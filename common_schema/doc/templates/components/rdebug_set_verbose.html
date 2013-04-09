@@ -1,0 +1,55 @@
+<h3>NAME</h3>
+rdebug_set_verbose(): Turn verbose mode on/off.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_set_verbose()</i> allows on to turn verbose mode on/off. Verbode mode
+	is useful for command-line usage of <i>rdebug</i>, in that it conveniently
+	causes useful info to be dumped on screen.
+</p>
+
+<p>
+	<i>rdebug_set_verbose()</i> causes an implicit invocation of 
+	<a href="rdebug_verbose.html">rdebug_verbose()</a> whenever
+	the <i>worker</i> enters stall (due to <i>stepping</i> or a breakpoint).
+</p>
+<p>
+	Execution of this routine is possible at any given time. Effect of calling
+	this method is durable throughout the MySQL session and is not limited to a
+	debugging session.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_set_verbose(
+    in verbose bool
+  )
+  NO SQL
+</pre></blockquote>
+</p>
+<p>
+  Input: 
+  <ul>
+    <li><strong>verbose</strong>: a <stron>TRUE</stron> or <strong>FALSE</strong> (or
+    	numeric equivalent) value to indicate requested verbose mode.
+	</li>
+  </ul>
+</p>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>,
+<a href="rdebug_verbose.html">rdebug_verbose()</a>,
+<a href="rdebug_set_breakpoint.html">rdebug_set_breakpoint()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
