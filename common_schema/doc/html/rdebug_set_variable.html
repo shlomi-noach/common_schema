@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>rdebug_set_variable: common_schema documentation</title>
+	<meta name="description" content="rdebug_set_variable: common_schema" />
+	<meta name="keywords" content="rdebug_set_variable: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.0</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="rdebug_set_variable.html">rdebug_set_variable</a></h2>	
+<h3>NAME</h3>
+rdebug_set_variable(): Modify value of local or user defined variable.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+</p>
+<p>
+	<i>rdebug_set_variable()</i> allows the <i>debugger</i> to modify values of
+	<i>worker's</i> visible local routine variables and user defined variables.
+</p>
+
+<p>
+	Variables which are eligible for modifications are those presented by
+	<a href="rdebug_watch_variables.html">rdebug_watch_variables()</a>. These are
+	the local variables in scope at the <i>worker's</i> currently executing routine,
+	and the user defined variables used anywhere by that routine. 
+</p>
+<p>
+	Calling <i>rdebug_set_variable()</i> should take place while the <i>worker</i>
+	is being suspended on a <a href="rdebug_set_breakpoint.html">breakpoint</a> or
+	by a step (<a href="rdebug_step_into.html">into</a>/<a 
+		href="rdebug_step_out.html">out</a>/<a 
+		href="rdebug_step_over.html">over</a>). 
+	During that time it is possible to call this routine multiple times for same
+	variables or for different variables.
+	Changes take effect immediately as the <i>worker</i> resumes execution.
+</p>
+<p>
+	The new value is passed as <strong>BLOB</strong> and is later translated to the 
+	appropriate data type via MySQL's internal assignment mechanism.
+</p>
+<p>
+	Execution of this routine only makes sense on an active debugging session, i.e.
+	after calling <a href="rdebug_start.html">rdebug_start()</a>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>rdebug_set_variable(
+    in rdebug_variable_name varchar(128),
+    in rdebug_variable_value blob
+  )
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input: 
+  <ul>
+    <li><strong>rdebug_variable_name</strong>: name of local variable or user defined variable
+    	to change. User defined variables are preceded  by <strong>"@"</strong>.
+    
+	</li>
+    <li><strong>rdebug_variable_value</strong>: new value for variable.</li>
+  </ul>
+</p>
+
+
+<h3>EXAMPLES</h3>
+	<p>
+		Watch current variables, modify a variable, and watch the change:
+	<blockquote><pre>mysql&gt; call rdebug_watch_variables();
++----------------+--------------------------+-------------------+---------------+----------------+
+| routine_schema | routine_name             | variable_name     | variable_type | variable_value |
++----------------+--------------------------+-------------------+---------------+----------------+
+| test           | analyze_continent_cities | @avg_count_cities | user_defined  | 18.282608695   |
+| test           | analyze_continent_cities | @count_countries  | user_defined  | 46             |
+| test           | analyze_continent_cities | current_continent | param         | Europe         |
++----------------+--------------------------+-------------------+---------------+----------------+
+
+mysql&gt; rdebug_set_variable('current_continent', 'Atlantis');
+
+mysql&gt; rdebug_watch_variables();
++----------------+--------------------------+-------------------+---------------+----------------+
+| routine_schema | routine_name             | variable_name     | variable_type | variable_value |
++----------------+--------------------------+-------------------+---------------+----------------+
+| test           | analyze_continent_cities | @avg_count_cities | user_defined  | 18.282608695   |
+| test           | analyze_continent_cities | @count_countries  | user_defined  | 46             |
+| test           | analyze_continent_cities | current_continent | param         | Atlantis       |
++----------------+--------------------------+-------------------+---------------+----------------+
+</pre></blockquote>
+The above only shows the <i>debugger's</i> view of the variables. At this point, the <i>worker</i>
+is still unaware of the changes since it is still suspended. Once the <i>worker</i> resumes
+execution, it updates the value of <strong>current_continent</strong> to <strong>'Atlantis'</strong>.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_get_variable.html">rdebug_get_variable()</a>,
+<a href="rdebug_watch_variables.html">rdebug_watch_variables()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>
