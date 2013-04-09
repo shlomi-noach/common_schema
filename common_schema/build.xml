@@ -5,21 +5,24 @@
 		</classpath>
 	</taskdef>
 
-	<!--	
-		<property name="mysql.user" value="root" />
-		<property name="mysql.password" value="" />
-		<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
-	-->
 	<property name="mysql.user" value="root" />
-	<property name="mysql.password" value="msandbox" />
-	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
-
+	<property name="mysql.password" value="" />
+	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
+	
+	
 	<!--
 
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
-	<property name="mysql.socket" value="/tmp/mysql_sandbox5609.sock" />
+	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
 -->
+
+	<!--	
+
+	<property name="mysql.user" value="root" />
+	<property name="mysql.password" value="msandbox" />
+	<property name="mysql.socket" value="/tmp/mysql_sandbox5610.sock" />
+	-->
 		
 	<property name="mysql.database" value="common_schema" />
 
@@ -83,6 +86,7 @@
 		<concat destfile="${build.dir}/${sql.base_components.output.file}">
 			<fileset dir="tables/" includes="*.sql" />
 
+			<fileset dir="routines/debug/" includes="*.sql" />
 			<fileset dir="routines/dependencies/" includes="*.sql" />
 			<fileset dir="routines/general/" includes="*.sql" />
 			<fileset dir="routines/general_internal/" includes="*.sql" />
@@ -100,7 +104,6 @@
 			<fileset dir="routines/text/" includes="*.sql" />
 			<fileset dir="routines/time/" includes="*.sql" />
 			<!--
-			<fileset dir="routines/debug/" includes="*.sql" />
 			<fileset dir="routines/math/" includes="*.sql" />			
 			-->			
 			<!--
