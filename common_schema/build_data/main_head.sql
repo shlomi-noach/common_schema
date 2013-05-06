@@ -71,6 +71,8 @@ USE common_schema;
 set @@group_concat_max_len = 1048576;
 set @current_sql_mode := @@sql_mode;
 set @@sql_mode = REPLACE(REPLACE(@@sql_mode, 'ANSI_QUOTES', ''), ',,', ',');
+-- The following needed for "split" operations copying data across tables
+set @@sql_mode = CONCAT_WS(',', @@sql_mode, 'NO_AUTO_VALUE_ON_ZERO');
 
 -- To be updated during installation process:
 set @common_schema_innodb_plugin_expected := 0;
