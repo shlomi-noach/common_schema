@@ -216,6 +216,7 @@ main_body: begin
                 end if;
               end if;
             end if;
+            call _drop_array(foreach_variables_array_id);
 	      end;
         when first_state = 'alpha' AND first_token = 'split' then begin
 	        call _consume_split_statement(id_from + 1, id_to, consumed_to_id, depth, split_table_schema, split_table_name, split_injected_action_statement, split_injected_text, split_options, should_execute_statement);
