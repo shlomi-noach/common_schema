@@ -126,6 +126,10 @@ begin
                             set p_state = 'system variable', v_from = v_from + 1;
                         else
                             set p_state = 'user-defined variable';
+                            if v_lookahead = '''' then
+                                set v_from = v_from + 1;
+                                leave my_loop;
+                            end if;
                         end if;
                     when v_char = '$' and allow_script_tokens then
                         set p_state = 'query_script variable';
