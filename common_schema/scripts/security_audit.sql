@@ -62,12 +62,12 @@ create temporary table _security_audit_identical_passwords (
 
 insert into _security_audit_identical_passwords
   SELECT 
-    user, host, password 
+    user, host, MIN(password) AS password 
   FROM (
     SELECT 
       user1.user, user1.host, 
       user2.user AS u2, user2.host AS h2, 
-      min(user1.password) as password 
+      user1.password as password 
     FROM 
       mysql.user AS user1 
       INNER JOIN mysql.user AS user2 ON (user1.password = user2.password) 
