@@ -67,7 +67,7 @@ insert into _security_audit_identical_passwords
     SELECT 
       user1.user, user1.host, 
       user2.user AS u2, user2.host AS h2, 
-      user1.password as password 
+      min(user1.password) as password 
     FROM 
       mysql.user AS user1 
       INNER JOIN mysql.user AS user2 ON (user1.password = user2.password) 
