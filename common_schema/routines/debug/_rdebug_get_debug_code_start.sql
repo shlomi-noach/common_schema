@@ -17,7 +17,10 @@ SQL SECURITY INVOKER
 COMMENT ''
 
 begin
-  return '/* [_common_schema_debug_] */';
+  -- The reson the next text is broken is that we wish to avoid mistakenly identify this
+  -- very routines as being a "with debug mode" due to the appearance of the magic
+  -- start-code. Much like "ps aux | grep ... | grep -v grep"
+  return CONCAT('/* [_common_schema_debug_', '] */');
 end $$
 
 DELIMITER ;

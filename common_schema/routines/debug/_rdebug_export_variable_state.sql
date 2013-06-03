@@ -4,7 +4,7 @@
 -- Foundation, version 2
 --
 -- 
--- Write down current variable (variables within current scope)
+-- Write down current variables (variables within current scope)
 -- into global variables state table
 -- 
 
