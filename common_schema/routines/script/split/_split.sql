@@ -33,7 +33,6 @@ main_body: begin
 
   set @_split_is_first_step_flag := true;
   
-  call _split_generate_dependency_tables(split_table_schema, split_table_name);
   call _split_deduce_columns(split_table_schema, split_table_name);
   call _split_init_variables();
   call _split_assign_min_max_variables(id_from, split_table_schema, split_table_name, split_options, is_empty_range);
@@ -49,6 +48,7 @@ main_body: begin
   set @query_script_split_start_time := SYSDATE();
   
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_columns', '@query_script_split_columns', FALSE);
+  call _declare_local_variable(id_from, id_from, id_to, depth, '$split_index', '@query_script_split_index_name', FALSE);
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_min', '@query_script_split_min', FALSE);
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_max', '@query_script_split_max', FALSE);
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_clause', '@query_script_split_comparison_clause', FALSE);
@@ -92,6 +92,7 @@ main_body: begin
       set @query_script_split_min := @_query_script_split_min;
       set @query_script_split_max := @_query_script_split_max;
       set @query_script_split_columns := @_query_script_split_columns;
+      set @query_script_split_index_name := @_query_script_split_index_name;
       call _split_set_step_clause_and_ranges_local_variables(comparison_clause);
     
       call _consume_statement(id_from, id_to, expect_single, consumed_to_id, depth, should_execute_statement);

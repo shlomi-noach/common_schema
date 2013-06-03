@@ -41,32 +41,7 @@ main_body: begin
     call throw('Invalid nesting level detected at end of script');
   end if;
 
-  drop temporary table if exists _qs_variables;
-  create temporary table _qs_variables(
-      variable_name VARCHAR(65) CHARSET ascii NOT NULL,
-      mapped_user_defined_variable_name  VARCHAR(65) CHARSET ascii NOT NULL,
-      declaration_depth INT UNSIGNED NOT NULL,
-      declaration_id INT UNSIGNED NOT NULL,
-      scope_end_id INT UNSIGNED NOT NULL,
-      value_snapshot TEXT DEFAULT NULL,
-      PRIMARY KEY(variable_name),
-      KEY(declaration_depth),
-      KEY(declaration_id),
-      KEY(scope_end_id)
-  ) engine=MyISAM;
---  create temporary table _qs_variables(
---      _qs_variables_id int unsigned auto_increment,
---      variable_name VARCHAR(65) CHARSET ascii NOT NULL,
---      mapped_user_defined_variable_name  VARCHAR(65) CHARSET ascii NOT NULL,
---      declaration_depth INT UNSIGNED NOT NULL,
---      declaration_id INT UNSIGNED NOT NULL,
---      scope_end_id INT UNSIGNED NOT NULL,
---      value_snapshot TEXT DEFAULT NULL,
---      PRIMARY KEY(_qs_variables_id),
---      KEY(variable_name),
---      KEY(declaration_depth),
---      KEY(declaration_id)
---  ) engine=MyISAM;
+  delete from _qs_variables;
   
   -- Identify ${my_var} expanded variables. These are initially not identified as a state.
   -- We hack the _sql_tokens table to make these in their own state, combining multiple rows into one,
@@ -122,6 +97,12 @@ main_body: begin
   end if;
   
   set @@group_concat_max_len := @__script_group_concat_max_len;  
+  if not (@query_script_skip_cleanup is true) then
+    delete from _sql_tokens;
+    delete from _qs_variables;
+    delete from _script_report_data;
+    -- delete from _split_column_names_table;
+  end if;
 end;
 //
 

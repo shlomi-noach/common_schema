@@ -21,21 +21,14 @@ begin
     declare v_state varchar(32);
     declare _sql_tokens_id int unsigned default 0;
     
-    drop temporary table if exists _sql_tokens;
-    create temporary table _sql_tokens(
-        id int unsigned primary key
-    ,   start int unsigned  not null
-    ,   level int not null
-    ,   token text          
-    ,   state text           not null
-    ) engine=MyISAM;
-    
+    delete from _sql_tokens;
+    start transaction;
     repeat 
         set v_old_from = v_from;
         call _get_sql_token(p_text, v_from, v_level, v_token, 'script', v_state);
         set _sql_tokens_id := _sql_tokens_id + 1;
-        insert into _sql_tokens(id,start,level,token,state) 
-        values (_sql_tokens_id, v_from, v_level, v_token, v_state);
+        insert into _sql_tokens(session_id,id,start,level,token,state) 
+        values (CONNECTION_ID(),_sql_tokens_id, v_from, v_level, v_token, v_state);
     until 
         v_old_from = v_from
     end repeat;
@@ -45,6 +38,7 @@ begin
       from _sql_tokens
       order by id;
     end if;
+    commit;
 end;
 //
 

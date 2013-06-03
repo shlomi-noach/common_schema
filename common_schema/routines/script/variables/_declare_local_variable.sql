@@ -31,7 +31,8 @@ main_body: begin
   --   call _throw_script_error(id_from, CONCAT('Duplicate local variable: ', local_variable));
   -- end if;
    
-  INSERT IGNORE INTO _qs_variables (variable_name, mapped_user_defined_variable_name, declaration_depth, declaration_id, scope_end_id) VALUES (local_variable, user_defined_variable_name, depth, id_variable_declaration, id_to);
+  INSERT IGNORE INTO _qs_variables (session_id, variable_name, mapped_user_defined_variable_name, declaration_depth, declaration_id, scope_end_id) 
+    VALUES (CONNECTION_ID(), local_variable, user_defined_variable_name, depth, id_variable_declaration, id_to);
   if ROW_COUNT() = 0 and throw_when_exists then
     call _throw_script_error(id_variable_declaration, CONCAT('Duplicate local variable: ', local_variable));
   end if;

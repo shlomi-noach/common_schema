@@ -21,12 +21,8 @@ begin
   declare is_horizontal_ruler tinyint unsigned default 0;
   
   if not @_common_schema_script_report_used then
-    drop temporary table if exists _script_report_data;
-    create temporary table _script_report_data (
-      id int unsigned AUTO_INCREMENT,
-      info text charset utf8,
-      PRIMARY KEY (id)
-    ) engine=MyISAM;
+    -- First report in this script. Make sure to clean up first.
+    delete from _script_report_data;
     set @_common_schema_script_report_used := true;
   end if;
   
@@ -69,9 +65,9 @@ begin
   end if;
   
   insert into 
-    _script_report_data (info) 
+    _script_report_data (session_id, info) 
   SELECT 
-    split_token(@_query_script_report_line, '\n', n)
+    CONNECTION_ID(), split_token(@_query_script_report_line, '\n', n)
   FROM
     numbers
   WHERE 
