@@ -15,7 +15,7 @@ begin
   declare split_num_column tinyint unsigned;
   
   drop temporary table if exists _split_unique_key_columns;
-  create temporary table _split_unique_key_columns
+  create temporary table _split_unique_key_columns engine=MyISAM
    SELECT
       TABLE_SCHEMA,
       TABLE_NAME,
@@ -32,7 +32,7 @@ begin
   ;
   
   drop temporary table if exists _split_i_s_columns;
-  create temporary table _split_i_s_columns
+  create temporary table _split_i_s_columns engine=MyISAM
    SELECT
       TABLE_SCHEMA,
       TABLE_NAME,
@@ -51,7 +51,7 @@ begin
           WHEN 'double' THEN 8
           WHEN 'decimal' THEN CEILING(NUMERIC_PRECISION/2)
           WHEN 'bit' THEN CEILING(NUMERIC_PRECISION/8)
-          WHEN 'set' THEN 64
+          WHEN 'set' THEN 8
           WHEN 'enum' THEN 8
           WHEN 'year' THEN 2
           WHEN 'char' THEN CHARACTER_OCTET_LENGTH
@@ -75,7 +75,7 @@ begin
   ;
   
   drop temporary table if exists _split_candidate_keys;
-  create temporary table _split_candidate_keys
+  create temporary table _split_candidate_keys engine=MyISAM
    SELECT
       TABLE_SCHEMA,
       TABLE_NAME,
@@ -92,7 +92,7 @@ begin
   ;
 
   drop temporary table if exists _split_candidate_keys_recommended;
-  create temporary table _split_candidate_keys_recommended
+  create temporary table _split_candidate_keys_recommended engine=MyISAM
     SELECT
       *
     FROM 
