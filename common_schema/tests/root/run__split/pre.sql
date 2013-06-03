@@ -48,3 +48,23 @@ create table test_split_complex_unique(
 insert into test_split_complex_unique
   select id, CONCAT('name_', id), TIMESTAMP('2000-01-01') + interval id second, CONCAT('textval_', id)
   from test_split;
+
+  
+drop table if exists test_split_multiple_unique;
+create table test_split_multiple_unique(
+  id int auto_increment,
+  small_val smallint,
+  name varchar(10), 
+  ts timestamp, 
+  textval varchar(32), 
+  PRIMARY KEY(id),
+  UNIQUE KEY `id` (id),
+  UNIQUE KEY `small` (small_val, name),
+  UNIQUE KEY `name` (name, ts, small_val),
+  UNIQUE KEY `ts` (ts, small_val),
+  UNIQUE KEY `textval` (textval)
+) engine=innodb;
+
+insert into test_split_multiple_unique
+  values (1, 2, 'brown', '2000-01-01 00:00:00', '6ff47afa5dc7daa42cc705a03fca8a9b')
+  ;
