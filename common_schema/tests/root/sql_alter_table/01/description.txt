@@ -1,0 +1,1 @@
+sql_alter_table: test table options
