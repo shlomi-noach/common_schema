@@ -1,3 +1,4 @@
+set @query_script_skip_cleanup := true;
 set @query := 'select * from test.some_table WHERE id < 10';
 call _interpret(@query, false);
 call _get_split_query_single_table (

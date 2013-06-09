@@ -1,3 +1,4 @@
+set @query_script_skip_cleanup := true;
 set @query := 'insert into test12.some_table values (1)';
 call _interpret(@query, false);
 call _get_split_query_single_table (

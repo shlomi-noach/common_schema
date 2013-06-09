@@ -1,3 +1,4 @@
+set @query_script_skip_cleanup := true;
 set @query := 'insert into test.target select id, val, (x*3) from test.some_table group by category having count(*) > 3';
 call _interpret(@query, false);
 call _get_split_query_single_table (

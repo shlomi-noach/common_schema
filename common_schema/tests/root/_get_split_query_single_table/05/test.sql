@@ -1,3 +1,4 @@
+set @query_script_skip_cleanup := true;
 set @query := 'delete from test12.some_table using `test12`.some_table JOIN test12.another_table where id < 10';
 call _interpret(@query, false);
 call _get_split_query_single_table (

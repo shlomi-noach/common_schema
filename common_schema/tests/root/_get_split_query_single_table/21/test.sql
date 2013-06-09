@@ -1,3 +1,4 @@
+set @query_script_skip_cleanup := true;
 set @query := 'insert into test.target select * from test.t1 join test.j2 where id < 10';
 call _interpret(@query, false);
 call _get_split_query_single_table (

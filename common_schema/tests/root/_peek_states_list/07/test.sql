@@ -1,3 +1,4 @@
+set @query_script_skip_cleanup := true;
 set @query := 'select some_schema.`some_table`';
 call _interpret(@query, false);
 call _peek_states_list(1, 10000, 'alpha,alpha|alphanum|quoted identifier,dot,alpha|alphanum|quoted identifier', true, true, true, @tokens_array_id, @match_to);
