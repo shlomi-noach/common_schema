@@ -1,0 +1,66 @@
+<h3>NAME</h3>
+debugged_routines: List routines with rdebug's debugging info    
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p>
+	<i>debugged_routines</i> lists those routines that have been 
+	<a href="rdebug_compile_routine.html">compiled with debug</a> info 
+	via <a href="rdebug_api.html">rdebug's API</a>.
+</p>
+<p>
+	It also provides with the SQL statement to remove the debug info from the routines.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC debugged_routines;
++---------------------+--------------+------+-----+---------+-------+
+| Field               | Type         | Null | Key | Default | Extra |
++---------------------+--------------+------+-----+---------+-------+
+| ROUTINE_SCHEMA      | varchar(64)  | NO   |     |         |       |
+| ROUTINE_NAME        | varchar(64)  | NO   |     |         |       |
+| ROUTINE_TYPE        | varchar(9)   | NO   |     |         |       |
+| sql_undebug_routine | varchar(332) | YES  |     | NULL    |       |
++---------------------+--------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<ul>
+	<li><strong>ROUTINE_SCHEMA</strong>: schema of routine</li>
+	<li><strong>ROUTINE_NAME</strong>: name of routine with debug info</li>
+	<li>
+		<strong>ROUTINE_TYPE</strong>: type of routine with debug info 
+		(<strong>'PROCEDURE'</strong> or <strong>'FUNCTION'</strong>)
+	</li>
+	<li><strong>sql_undebug_routine</strong>: SQL statement to invoke for
+		removing debug info from routine.</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; call rdebug_compile_routine('test', 'analyze_continents', true);
+
+mysql&gt; call rdebug_compile_routine('test', 'analyze_continent_cities', true);
+
+mysql&gt; SELECT * FROM debugged_routines;
++----------------+--------------------------+--------------+----------------------------------------------------------------------------------------+
+| ROUTINE_SCHEMA | ROUTINE_NAME             | ROUTINE_TYPE | sql_undebug_routine                                                                    |
++----------------+--------------------------+--------------+----------------------------------------------------------------------------------------+
+| test           | analyze_continents       | PROCEDURE    | call `common_schema`.rdebug_compile_routine('test', 'analyze_continents', false)       |
+| test           | analyze_continent_cities | PROCEDURE    | call `common_schema`.rdebug_compile_routine('test', 'analyze_continent_cities', false) |
++----------------+--------------------------+--------------+----------------------------------------------------------------------------------------+
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>,
+<a href="rdebug_show_routine.html">rdebug_show_routine()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
