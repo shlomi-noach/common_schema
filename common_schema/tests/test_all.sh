@@ -48,7 +48,7 @@ do
 
 		# verbose
 		if [ -f description.txt ] ; then
-			export TEST_BRIEF_DESCRIPTION="$(cat description.txt | head -n 1 | cut -c 1-60)"
+			export TEST_BRIEF_DESCRIPTION="$(cat description.txt | head -n 1 | cut -c 1-80)"
 		else
 			export TEST_BRIEF_DESCRIPTION=""
 		fi
@@ -66,7 +66,7 @@ do
 		# execute test code
 		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA --silent --raw < test.sql > ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE} 2> ${TEST_OUTPUT_PATH}/${TEST_ERROR_FILE}
 		if [ $? -eq 0 ] ; then
-			# check test results
+			# No errors thrown by test itself; check test results
 			if [ -f error_expected.txt ] ; then
 			  # error is expected. How come no error?
 			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed on test.sql; expected error, found none"
@@ -83,6 +83,10 @@ do
 				  
 				  exit 1
 				fi
+			elif [ -f expect_no_error.txt ] ; then
+				# There is an "expect_no_error.txt" file: results are disregarded.
+				# The mere fact no error is thrown means "good"!
+				:
 			else
 				# No explicit "expected.txt" result.
 				# By default, we expect "1"
