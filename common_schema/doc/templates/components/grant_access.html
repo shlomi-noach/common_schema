@@ -1,0 +1,37 @@
+<h3>NAME</h3>
+grant_access(): Grant SELECT & EXECUTE to all grantees on common_schema
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	This is a <i>common_schema</i> meta routine, which grants access on common_schema to all
+	existing accounts.
+</p>
+<p>
+	It will, in particular, grant <strong>SELECT</strong> and <strong>EXECUTE</strong>
+	on all tables, views and routines in common_schema.
+</p>
+<p>
+	You may possibly wish to execute this routine after <i>common_schema</i> installation
+	so as to allow all accounts access to <i>common_schema</i>.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>grant_access() 
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="duplicate_grantee.html">duplicate_grantee()</a>,
+<a href="processlist_grantees.html">processlist_grantees</a>,
+<a href="sql_accounts.html">sql_accounts</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
