@@ -61,7 +61,7 @@ main_body: begin
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_table_schema', '@query_script_split_table_schema', FALSE);
   call _declare_local_variable(id_from, id_from, id_to, depth, '$split_table_name', '@query_script_split_table_name', FALSE);
   
-  set split_range_size := least(10000, greatest(100, floor(ifnull(get_option(split_options, 'size'), 1000))));
+  set split_range_size := least(50000, greatest(100, floor(ifnull(get_option(split_options, 'size'), 1000))));
   _split_step_loop: loop
     call _split_is_range_start_overflow(is_overflow);
     if is_overflow and not @_split_is_first_step_flag then
