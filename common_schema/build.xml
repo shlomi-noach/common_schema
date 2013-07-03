@@ -17,6 +17,13 @@
 	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
 -->
 
+	<!--
+
+	<property name="mysql.user" value="root" />
+	<property name="mysql.password" value="msandbox" />
+	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
+-->
+
 	<!--	
 
 	<property name="mysql.user" value="root" />
