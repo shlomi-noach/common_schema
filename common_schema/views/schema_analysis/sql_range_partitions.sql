@@ -53,7 +53,13 @@ VIEW _sql_range_partitions_base AS
     TIMESTAMPDIFF(DAY, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_day_from_days,
     TIMESTAMPDIFF(WEEK, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_week_from_days,
     TIMESTAMPDIFF(MONTH, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_month_from_days,
-    TIMESTAMPDIFF(YEAR, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_year_from_days
+    TIMESTAMPDIFF(YEAR, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_year_from_days,
+    (_as_datetime(unquote(p0.PARTITION_DESCRIPTION)) < NOW()) AS is_past_timestamp,
+    (_as_datetime(unquote(p1.PARTITION_DESCRIPTION)) >= NOW()) AS is_future_timestamp,
+    (_as_datetime(FROM_UNIXTIME(p0.PARTITION_DESCRIPTION)) < NOW()) AS is_past_from_unixtime,
+    (_as_datetime(FROM_UNIXTIME(p1.PARTITION_DESCRIPTION)) >= NOW()) AS is_future_from_unixtime,
+    (_as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)) < NOW()) AS is_past_from_days,
+    (_as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION)) >= NOW()) AS is_future_from_days
   from 
     information_schema.partitions p0 
     join information_schema.partitions p1 on (p0.table_schema=p1.table_schema and p0.table_name=p1.table_name and p0.PARTITION_ORDINAL_POSITION = p1.PARTITION_ORDINAL_POSITION-1)
@@ -86,7 +92,13 @@ VIEW _sql_range_partitions_diff AS
     if((count(distinct(diff_day_from_days)) = 1) and min(valid_from_days), min(diff_day_from_days), 0) as diff_day_from_days, 
     if((count(distinct(diff_week_from_days)) = 1) and min(valid_from_days), min(diff_week_from_days), 0) as diff_week_from_days, 
     if((count(distinct(diff_month_from_days)) = 1) and min(valid_from_days), min(diff_month_from_days), 0) as diff_month_from_days, 
-    if((count(distinct(diff_year_from_days)) = 1) and min(valid_from_days), min(diff_year_from_days), 0) as diff_year_from_days
+    if((count(distinct(diff_year_from_days)) = 1) and min(valid_from_days), min(diff_year_from_days), 0) as diff_year_from_days,
+    SUM(is_past_timestamp) AS count_past_timestamp,
+    SUM(is_future_timestamp) AS count_future_timestamp,
+    SUM(is_past_from_unixtime) AS count_past_from_unixtime,
+    SUM(is_future_from_unixtime) AS count_future_from_unixtime,
+    SUM(is_past_from_days) AS count_past_from_days,
+    SUM(is_future_from_days) AS count_future_from_days
   from
     _sql_range_partitions_base
   group by
@@ -135,7 +147,19 @@ VIEW _sql_range_partitions_analysis AS
       when diff_day != 0 then max_partition_description + interval diff_day day
       when diff != 0 then max_partition_description + diff
       else NULL
-    end, '.', 1) as next_partition_human_description
+    end, '.', 1) as next_partition_human_description,
+    case
+      when (diff_year_from_unixtime != 0 or diff_month_from_unixtime != 0 or diff_week_from_unixtime or diff_day_from_unixtime != 0) then count_past_from_unixtime
+      when (diff_year_from_days != 0 or diff_month_from_days != 0 or diff_week_from_days != 0 or diff_day_from_days != 0) then count_past_from_days
+      when (diff_year != 0 or diff_month != 0 or diff_week != 0 or diff_day != 0) then count_past_timestamp
+      else NULL
+    end as count_past_partitions,
+    case
+      when (diff_year_from_unixtime != 0 or diff_month_from_unixtime != 0 or diff_week_from_unixtime or diff_day_from_unixtime != 0) then count_future_from_unixtime
+      when (diff_year_from_days != 0 or diff_month_from_days != 0 or diff_week_from_days != 0 or diff_day_from_days != 0) then count_future_from_days
+      when (diff_year != 0 or diff_month != 0 or diff_week != 0 or diff_day != 0) then count_future_timestamp
+      else NULL
+    end as count_future_partitions
   from
     _sql_range_partitions_diff
     join _sql_range_partitions_summary using (table_schema, table_name)
@@ -173,6 +197,9 @@ VIEW sql_range_partitions AS
     table_schema,
     table_name,
     count_partitions,
+    count_past_partitions,
+    count_future_partitions,
+    has_maxvalue,
     CONCAT('alter table ', mysql_qualify(table_schema), '.', mysql_qualify(table_name), ' drop partition ', mysql_qualify(first_partition_name_skipping_zero)) as sql_drop_first_partition,
     IF (has_maxvalue,
       CONCAT(
