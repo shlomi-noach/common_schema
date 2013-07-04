@@ -40,5 +40,3 @@ END $$
 
 DELIMITER ;
 
-
-select  str_to_date(concat(@y:=year(now())), '%Y-%c-%e')
