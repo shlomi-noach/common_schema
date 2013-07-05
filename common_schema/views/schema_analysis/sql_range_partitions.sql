@@ -10,6 +10,12 @@ VIEW _sql_range_partitions_summary AS
     table_schema, 
     table_name, 
     COUNT(*) as count_partitions,
+    SUM(_as_datetime(unquote(PARTITION_DESCRIPTION)) < NOW()) AS count_past_timestamp,
+    SUM(_as_datetime(unquote(PARTITION_DESCRIPTION)) >= NOW()) AS count_future_timestamp,
+    SUM(IF(PARTITION_DESCRIPTION = 'MAXVALUE', 0, _as_datetime(FROM_UNIXTIME(PARTITION_DESCRIPTION)) < NOW())) AS count_past_from_unixtime,
+    SUM(IF(PARTITION_DESCRIPTION = 'MAXVALUE', 0, _as_datetime(FROM_UNIXTIME(PARTITION_DESCRIPTION)) >= NOW())) AS count_future_from_unixtime,
+    SUM(IF(PARTITION_DESCRIPTION = 'MAXVALUE', 0, _as_datetime(FROM_DAYS(PARTITION_DESCRIPTION)) < NOW())) AS count_past_from_days,
+    SUM(IF(PARTITION_DESCRIPTION = 'MAXVALUE', 0, _as_datetime(FROM_DAYS(PARTITION_DESCRIPTION)) >= NOW())) AS count_future_from_days,
     substring_index(group_concat(PARTITION_NAME order by PARTITION_ORDINAL_POSITION), ',', 1) as first_partition_name,
     substring_index(group_concat(IF((PARTITION_ORDINAL_POSITION = 1 and PARTITION_DESCRIPTION = 0), NULL, PARTITION_NAME) order by PARTITION_ORDINAL_POSITION), ',', 1) as first_partition_name_skipping_zero,    
     substring_index(group_concat(PARTITION_NAME order by PARTITION_ORDINAL_POSITION), ',', -1) as last_partition_name,
@@ -53,13 +59,7 @@ VIEW _sql_range_partitions_base AS
     TIMESTAMPDIFF(DAY, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_day_from_days,
     TIMESTAMPDIFF(WEEK, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_week_from_days,
     TIMESTAMPDIFF(MONTH, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_month_from_days,
-    TIMESTAMPDIFF(YEAR, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_year_from_days,
-    (_as_datetime(unquote(p0.PARTITION_DESCRIPTION)) < NOW()) AS is_past_timestamp,
-    (_as_datetime(unquote(p1.PARTITION_DESCRIPTION)) >= NOW()) AS is_future_timestamp,
-    (_as_datetime(FROM_UNIXTIME(p0.PARTITION_DESCRIPTION)) < NOW()) AS is_past_from_unixtime,
-    (_as_datetime(FROM_UNIXTIME(p1.PARTITION_DESCRIPTION)) >= NOW()) AS is_future_from_unixtime,
-    (_as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)) < NOW()) AS is_past_from_days,
-    (_as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION)) >= NOW()) AS is_future_from_days
+    TIMESTAMPDIFF(YEAR, _as_datetime(FROM_DAYS(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_DAYS(p1.PARTITION_DESCRIPTION))) AS diff_year_from_days
   from 
     information_schema.partitions p0 
     join information_schema.partitions p1 on (p0.table_schema=p1.table_schema and p0.table_name=p1.table_name and p0.PARTITION_ORDINAL_POSITION = p1.PARTITION_ORDINAL_POSITION-1)
@@ -92,13 +92,7 @@ VIEW _sql_range_partitions_diff AS
     if((count(distinct(diff_day_from_days)) = 1) and min(valid_from_days), min(diff_day_from_days), 0) as diff_day_from_days, 
     if((count(distinct(diff_week_from_days)) = 1) and min(valid_from_days), min(diff_week_from_days), 0) as diff_week_from_days, 
     if((count(distinct(diff_month_from_days)) = 1) and min(valid_from_days), min(diff_month_from_days), 0) as diff_month_from_days, 
-    if((count(distinct(diff_year_from_days)) = 1) and min(valid_from_days), min(diff_year_from_days), 0) as diff_year_from_days,
-    SUM(is_past_timestamp) AS count_past_timestamp,
-    SUM(is_future_timestamp) AS count_future_timestamp,
-    SUM(is_past_from_unixtime) AS count_past_from_unixtime,
-    SUM(is_future_from_unixtime) AS count_future_from_unixtime,
-    SUM(is_past_from_days) AS count_past_from_days,
-    SUM(is_future_from_days) AS count_future_from_days
+    if((count(distinct(diff_year_from_days)) = 1) and min(valid_from_days), min(diff_year_from_days), 0) as diff_year_from_days
   from
     _sql_range_partitions_base
   group by
