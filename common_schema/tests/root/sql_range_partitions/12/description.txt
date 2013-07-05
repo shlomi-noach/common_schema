@@ -1,0 +1,1 @@
+sql_range_partitions: test count_past_partitions & count_future_partitions, with maxvalue
