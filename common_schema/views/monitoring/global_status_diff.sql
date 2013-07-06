@@ -17,8 +17,26 @@ VIEW _global_status_sleep AS
     SELECT 
       '' AS VARIABLE_NAME, 
       SLEEP(10) 
-    FROM DUAL
+    FROM DUAL 
   )
+;
+
+
+CREATE OR REPLACE
+ALGORITHM = TEMPTABLE
+SQL SECURITY INVOKER
+VIEW _global_status_wrapper AS
+  (
+    SELECT VARIABLE_NAME, VARIABLE_VALUE FROM INFORMATION_SCHEMA.GLOBAL_STATUS
+  )
+  UNION ALL
+  (
+    SELECT 
+      '' AS VARIABLE_NAME, 
+      0 
+    FROM DUAL 
+  )
+  
 ;
 
 
@@ -29,7 +47,7 @@ CREATE OR REPLACE
 ALGORITHM = MERGE
 SQL SECURITY INVOKER
 VIEW global_status_diff AS
-  SELECT 
+  SELECT STRAIGHT_JOIN
     LOWER(gs0.VARIABLE_NAME) AS variable_name,
     gs0.VARIABLE_VALUE AS variable_value_0,
     gs1.VARIABLE_VALUE AS variable_value_1,
@@ -38,7 +56,7 @@ VIEW global_status_diff AS
     (gs1.VARIABLE_VALUE - gs0.VARIABLE_VALUE) * 60 / 10 AS variable_value_pminute
   FROM
     _global_status_sleep AS gs0
-    JOIN INFORMATION_SCHEMA.GLOBAL_STATUS gs1 USING (VARIABLE_NAME)
+    JOIN _global_status_wrapper gs1 USING (VARIABLE_NAME)
 ;
 
 -- 
