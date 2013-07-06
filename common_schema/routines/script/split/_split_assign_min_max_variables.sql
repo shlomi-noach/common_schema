@@ -25,6 +25,8 @@ begin
   declare columns_order_descending_clause text default _split_get_columns_order_descending_clause();
   declare max_variables_names text default _split_get_max_variables_names();
   declare columns_count tinyint unsigned default _split_get_columns_count();
+  declare start_values text default get_option(split_options, 'start');
+  declare stop_values text default get_option(split_options, 'stop');
   
   set is_empty_range := false;
 
@@ -46,41 +48,47 @@ begin
   );
   call exec_single(query);
   
-  if get_option(split_options, 'start') is not null then
-    if columns_count = 1 then
-      set query := CONCAT(
-        'set ', min_variables_names, ' := GREATEST(', min_variables_names, ', ', QUOTE(get_option(split_options, 'start')), ')'
-      );
-      call exec_single(query);
+  if start_values is not null then
+    if columns_count = get_num_tokens(start_values, ',') then
+      select 
+          group_concat('set ', min_variable_name, ' := ', QUOTE(split_token(start_values, ',', column_order)), ';' order by column_order separator '')
+        from
+          _split_column_names_table
+        into query;
+      call exec(query);
       set manual_min_max_params_used := true;
     else
-      call _throw_script_error(id_from, 'Found ''start'' option, but this split uses multiple columns');
+      call _throw_script_error(id_from, CONCAT(get_num_tokens(start_values, ','), ' ''start'' value[s] provided; chosen index has ', columns_count, ' columns'));
     end if;
   end if;
-  if get_option(split_options, 'stop') is not null then
-    if columns_count = 1 then
-      set query := CONCAT(
-        'set ', max_variables_names, ' := LEAST(', max_variables_names, ', ', QUOTE(get_option(split_options, 'stop')), ')'
-      );
-      call exec_single(query);
+  if stop_values is not null then
+    if columns_count = get_num_tokens(stop_values, ',') then
+      select 
+          group_concat('set ', max_variable_name, ' := ', QUOTE(split_token(stop_values, ',', column_order)), ';' order by column_order separator '')
+        from
+          _split_column_names_table
+        into query;
+      call exec(query);
       set manual_min_max_params_used := true;
     else
-      call _throw_script_error(id_from, 'Found ''stop'' option, but this split uses multiple columns');
+      call _throw_script_error(id_from, CONCAT(get_num_tokens(stop_values, ','), ' ''stop'' value[s] provided; chosen index has ', columns_count, ' columns'));
     end if;
   end if;
   if manual_min_max_params_used then
+
     -- Due to manual intervention, we need to verify boundaries.
     -- We know for certain there is one column in splitting key (due to above checks)
     select 
       CONCAT(
         'SELECT (',
-          min_variable_name, ' > ', max_variable_name,
+          GROUP_CONCAT(min_variable_name order by column_order), ') > (', GROUP_CONCAT(max_variable_name order by column_order),
         ') INTO @_split_is_empty_range_result'
         )
       from _split_column_names_table
       into query;
 
     call exec_single(query);
+    
     if @_split_is_empty_range_result then
       set is_empty_range := true;
     end if;

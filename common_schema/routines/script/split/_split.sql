@@ -24,6 +24,7 @@ COMMENT 'split values by columns...'
 
 main_body: begin
   declare is_overflow tinyint unsigned;
+  declare is_range_identical tinyint unsigned;
   declare is_empty_range tinyint unsigned;
   declare deadlock_detected tinyint unsigned;
   declare split_range_size int unsigned;
@@ -69,6 +70,10 @@ main_body: begin
     end if;
     call _split_assign_range_end_variables(split_table_schema, split_table_name, split_range_size);
     -- We now have a range start+end
+    call _split_is_range_start_end_identical(is_range_identical);
+    if is_range_identical and not @_split_is_first_step_flag then
+      leave _split_step_loop;
+    end if;
     -- start split step operation
     call _split_get_step_comparison_clause(comparison_clause);
 
