@@ -62,8 +62,8 @@ VIEW sql_alter_table AS
     TABLE_SCHEMA,
     TABLE_NAME,
     ENGINE,
-    GROUP_CONCAT(sql_drop_key SEPARATOR ', ' ORDER BY INDEX_NAME) AS sql_drop_keys,
-    GROUP_CONCAT(sql_add_key  SEPARATOR ', ' ORDER BY INDEX_NAME) AS sql_add_keys,
+    GROUP_CONCAT(sql_drop_key ORDER BY INDEX_NAME SEPARATOR ', ') AS sql_drop_keys,
+    GROUP_CONCAT(sql_add_key ORDER BY INDEX_NAME  SEPARATOR ', ') AS sql_add_keys,
     CONCAT(
       'ENGINE=', ENGINE, ' ',
       IF(CREATE_OPTIONS='partitioned', '', CREATE_OPTIONS)
