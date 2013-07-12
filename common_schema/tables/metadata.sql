@@ -47,5 +47,5 @@ A copy of the GNU General Public License is available at
   ('project_repository', 'https://common-schema.googlecode.com/svn/trunk/'),
   ('project_repository_type', 'svn'),
   ('revision', 'revision.placeholder'),
-  ('version', '2.0.0-alpha')
+  ('version', '2.1')
 ;  
