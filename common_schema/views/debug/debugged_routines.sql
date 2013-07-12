@@ -1,6 +1,6 @@
 
 -- 
--- Lists routines that have debugging info    
+-- Lists routines with rdebug's debugging info    
 -- 
 
 CREATE OR REPLACE
