@@ -1,4 +1,5 @@
 --
+-- Generate a Google Image multi-line chart URL by an arbitrary query 
 --
 
 DELIMITER $$
@@ -28,7 +29,7 @@ begin
   set @_line_chart_query := "
 	SELECT
 	  CONCAT(
-	    'http://chart.apis.google.com/chart?cht=lc&chs=800x350&chxt=x,y&chxr=1,',
+	    'http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,',
 	    ROUND(MIN(min_value), 1), ',',
 	    ROUND(MAX(max_value), 1),
 	    '&chd=s:',

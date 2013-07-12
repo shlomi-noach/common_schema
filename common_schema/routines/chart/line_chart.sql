@@ -1,4 +1,5 @@
 --
+-- Generate an ASCII multi-line chart based on an arbitrary query
 --
 
 DELIMITER $$
@@ -25,7 +26,7 @@ begin
   set @_line_chart_query := "
 	SELECT
 	  cast(y_scale as decimal(64,${multi_line_chart_value_precision})) as y_scale,
-	  horizontal_bar as chart
+	  horizontal_bar as common_schema_chart
 	  FROM
 	  (
 	  SELECT
