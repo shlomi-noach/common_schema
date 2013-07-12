@@ -40,16 +40,19 @@ View
 <h3>STRUCTURE</h3>
 
 <blockquote><pre>
-mysql&gt; DESC common_schema.sql_range_partitions;
-+--------------------------+--------------+------+-----+---------+-------+
-| Field                    | Type         | Null | Key | Default | Extra |
-+--------------------------+--------------+------+-----+---------+-------+
-| table_schema             | varchar(64)  | NO   |     |         |       |
-| table_name               | varchar(64)  | NO   |     |         |       |
-| count_partitions         | bigint(21)   | NO   |     | 0       |       |
-| sql_drop_first_partition | varchar(284) | YES  |     | NULL    |       |
-| sql_add_next_partition   | longblob     | YES  |     | NULL    |       |
-+--------------------------+--------------+------+-----+---------+-------+
+mysql&gt; DESC sql_range_partitions;
++--------------------------+---------------+------+-----+---------+-------+
+| Field                    | Type          | Null | Key | Default | Extra |
++--------------------------+---------------+------+-----+---------+-------+
+| table_schema             | varchar(64)   | NO   |     |         |       |
+| table_name               | varchar(64)   | NO   |     |         |       |
+| count_partitions         | bigint(21)    | NO   |     | 0       |       |
+| count_past_partitions    | decimal(23,0) | YES  |     | NULL    |       |
+| count_future_partitions  | decimal(23,0) | YES  |     | NULL    |       |
+| has_maxvalue             | decimal(23,0) | YES  |     | NULL    |       |
+| sql_drop_first_partition | varchar(284)  | YES  |     | NULL    |       |
+| sql_add_next_partition   | longblob      | YES  |     | NULL    |       |
++--------------------------+---------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
@@ -59,6 +62,12 @@ mysql&gt; DESC common_schema.sql_range_partitions;
 	<li><strong>table_schema</strong>: schema of partitioned table table</li>
 	<li><strong>table_name</strong>: table partitioned by <strong>RANGE</strong> or <strong>RANGE COLUMNS</strong></li>
 	<li><strong>count_partitions</strong>: number of partitions in table</li>
+	<li><strong>count_past_partitions</strong>: in the case partitions are recognized to be by
+		some temporal representation, the number of partitions that are in the past.</li>
+	<li><strong>count_future_partitions</strong>: in the case partitions are recognized to be by
+		some temporal representation, the number of partitions that are in the future (including NOW).</li>
+	<li><strong>has_maxvalue</strong>: <strong>1</strong> is the table has a 
+		<strong>LESS THAN MAXVALUE</strong> partition, <strong>0</strong> otherwise.</li>
 	<li><strong>sql_drop_first_partition</strong>: 
 		A SQL statement which drops the first partition.
 		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
@@ -94,9 +103,19 @@ mysql&gt; SELECT * FROM sql_range_partitions WHERE table_name='quarterly_report_
             table_schema: test
               table_name: quarterly_report_status
         count_partitions: 7
+   count_past_partitions: 6
+ count_future_partitions: 0
+            has_maxvalue: 1
 sql_drop_first_partition: alter table `test`.`quarterly_report_status` drop partition `p0`
   sql_add_next_partition: alter table `test`.`quarterly_report_status` reorganize partition `p6` into (partition `p_20090701000000` values less than (1246395600) /* 2009-07-01 00:00:00 */ , partition p_maxvalue values less than MAXVALUE)
 </pre></blockquote>
+<p>
+	The above query was issued in the year <strong>2013</strong>, and so all partitions
+	are considered as <i>in the past</i>. The <strong>MAXVALUE</strong> partition is considered
+	neither as past nor future (although it will contain any future rows). This is so that
+	<strong>count_future_partitions</strong> makes for the number of partitions strictly
+	specifying future dates.
+</p>
 
 
 <p>Add next partition:</p>
@@ -108,7 +127,7 @@ Create Table: CREATE TABLE `quarterly_report_status` (
   `report_id` int(11) NOT NULL,
   `report_status` varchar(20) NOT NULL,
   `report_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=MyISAM DEFAULT CHARSET=latin1
+) ENGINE=MyISAM DEFAULT CHARSET=utf8
 /*!50100 PARTITION BY RANGE (UNIX_TIMESTAMP(report_updated))
 (PARTITION p0 VALUES LESS THAN (1199138400) ENGINE = MyISAM,
  PARTITION p1 VALUES LESS THAN (1206997200) ENGINE = MyISAM,

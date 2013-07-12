@@ -208,15 +208,31 @@ The user is always allowed to specify the splitting table, even on single table 
 	<ul>
 		<li><strong>size</strong>: number of rows used in each step (minimum: 100; maximum: 50,000; default: 1,000)</li>
 		<li>
-			<strong>start</strong>: in the specific case where the operation utilizes a single column for splitting 
-			(as will be the case for the common AUTO_INCREMENT PRIMARY KEYs), the operation will only begin with given value (inclusive).
-			<br/>An error is thrown when the splitting key uses two columns or more.
+			<strong>start</strong>: starting point for the <i>split</i> operation.
+			This is a comma delimited list of values (quoted on multiple values). 
+			<br/>The count of values must match the 
+			number of columns in the index picked by <i>split</i>. Thus, if <i>split</i> picks an
+			AUTO_INCREMENT PRIMARY KEY for the operation, the value is merely a single integer.
+			<br/>Compound values such as <strong>'2013-07-05,12,smith'</strong> are valid.
+			<br/>Values do not have to strictly exist in the table: the <i>split</i> operation will begin
+			<i>as of these values</i>, meaning starting at the first row with these exact values 
+			or larger. 
+			<br/>An error is thrown when the number of values specified does not match the
+			number of columns covered by the splitting key.
 			<br/>All data types are supported, including textual.
 		</li>
 		<li>
-			<strong>stop</strong>: in the specific case where the operation utilizes a single column for splitting 
-			(as will be the case for the common AUTO_INCREMENT PRIMARY KEYs), the operation will terminate with given value (inclusive).
-			<br/>An error is thrown when the splitting key uses two columns or more.
+			<strong>stop</strong>: ending point for the <i>split</i> operation.
+			This is a comma delimited list of values (quoted on multiple values). 
+			<br/>The count of values must match the 
+			number of columns in the index picked by <i>split</i>. Thus, if <i>split</i> picks an
+			AUTO_INCREMENT PRIMARY KEY for the operation, the value is merely a single integer.
+			<br/>Compound values such as <strong>'2013-07-05,12,smith'</strong> are valid.
+			<br/>Values do not have to strictly exist in the table: the <i>split</i> operation will run
+			<i>up to these values</i>, meaning stopping at the first row with these exact values 
+			and excluding any larger. 
+			<br/>An error is thrown when the number of values specified does not match the
+			number of columns covered by the splitting key.
 			<br/>All data types are supported, including textual.
 		</li>
 		<li>
@@ -234,6 +250,23 @@ The user is always allowed to specify the splitting table, even on single table 
   throttle 2;
 </pre></blockquote>
 In the above example, the user builds the splitting of the <strong>DELETE</strong> query manually.
+</p>
+
+<p>
+	The following example shows how to use the <strong>start</strong> parameter
+	in the case of a compound key. The <strong>film_actor</strong> table has a compound
+	PRIMARY KEY on <strong>(`actor_id`,`film_id`)</strong>.
+	The <i>split</i> operation starts with <strong>actor_id = 12 & film_id = 631</strong>.
+<blockquote><pre>split({start:'12,631'} : UPDATE sakila.film_actor set last_update=NOW())
+  throttle 2;
+</pre></blockquote>
+	In the above the values <strong>'12,631'</strong> are quoted: quotes must be added for
+	multiple values; they are allowed but not required on single values (as can be seen
+	on the previous example).	
+	<br/>Since there is no limitation on the type of columns, it is possible that they are
+	textual. The case where you would have a comma (<strong>","</strong>) in one of your
+	<strong>start/stop</strong> column values is <i>not supported</i>; any comma is 
+	interpreted as a columns separator. 
 </p>
 
 <a name="limitations"></a>

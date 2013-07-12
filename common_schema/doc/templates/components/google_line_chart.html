@@ -1,0 +1,74 @@
+<h3>NAME</h3>
+google_line_chart(): Generate a Google Image multi-line chart URL based on an arbitrary query.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Given an arbitrary query, generate a Google Image Chart URL to visualize query's data.
+</p>
+<p>
+	To make for a compact URL (less than 2048 characters), data values are presented with
+	low resolution format, which allows at most <strong>63</strong> distinct values on the
+	vertical scale. This makes for non-smooth lines in some cases (See EXAMPLES below).
+</p>
+<p>
+	Even as this procedure was created (2013), Google Image Charts are deprecated, yet the
+	service is still running and functional. The service may go down at any stage.
+</p>
+
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>google_line_chart(
+	IN values_query TEXT, 
+	IN chart_legend TEXT
+  )
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li>
+    	<strong>values_query</strong>: a query producing data to be visualized. Query columns are
+    	assumed as follows:
+    	<ul>
+    		<li>First column makes for <i>"x"</i> values. <i>google_line_chart()</i> will sort the
+    		results by first column ascending. The type of this column is arbitrary; it could
+    		be numerical, temporal etc.</li>
+    		<li>2nd [, 3rd [...]] columns are <i>"y"</i> values. You may provide up to 
+    		<strong>8</strong> data columns, totaling <strong>9</strong> columns together with
+    		the first <i>"x"</i> values column.
+    		</li>
+    	</ul>
+	</li>
+    <li>
+    	<strong>chart_legend</strong>: comma delimited text, listing the desired
+    	legend items. There should be the same number of tokens in this parameter as there
+    	are data columns in the query. However, <i>google_line_chart()</i> will work with less that
+    	number or more; the result of a nonmatching number is a nonmatching legend.
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Show a simple sine & log computation:
+	<blockquote><pre>mysql&gt; call google_line_chart("select n, log(n), sin(n/5)+2 from numbers where n > 0 order by n limit 80", "log n, 2 + sin n/5") \G
+*************************** 1. row ***************************
+google_chart_url: <a href="http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,0.0,4.4&chd=s:AKPTWZbdfghjklmnnopqqrssttuuvvwwxxxyyzzz0001112222333444455555666677777888888999,fhkmopqqponljhebYWTRQPOOOQRTVYbdgjlnopqqpomkifcZXUSQPOOOPQSUXacfikmopqqponljgdbY&chxs=0,505050,10,0,lt&chxl=0:|1|||||||||||||||||||20||||||||||||||||||||40||||||||||||||||||||60||||||||||||||||||||80&chg=1.265822784,25,1,2,0,0&chco=ff8c00,4682b4&chdl=log n|2 + sin n/5&chdlp=b">http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,0.0,4.4&chd=s:AKPTWZbdfghjklmnnopqqrssttuuvvwwxxxyyzzz0001112222333444455555666677777888888999,fhkmopqqponljhebYWTRQPOOOQRTVYbdgjlnopqqpomkifcZXUSQPOOOPQSUXacfikmopqqponljgdbY&chxs=0,505050,10,0,lt&chxl=0:|1|||||||||||||||||||20||||||||||||||||||||40||||||||||||||||||||60||||||||||||||||||||80&chg=1.265822784,25,1,2,0,0&chco=ff8c00,4682b4&chdl=log n|2 + sin n/5&chdlp=b</a>
+</pre></blockquote>
+	The above leads to this image:
+	<img src="http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,0.0,4.4&chd=s:AKPTWZbdfghjklmnnopqqrssttuuvvwwxxxyyzzz0001112222333444455555666677777888888999,fhkmopqqponljhebYWTRQPOOOQRTVYbdgjlnopqqpomkifcZXUSQPOOOPQSUXacfikmopqqponljgdbY&chxs=0,505050,10,0,lt&chxl=0:|1|||||||||||||||||||20||||||||||||||||||||40||||||||||||||||||||60||||||||||||||||||||80&chg=1.265822784,25,1,2,0,0&chco=ff8c00,4682b4&chdl=log n|2 + sin n/5&chdlp=b"" alt="SQL chart by common_schema"/>
+</p>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="line_chart.html">line_chart()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach

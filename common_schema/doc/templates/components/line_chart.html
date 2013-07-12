@@ -1,0 +1,95 @@
+<h3>NAME</h3>
+line_chart(): Generate an ASCII multi-line chart based on an arbitrary query.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Given an arbitrary query, generate a poor man's ASCII multi-line chart visualizing
+	query's data. Visualization includes multi-line plot, x-axis extreme values, 
+	y-axis approximated values and an optional legend.
+</p>
+<p>
+	Height of query is currently fixed, and width of query varies by amount of returned rows.
+</p>
+
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>line_chart(
+	IN values_query TEXT, 
+	IN chart_legend TEXT
+  )
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li>
+    	<strong>values_query</strong>: a query producing data to be visualized. Query columns are
+    	assumed as follows:
+    	<ul>
+    		<li>First column makes for <i>"x"</i> values. <i>line_chart()</i> will sort the
+    		results by first column ascending. The type of this column is arbitrary; it could
+    		be numerical, temporal etc.</li>
+    		<li>2nd [, 3rd [...]] columns are <i>"y"</i> values. You may provide up to 
+    		<strong>8</strong> data columns, totaling <strong>9</strong> columns together with
+    		the first <i>"x"</i> values column. Note, however, that due to low ASCII plotting
+    		resolution, more columns make for less readable visualization.
+    		<br/>Values of these columns are expected to be numerical.
+    		</li>
+    	</ul>
+	</li>
+    <li>
+    	<strong>chart_legend</strong>: comma delimited text, listing the desired
+    	legend items. There should be the same number of tokens in this parameter as there
+    	are data columns in the query. However, <i>line_chart()</i> will work with less that
+    	number or more; the result of a nonmatching number is a nonmatching legend.
+    	<br/>You may pass <strong>NULL</strong> or <strong>''</strong> (empty text) to
+    	avoid displaying a legend. 
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Show a simple sine & log computation:
+	<blockquote><pre>mysql&gt; call line_chart("select n, log(n), sin(n/5)+2 from numbers where n > 0 order by n limit 80", "log n, 2 + sin n/5");
++---------+----------------------------------------------------------------------------------+
+| y_scale | common_schema_chart                                                              |
++---------+----------------------------------------------------------------------------------+
+| 4.38    | ---------------------------------------------------------------------########### |
+| 4.11    | -----------------------------------------------------################----------- |
+| 3.83    | ----------------------------------------#############--------------------------- |
+| 3.56    | ------------------------------##########---------------------------------------- |
+| 3.29    | -----------------------#######-------------------------------------------------- |
+| 3.01    | -----*****-------######-------------*****---------------------------*****------- |
+| 2.74    | ---**-----**-####-----------------**-----**-----------------------**-----**----- |
+| 2.46    | -**-------##**-------------------*---------**-------------------**---------*---- |
+| 2.19    | *------###----*----------------**------------*-----------------*------------**-- |
+| 1.92    | -----##--------*--------------*---------------**-------------**---------------*- |
+| 1.64    | ----#-----------**----------**------------------*-----------*------------------* |
+| 1.37    | ---#--------------**-------*---------------------**-------**-------------------- |
+| 1.10    | --#-----------------*******------------------------*******---------------------- |
+| 0.82    | -#------------------------------------------------------------------------------ |
+| 0.55    | -------------------------------------------------------------------------------- |
+| 0.27    | -------------------------------------------------------------------------------- |
+| 0.00    | #------------------------------------------------------------------------------- |
+|         | v::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::v |
+|         | 1                                                                             80 |
+|         |     # log n                                                                      |
+|         |     * 2 + sin n/5                                                                |
++---------+----------------------------------------------------------------------------------+
+</pre></blockquote>
+	</p>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="google_line_chart.html">google_line_chart()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
