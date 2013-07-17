@@ -246,7 +246,7 @@ The user is always allowed to specify the splitting table, even on single table 
 	AUTO_INCREMENT PRIMARY KEY column called <strong>rental_id</strong>.
 	The <i>split</i> operation starts with <strong>rental_id</strong> value of 1200, works
 	till the end of table, and uses chunks of <strong>500</strong> rows at a time.
-<blockquote><pre>split ({start: 1200, step: 500} : DELETE FROM sakila.rental WHERE rental_date < NOW() - INTERVAL 5 YEAR)
+<blockquote><pre>split ({start: 1200, size: 500} : DELETE FROM sakila.rental WHERE rental_date < NOW() - INTERVAL 5 YEAR)
   throttle 2;
 </pre></blockquote>
 In the above example, the user builds the splitting of the <strong>DELETE</strong> query manually.
