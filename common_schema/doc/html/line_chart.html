@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>rdebug_step_over: common_schema documentation</title>
-	<meta name="description" content="rdebug_step_over: common_schema" />
-	<meta name="keywords" content="rdebug_step_over: common_schema" />
+	<title>line_chart: common_schema documentation</title>
+	<meta name="description" content="line_chart: common_schema" />
+	<meta name="keywords" content="line_chart: common_schema" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
@@ -16,47 +16,99 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="rdebug_step_over.html">rdebug_step_over</a></h2>	
+				<h2><a href="line_chart.html">line_chart</a></h2>	
 <h3>NAME</h3>
-rdebug_step_over(): Execute next statement without drilling down to possible routine code.
+line_chart(): Generate an ASCII multi-line chart based on an arbitrary query.
 
 <h3>TYPE</h3>
 Procedure
 
 <h3>DESCRIPTION</h3>
 <p>
-	This procedure is part of the <a href="rdebug_api.html">rdebug API</a>.
+	Given an arbitrary query, generate a poor man's ASCII multi-line chart visualizing
+	query's data. Visualization includes multi-line plot, x-axis extreme values, 
+	y-axis approximated values and an optional legend.
 </p>
 <p>
-	<i>rdebug_step_over()</i> executes the worker until it reaches next possible
-	stop-point at current stack level or higher.
+	Height of query is currently fixed, and width of query varies by amount of returned rows.
 </p>
-<p>
-	Calls to nested routines are executed, but not debugged: the point at which
-	the worker stops after calling <i>rdebug_step_over</i> is never a drill down.
-	The rule says: "stop at your earliest opportunity within the current routine
-	or, summing it exits, within its calling routine.
-</p>
-<p>
-	Execution of this routine only makes sense on an active debugging session, i.e.
-	after calling <a href="rdebug_start.html">rdebug_start()</a>.
-</p>
+
 
 <h3>SYNOPSIS</h3>
 <p>
-<blockquote><pre>rdebug_step_over()
+<blockquote><pre>line_chart(
+	IN values_query TEXT, 
+	IN chart_legend TEXT
+  )
   READS SQL DATA</pre></blockquote>
 </p>
+<p>
+  Input:
+  <ul>
+    <li>
+    	<strong>values_query</strong>: a query producing data to be visualized. Query columns are
+    	assumed as follows:
+    	<ul>
+    		<li>First column makes for <i>"x"</i> values. <i>line_chart()</i> will sort the
+    		results by first column ascending. The type of this column is arbitrary; it could
+    		be numerical, temporal etc.</li>
+    		<li>2nd [, 3rd [...]] columns are <i>"y"</i> values. You may provide up to 
+    		<strong>8</strong> data columns, totaling <strong>9</strong> columns together with
+    		the first <i>"x"</i> values column. Note, however, that due to low ASCII plotting
+    		resolution, more columns make for less readable visualization.
+    		<br/>Values of these columns are expected to be numerical.
+    		</li>
+    	</ul>
+	</li>
+    <li>
+    	<strong>chart_legend</strong>: comma delimited text, listing the desired
+    	legend items. There should be the same number of tokens in this parameter as there
+    	are data columns in the query. However, <i>line_chart()</i> will work with less that
+    	number or more; the result of a nonmatching number is a nonmatching legend.
+    	<br/>You may pass <strong>NULL</strong> or <strong>''</strong> (empty text) to
+    	avoid displaying a legend. 
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Show a simple sine & log computation:
+	<blockquote><pre>mysql&gt; call line_chart("select n, log(n), sin(n/5)+2 from numbers where n > 0 order by n limit 80", "log n, 2 + sin n/5");
++---------+----------------------------------------------------------------------------------+
+| y_scale | common_schema_chart                                                              |
++---------+----------------------------------------------------------------------------------+
+| 4.38    | ---------------------------------------------------------------------########### |
+| 4.11    | -----------------------------------------------------################----------- |
+| 3.83    | ----------------------------------------#############--------------------------- |
+| 3.56    | ------------------------------##########---------------------------------------- |
+| 3.29    | -----------------------#######-------------------------------------------------- |
+| 3.01    | -----*****-------######-------------*****---------------------------*****------- |
+| 2.74    | ---**-----**-####-----------------**-----**-----------------------**-----**----- |
+| 2.46    | -**-------##**-------------------*---------**-------------------**---------*---- |
+| 2.19    | *------###----*----------------**------------*-----------------*------------**-- |
+| 1.92    | -----##--------*--------------*---------------**-------------**---------------*- |
+| 1.64    | ----#-----------**----------**------------------*-----------*------------------* |
+| 1.37    | ---#--------------**-------*---------------------**-------**-------------------- |
+| 1.10    | --#-----------------*******------------------------*******---------------------- |
+| 0.82    | -#------------------------------------------------------------------------------ |
+| 0.55    | -------------------------------------------------------------------------------- |
+| 0.27    | -------------------------------------------------------------------------------- |
+| 0.00    | #------------------------------------------------------------------------------- |
+|         | v::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::v |
+|         | 1                                                                             80 |
+|         |     # log n                                                                      |
+|         |     * 2 + sin n/5                                                                |
++---------+----------------------------------------------------------------------------------+
+</pre></blockquote>
+	</p>
+
 
 <h3>ENVIRONMENT</h3>
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
-<a href="rdebug_compile_routine.html">rdebug_compile_routine()</a>,
-<a href="rdebug_run.html">rdebug_run()</a>,
-<a href="rdebug_start.html">rdebug_start()</a>,
-<a href="rdebug_step_into.html">rdebug_step_into()</a>,
-<a href="rdebug_step_out.html">rdebug_step_out()</a>
+<a href="google_line_chart.html">google_line_chart()</a>
 
 <h3>AUTHOR</h3>
 Shlomi Noach

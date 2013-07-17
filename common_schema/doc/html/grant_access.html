@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>global_status_diff_clean: common_schema documentation</title>
-	<meta name="description" content="global_status_diff_clean: common_schema" />
-	<meta name="keywords" content="global_status_diff_clean: common_schema" />
+	<title>grant_access: common_schema documentation</title>
+	<meta name="description" content="grant_access: common_schema" />
+	<meta name="keywords" content="grant_access: common_schema" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
@@ -16,73 +16,42 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="global_status_diff_clean.html">global_status_diff_clean</a></h2>	
+				<h2><a href="grant_access.html">grant_access</a></h2>	
 <h3>NAME</h3>
-global_status_diff_clean: Status variables difference over time, with spaces where zero diff encountered
+grant_access(): Grant SELECT & EXECUTE to all grantees on common_schema
+
 <h3>TYPE</h3>
-View
+Procedure
 
 <h3>DESCRIPTION</h3>
-<p></p>
-
-<p><i>global_status_diff_clean</i> is a visual presentation case for <a href="global_status_diff.html">global_status_diff</a>
-</p>
-
-<p>It presents with same data from <i>global_status_diff</i>, except that when no difference encountered (value unchanged
-for the sampling duration), the zero value is replaced with empty text. 
-</p>
-
 <p>
-It is merely a visualization aid, allowing the eye to more easily catch changed values. Automated reads should keep to <i>global_status_diff</i>.
+	This is a <i>common_schema</i> meta routine, which grants access on common_schema to all
+	existing accounts.
 </p>
-
-<h3>STRUCTURE</h3>
-
-<blockquote><pre>
-mysql&gt; DESC common_schema.global_status_diff_clean;
-+------------------------+---------------+------+-----+---------+-------+
-| Field                  | Type          | Null | Key | Default | Extra |
-+------------------------+---------------+------+-----+---------+-------+
-| variable_name          | varchar(64)   | YES  |     | NULL    |       |
-| variable_value_0       | longtext      | YES  |     | NULL    |       |
-| variable_value_1       | varchar(1024) | YES  |     | NULL    |       |
-| variable_value_diff    | varbinary(23) | YES  |     | NULL    |       |
-| variable_value_psec    | varbinary(23) | YES  |     | NULL    |       |
-| variable_value_pminute | varbinary(23) | YES  |     | NULL    |       |
-+------------------------+---------------+------+-----+---------+-------+
-</pre></blockquote>
+<p>
+	It will, in particular, grant <strong>SELECT</strong> and <strong>EXECUTE</strong>
+	on all tables, views and routines in common_schema.
+</p>
+<p>
+	You may possibly wish to execute this routine after <i>common_schema</i> installation
+	so as to allow all accounts access to <i>common_schema</i>.
+</p>
 
 <h3>SYNOPSIS</h3>
-<p>The structure of this view is identical to that of <a href="global_status_diff.html">global_status_diff</a>, except:</p>
+<p>
+<blockquote><pre>grant_access() 
+  MODIFIES SQL DATA</pre></blockquote>
+</p>
 
-<ul>
-	<li><strong>variable_value_diff</strong>: difference between the two samples, or empty text when difference is zero</li>
-	<li><strong>variable_value_psec</strong>: average change in value per second of execution, or empty text when difference is zero</li>
-	<li><strong>variable_value_pminute</strong>: estimated (via extrapolation) average change in value per minute of execution, or empty text when difference is zero</li>
-</ul>
-
-<h3>EXAMPLES</h3>
-<p>Get status difference for various InnoDB write metrics:</p>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.global_status_diff_clean WHERE variable_name LIKE 'innodb_%write%';
-+-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
-| variable_name                     | variable_value_0 | variable_value_1 | variable_value_diff | variable_value_psec | variable_value_pminute |
-+-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
-| innodb_buffer_pool_write_requests | 1000933916       | 1000934526       | 610                 | 61                  | 3660                   |
-| innodb_data_pending_writes        | 0                | 0                |                     |                     |                        |
-| innodb_data_writes                | 100388839        | 100389001        | 162                 | 16.2                | 972                    |
-| innodb_dblwr_writes               | 603346           | 603346           |                     |                     |                        |
-| innodb_log_write_requests         | 338954473        | 338954531        | 58                  | 5.8                 | 348                    |
-| innodb_log_writes                 | 69347559         | 69347618         | 59                  | 5.9                 | 354                    |
-| innodb_os_log_pending_writes      | 0                | 0                |                     |                     |                        |
-+-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
-</pre></blockquote>
 
 <h3>ENVIRONMENT</h3>
 MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
-<a href="global_status_diff.html">global_status_diff</a>,
-<a href="global_status_diff_nonzero.html">global_status_diff_nonzero</a>
+<a href="duplicate_grantee.html">duplicate_grantee()</a>,
+<a href="processlist_grantees.html">processlist_grantees</a>,
+<a href="sql_accounts.html">sql_accounts</a>
+
 <h3>AUTHOR</h3>
 Shlomi Noach
 				<br/>

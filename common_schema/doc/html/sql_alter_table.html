@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> <strong>2.0</strong> documentation
+			<h1>common_schema</h1> <strong>2.1</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -25,12 +25,16 @@ View
 <h3>DESCRIPTION</h3>
 <p></p>
 
-<p><i>sql_alter_table</i> provides with SQL statements to alter a table to its current form in terms of engine and create options.
+<p><i>sql_alter_table</i> provides with SQL statements to alter a table to its current form.
 </p>
 
 <p>
-This view is useful in generating a "resurrection" script to restore table to its current engine state.
-For example, it may provide with the rollback script for a database migration from MyISAM to InnoDB, or from InnoDB Antelope to Barracuda format.
+	This view analyzes table structure and provides with the syntax required to rebuild the
+	table by various aspects.
+	It can be useful in generating a "resurrection" script to restore table to its current 
+	engine or indexes state.
+	For example, it may provide with the rollback script for a database migration from
+	MyISAM to InnoDB, or from InnoDB Antelope to Barracuda format.
 </p>
 
 <h3>STRUCTURE</h3>
@@ -43,28 +47,42 @@ mysql&gt; DESC common_schema.sql_alter_table;
 | TABLE_SCHEMA    | varchar(64)  | NO   |     |         |       |
 | TABLE_NAME      | varchar(64)  | NO   |     |         |       |
 | ENGINE          | varchar(64)  | YES  |     | NULL    |       |
-| alter_statement | varchar(473) | YES  |     | NULL    |       |
+| sql_drop_keys   | longtext     | YES  |     | NULL    |       |
+| sql_add_keys    | longblob     | YES  |     | NULL    |       |
+| table_options   | varchar(327) | YES  |     | NULL    |       |
+| alter_statement | varchar(511) | YES  |     | NULL    |       |
 +-----------------+--------------+------+-----+---------+-------+
 </pre></blockquote>
 
 <h3>SYNOPSIS</h3>
 
-<p>Columns of this view:</p>
-<ul>
-	<li><strong>TABLE_SCHEMA</strong>: schema of current table</li>
-	<li><strong>TABLE_NAME</strong>: current table name</li>
-	<li><strong>ENGINE</strong>: current engine name</li>
-	<li><strong>alter_statement</strong>: 
-		A SQL statement which ALTERs current table to its current engine with create-options.
-		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+<p>Columns of this view:
+	<ul>
+		<li><strong>TABLE_SCHEMA</strong>: schema of current table</li>
+		<li><strong>TABLE_NAME</strong>: current table name</li>
+		<li><strong>ENGINE</strong>: current engine name</li>
+		<li><strong>sql_drop_keys</strong>: 
+			A SQL statement to drop all keys on table.
 		</li>
-</ul>
+		<li><strong>sql_add_keys</strong>: 
+			A SQL statement to create all keys on table
+		</li>
+		<li><strong>table_options</strong>: 
+			All table options for this table
+		</li>
+		<li><strong>alter_statement</strong>: 
+			A SQL statement which ALTERs current table to its current engine with create options.
+			<br/>Use <a href="eval.html">eval()</a> to apply SQL columns.
+		</li>
+		
+	</ul>
+</p>
 
 <p>The SQL statements are not terminated by ';'.</p>
 
 <h3>EXAMPLES</h3>
 <p>Generate ALTER TABLE statements for `sakila` tables:</p>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.sql_alter_table WHERE TABLE_SCHEMA='sakila';
+<blockquote><pre>mysql&gt; SELECT TABLE_SCHEMA, TABLE_NAME, ENGINE, alter_statement FROM common_schema.sql_alter_table WHERE TABLE_SCHEMA='sakila';
 +--------------+---------------+--------+-----------------------------------------------------+
 | TABLE_SCHEMA | TABLE_NAME    | ENGINE | alter_statement                                     |
 +--------------+---------------+--------+-----------------------------------------------------+
@@ -91,7 +109,7 @@ mysql&gt; DESC common_schema.sql_alter_table;
 <blockquote><pre>mysql&gt; ALTER TABLE sakila.film_text ENGINE=MyISAM ROW_FORMAT=FIXED;
 mysql&gt; ALTER TABLE sakila.film_category ENGINE=InnoDB ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=8;
 
-mysql&gt; SELECT * FROM common_schema.sql_alter_table WHERE TABLE_SCHEMA='sakila';
+mysql&gt; SELECT TABLE_SCHEMA, TABLE_NAME, ENGINE, alter_statement FROM common_schema.sql_alter_table WHERE TABLE_SCHEMA='sakila';
 +--------------+---------------+--------+-------------------------------------------------------------------------------------------+
 | TABLE_SCHEMA | TABLE_NAME    | ENGINE | alter_statement                                                                           |
 +--------------+---------------+--------+-------------------------------------------------------------------------------------------+
@@ -115,6 +133,16 @@ mysql&gt; SELECT * FROM common_schema.sql_alter_table WHERE TABLE_SCHEMA='sakila
 </pre></blockquote>
 <p>Note again that the SQL statements are not terminated by ';'. 
 Either CONCAT() these beforehand, or use <i>sed</i>/<i>awk</i> afterwards.</p>
+
+
+<p>Show indexes DROP and ADD statements for a given table:</p>
+<blockquote><pre>mysql&gt; SELECT TABLE_SCHEMA, TABLE_NAME, sql_drop_keys, sql_add_keys FROM common_schema.sql_alter_table WHERE TABLE_SCHEMA='sakila' and TABLE_NAME='rental' \G
+
+ TABLE_SCHEMA: sakila
+   TABLE_NAME: rental
+sql_drop_keys: DROP KEY `idx_fk_customer_id`, DROP KEY `idx_fk_inventory_id`, DROP KEY `idx_fk_staff_id`, DROP PRIMARY KEY, DROP KEY `rental_date`
+ sql_add_keys: ADD KEY `idx_fk_customer_id`(`customer_id`), ADD KEY `idx_fk_inventory_id`(`inventory_id`), ADD KEY `idx_fk_staff_id`(`staff_id`), ADD PRIMARY KEY (`rental_id`), ADD UNIQUE KEY `rental_date`(`rental_date`,`inventory_id`,`customer_id`)
+</pre></blockquote>
 
 <h3>ENVIRONMENT</h3>
 MySQL 5.1 or newer
@@ -171,6 +199,7 @@ Shlomi Noach
 						<li><a title="Security" href="security_routines.html">Security</a></li>
 						<li><a title="Text" href="text_routines.html">Text</a></li>
 						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
 					</ul>
 					<h3>VIEWS</h3>
 					<ul>

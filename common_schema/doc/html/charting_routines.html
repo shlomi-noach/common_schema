@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>global_status_diff_clean: common_schema documentation</title>
-	<meta name="description" content="global_status_diff_clean: common_schema" />
-	<meta name="keywords" content="global_status_diff_clean: common_schema" />
+	<title>charting_routines: common_schema documentation</title>
+	<meta name="description" content="charting_routines: common_schema" />
+	<meta name="keywords" content="charting_routines: common_schema" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
@@ -16,75 +16,56 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="global_status_diff_clean.html">global_status_diff_clean</a></h2>	
-<h3>NAME</h3>
-global_status_diff_clean: Status variables difference over time, with spaces where zero diff encountered
-<h3>TYPE</h3>
-View
-
-<h3>DESCRIPTION</h3>
-<p></p>
-
-<p><i>global_status_diff_clean</i> is a visual presentation case for <a href="global_status_diff.html">global_status_diff</a>
-</p>
-
-<p>It presents with same data from <i>global_status_diff</i>, except that when no difference encountered (value unchanged
-for the sampling duration), the zero value is replaced with empty text. 
-</p>
+				<h2><a href="charting_routines.html">charting_routines</a></h2>	
+<h3>SYNOPSIS</h3>
 
 <p>
-It is merely a visualization aid, allowing the eye to more easily catch changed values. Automated reads should keep to <i>global_status_diff</i>.
+Charting routines: quick, poor man's charting of one's data
+<ul>
+	<li><a href="line_chart.html">line_chart()</a>: Generate an ASCII multi-line chart based on an arbitrary query.</li>
+	<li><a href="google_line_chart.html">google_line_chart()</a>: Generate a Google Image multi-line chart URL based on an arbitrary query.</li>
+</ul>
 </p>
 
-<h3>STRUCTURE</h3>
-
-<blockquote><pre>
-mysql&gt; DESC common_schema.global_status_diff_clean;
-+------------------------+---------------+------+-----+---------+-------+
-| Field                  | Type          | Null | Key | Default | Extra |
-+------------------------+---------------+------+-----+---------+-------+
-| variable_name          | varchar(64)   | YES  |     | NULL    |       |
-| variable_value_0       | longtext      | YES  |     | NULL    |       |
-| variable_value_1       | varchar(1024) | YES  |     | NULL    |       |
-| variable_value_diff    | varbinary(23) | YES  |     | NULL    |       |
-| variable_value_psec    | varbinary(23) | YES  |     | NULL    |       |
-| variable_value_pminute | varbinary(23) | YES  |     | NULL    |       |
-+------------------------+---------------+------+-----+---------+-------+
-</pre></blockquote>
-
-<h3>SYNOPSIS</h3>
-<p>The structure of this view is identical to that of <a href="global_status_diff.html">global_status_diff</a>, except:</p>
-
-<ul>
-	<li><strong>variable_value_diff</strong>: difference between the two samples, or empty text when difference is zero</li>
-	<li><strong>variable_value_psec</strong>: average change in value per second of execution, or empty text when difference is zero</li>
-	<li><strong>variable_value_pminute</strong>: estimated (via extrapolation) average change in value per minute of execution, or empty text when difference is zero</li>
-</ul>
-
 <h3>EXAMPLES</h3>
-<p>Get status difference for various InnoDB write metrics:</p>
-<blockquote><pre>mysql&gt; SELECT * FROM common_schema.global_status_diff_clean WHERE variable_name LIKE 'innodb_%write%';
-+-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
-| variable_name                     | variable_value_0 | variable_value_1 | variable_value_diff | variable_value_psec | variable_value_pminute |
-+-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
-| innodb_buffer_pool_write_requests | 1000933916       | 1000934526       | 610                 | 61                  | 3660                   |
-| innodb_data_pending_writes        | 0                | 0                |                     |                     |                        |
-| innodb_data_writes                | 100388839        | 100389001        | 162                 | 16.2                | 972                    |
-| innodb_dblwr_writes               | 603346           | 603346           |                     |                     |                        |
-| innodb_log_write_requests         | 338954473        | 338954531        | 58                  | 5.8                 | 348                    |
-| innodb_log_writes                 | 69347559         | 69347618         | 59                  | 5.9                 | 354                    |
-| innodb_os_log_pending_writes      | 0                | 0                |                     |                     |                        |
-+-----------------------------------+------------------+------------------+---------------------+---------------------+------------------------+
+	<p>
+		Generate a 2 line sample chart:
+	</p>
+	<blockquote><pre>mysql&gt; call line_chart("select n, log(n), sin(n/5)+2 from numbers where n > 0 order by n limit 80", "log n, 2 + sin n/5");
++---------+----------------------------------------------------------------------------------+
+| y_scale | common_schema_chart                                                              |
++---------+----------------------------------------------------------------------------------+
+| 4.38    | ---------------------------------------------------------------------########### |
+| 4.11    | -----------------------------------------------------################----------- |
+| 3.83    | ----------------------------------------#############--------------------------- |
+| 3.56    | ------------------------------##########---------------------------------------- |
+| 3.29    | -----------------------#######-------------------------------------------------- |
+| 3.01    | -----*****-------######-------------*****---------------------------*****------- |
+| 2.74    | ---**-----**-####-----------------**-----**-----------------------**-----**----- |
+| 2.46    | -**-------##**-------------------*---------**-------------------**---------*---- |
+| 2.19    | *------###----*----------------**------------*-----------------*------------**-- |
+| 1.92    | -----##--------*--------------*---------------**-------------**---------------*- |
+| 1.64    | ----#-----------**----------**------------------*-----------*------------------* |
+| 1.37    | ---#--------------**-------*---------------------**-------**-------------------- |
+| 1.10    | --#-----------------*******------------------------*******---------------------- |
+| 0.82    | -#------------------------------------------------------------------------------ |
+| 0.55    | -------------------------------------------------------------------------------- |
+| 0.27    | -------------------------------------------------------------------------------- |
+| 0.00    | #------------------------------------------------------------------------------- |
+|         | v::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::v |
+|         | 1                                                                             80 |
+|         |     # log n                                                                      |
+|         |     * 2 + sin n/5                                                                |
++---------+----------------------------------------------------------------------------------+
 </pre></blockquote>
 
-<h3>ENVIRONMENT</h3>
-MySQL 5.1 or newer
-
-<h3>SEE ALSO</h3>
-<a href="global_status_diff.html">global_status_diff</a>,
-<a href="global_status_diff_nonzero.html">global_status_diff_nonzero</a>
-<h3>AUTHOR</h3>
-Shlomi Noach
+	<p>
+		Generate a 2 line sample chart in google image chart URL format:
+	</p>
+	<blockquote><pre>mysql&gt; call google_line_chart("select n, log(n), sin(n/5)+2 from numbers where n > 0 order by n limit 80", "log n, 2 + sin n/5") \G
+*************************** 1. row ***************************
+google_chart_url: <a href="http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,0.0,4.4&chd=s:AKPTWZbdfghjklmnnopqqrssttuuvvwwxxxyyzzz0001112222333444455555666677777888888999,fhkmopqqponljhebYWTRQPOOOQRTVYbdgjlnopqqpomkifcZXUSQPOOOPQSUXacfikmopqqponljgdbY&chxs=0,505050,10,0,lt&chxl=0:|1|||||||||||||||||||20||||||||||||||||||||40||||||||||||||||||||60||||||||||||||||||||80&chg=1.265822784,25,1,2,0,0&chco=ff8c00,4682b4&chdl=log n|2 + sin n/5&chdlp=b">http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,0.0,4.4&chd=s:AKPTWZbdfghjklmnnopqqrssttuuvvwwxxxyyzzz0001112222333444455555666677777888888999,fhkmopqqponljhebYWTRQPOOOQRTVYbdgjlnopqqpomkifcZXUSQPOOOPQSUXacfikmopqqponljgdbY&chxs=0,505050,10,0,lt&chxl=0:|1|||||||||||||||||||20||||||||||||||||||||40||||||||||||||||||||60||||||||||||||||||||80&chg=1.265822784,25,1,2,0,0&chco=ff8c00,4682b4&chdl=log n|2 + sin n/5&chdlp=b</a>
+</pre></blockquote>
 				<br/>
 			</div>
 			<div id="sidebarwrapper">
