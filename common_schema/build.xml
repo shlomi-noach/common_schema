@@ -5,17 +5,17 @@
 		</classpath>
 	</taskdef>
 
+
+	
+	<!--
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="" />
 	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
+-->
 	
-	
-	<!--
-
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
 	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
--->
 
 	<!--
 
@@ -93,6 +93,7 @@
 		<concat destfile="${build.dir}/${sql.base_components.output.file}">
 			<fileset dir="tables/" includes="*.sql" />
 
+			<fileset dir="routines/chart/" includes="*.sql" />
 			<fileset dir="routines/debug/" includes="*.sql" />
 			<fileset dir="routines/dependencies/" includes="*.sql" />
 			<fileset dir="routines/general/" includes="*.sql" />
@@ -122,10 +123,12 @@
 			
 			<fileset dir="views/schema_analysis/" includes="*.sql" />
 			<fileset dir="views/data_dimension/" includes="*.sql" />
+			<fileset dir="views/debug/" includes="*.sql" />
 			<fileset dir="views/i_s/" includes="*.sql" />
 			<fileset dir="views/meta/" includes="*.sql" />
 			<fileset dir="views/monitoring/" includes="*.sql" />
 			<fileset dir="views/process/" includes="*.sql" />
+			<fileset dir="views/script/" includes="*.sql" />
 			<fileset dir="views/security/" includes="*.sql" />
 		</concat>
 		<replace file="${build.dir}/${sql.base_components.output.file}" token="revision.placeholder" value="${svn.revision}"/>
