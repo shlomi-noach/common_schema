@@ -12,5 +12,7 @@ VIEW _script_report_data AS
   FROM
     _global_script_report_data
   WHERE
-    session_id = CONNECTION_ID()
+    server_id = _get_server_id()
+    and session_id = CONNECTION_ID()
+with check option
 ;

@@ -13,4 +13,5 @@ VIEW _split_column_names_table AS
     _global_split_column_names_table
   WHERE
     session_id = CONNECTION_ID()
+with check option
 ;

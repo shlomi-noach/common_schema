@@ -13,4 +13,5 @@ VIEW _qs_variables AS
     _global_qs_variables
   WHERE
     session_id = CONNECTION_ID()
+with check option
 ;

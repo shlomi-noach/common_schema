@@ -13,4 +13,5 @@ VIEW _sql_tokens AS
     _global_sql_tokens
   WHERE
     session_id = CONNECTION_ID()
+with check option
 ;
