@@ -25,6 +25,13 @@ main_body: begin
   declare num_expanded_variables_ids int unsigned;
   declare expanded_variable_index int unsigned;
   declare current_expanded_variable_id int unsigned;
+  /*!50500
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+      call _cleanup_script_tables();
+      RESIGNAL;
+    END;
+   */
   
   set @@max_sp_recursion_depth := 127;
   set @__script_group_concat_max_len := @@group_concat_max_len;
@@ -96,13 +103,8 @@ main_body: begin
     call _script_report_finalize();
   end if;
   
-  set @@group_concat_max_len := @__script_group_concat_max_len;  
-  if not (@query_script_skip_cleanup is true) then
-    delete from _sql_tokens;
-    delete from _qs_variables;
-    delete from _script_report_data;
-    -- delete from _split_column_names_table;
-  end if;
+  set @@group_concat_max_len := @__script_group_concat_max_len;
+  call _cleanup_script_tables();
 end;
 //
 
