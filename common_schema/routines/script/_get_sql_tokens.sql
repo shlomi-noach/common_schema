@@ -27,8 +27,8 @@ begin
         set v_old_from = v_from;
         call _get_sql_token(p_text, v_from, v_level, v_token, 'script', v_state);
         set _sql_tokens_id := _sql_tokens_id + 1;
-        insert into _sql_tokens(session_id,id,start,level,token,state) 
-        values (CONNECTION_ID(),_sql_tokens_id, v_from, v_level, v_token, v_state);
+        insert into _sql_tokens(server_id, session_id, id, start, level, token, state) 
+        values (_get_server_id(), CONNECTION_ID(), _sql_tokens_id, v_from, v_level, v_token, v_state);
     until 
         v_old_from = v_from
     end repeat;

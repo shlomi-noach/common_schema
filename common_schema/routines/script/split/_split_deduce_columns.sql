@@ -5,7 +5,7 @@
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS _split_deduce_columns $$
-CREATE PROCEDURE _split_deduce_columns(split_table_schema varchar(128), split_table_name varchar(128)) 
+CREATE PROCEDURE _split_deduce_columns(split_table_schema varchar(128), split_table_name varchar(128), requested_index_name varchar(128)) 
 MODIFIES SQL DATA
 SQL SECURITY INVOKER
 COMMENT 'split values by columns...'
@@ -14,7 +14,7 @@ begin
   declare split_column_names varchar(2048) default NULL;
   declare split_num_column tinyint unsigned;
 
-  call _split_generate_dependency_tables(split_table_schema, split_table_name);
+  call _split_generate_dependency_tables(split_table_schema, split_table_name, requested_index_name);
   
   SELECT 
       column_names, count_column_in_index, index_name
@@ -27,6 +27,9 @@ begin
     
   call _split_cleanup_dependency_tables();
 
+  if (requested_index_name is not null) and ((requested_index_name = @_query_script_split_index_name) IS NOT TRUE) then
+    call throw(CONCAT('split: index: ', requested_index_name, ' requested, but not found/not unique'));
+  end if;
   if split_column_names is null then
     call throw(CONCAT('split: no key or definition found for: ', split_table_schema, '.', split_table_name));
   end if;
@@ -36,6 +39,7 @@ begin
   delete from _split_column_names_table;
   insert into _split_column_names_table
     select
+      _get_server_id(),
       CONNECTION_ID(),
       n,
       split_table_name,

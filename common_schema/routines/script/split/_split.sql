@@ -34,7 +34,7 @@ main_body: begin
 
   set @_split_is_first_step_flag := true;
   
-  call _split_deduce_columns(split_table_schema, split_table_name);
+  call _split_deduce_columns(split_table_schema, split_table_name, get_option(split_options, 'index'));
   call _split_init_variables();
   call _split_assign_min_max_variables(id_from, split_table_schema, split_table_name, split_options, is_empty_range);
   

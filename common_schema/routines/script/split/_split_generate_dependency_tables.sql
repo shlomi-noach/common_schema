@@ -5,7 +5,7 @@
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS _split_generate_dependency_tables $$
-CREATE PROCEDURE _split_generate_dependency_tables(split_table_schema varchar(128), split_table_name varchar(128)) 
+CREATE PROCEDURE _split_generate_dependency_tables(split_table_schema varchar(128), split_table_name varchar(128), requested_index_name varchar(128)) 
 MODIFIES SQL DATA
 SQL SECURITY INVOKER
 COMMENT 'analyze recommended keys'
@@ -98,6 +98,7 @@ begin
     FROM 
       _split_candidate_keys
     ORDER BY   
+      (INDEX_NAME = requested_index_name) IS TRUE DESC,
       has_nullable ASC, covered_columns_length ASC, is_primary DESC
     LIMIT 1
   ;

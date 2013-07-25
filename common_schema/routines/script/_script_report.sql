@@ -65,9 +65,9 @@ begin
   end if;
   
   insert into 
-    _script_report_data (session_id, info) 
+    _script_report_data (server_id, session_id, info) 
   SELECT 
-    CONNECTION_ID(), split_token(@_query_script_report_line, '\n', n)
+    _get_server_id(), CONNECTION_ID(), split_token(@_query_script_report_line, '\n', n)
   FROM
     numbers
   WHERE 
