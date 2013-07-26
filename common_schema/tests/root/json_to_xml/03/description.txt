@@ -1,0 +1,1 @@
+export JSON to XML, test negative number
