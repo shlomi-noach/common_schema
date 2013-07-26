@@ -18,7 +18,7 @@ create procedure _get_json_token(
                         ,   'colon'
                         ,   'comma'                        
                         ,   'decimal'
-                        ,   'error'
+                        ,   'error','minus'
                         ,   'integer'
                         ,   'number'
                         ,   'object_begin'
@@ -39,6 +39,7 @@ begin
     declare v_length int unsigned default character_length(p_text);
     declare v_char, v_lookahead, v_quote_char    varchar(1) charset utf8;
     declare v_from int unsigned;
+    declare negative_number bool default false;
 
     if p_from is null then
         set p_from = 1;
@@ -60,12 +61,18 @@ begin
         set v_char = substr(p_text, v_from, 1)
         ,   v_lookahead = substr(p_text, v_from+1, 1)
         ;
+        if v_char = '-' then
+            set negative_number := true, v_from = v_from + 1;
+            iterate my_loop;
+        end if;
         state_case: begin case p_state
             when 'error' then 
                 set p_from = v_length;
                 leave state_case;            
             when 'start' then
                 case
+                    when v_char = '-' then
+                        set p_state = 'minus', v_from = v_from + 1;
                     when v_char between '0' and '9' then 
                         set p_state = 'integer';
                     when v_char between 'A' and 'Z' 
@@ -175,6 +182,9 @@ begin
     end if;
     if p_state = 'alphanum' then
       set p_state := 'alpha';
+    end if;
+    if negative_number and (p_state != 'number') then
+    	set p_token := NULL;
     end if;
 end;
 //
