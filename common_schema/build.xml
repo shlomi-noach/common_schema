@@ -148,6 +148,11 @@
 				<fileset dir="views/percona_server/" includes="*.sql" />
 			</path>
 		</foreach>
+		<foreach param="tokudb_component.filename" target="build_tokudb_component">
+			<path>
+				<fileset dir="views/tokudb/" includes="*.sql" />
+			</path>
+		</foreach>
 		<concat destfile="${build.dir}/${sql.additional_components.output.file}">
 			<fileset dir="${tmp.dir}" includes="*.sql" />
 		</concat>
@@ -168,6 +173,14 @@
 		<loadfile property="component.text" srcfile="${percona_server_component.filename}"></loadfile>
 		<copy file="${build_data.dir}/percona_server_component.sql" toFile="${tmp.dir}/${percona_server_component.file.basename}" />
 		<replace file="${tmp.dir}/${percona_server_component.file.basename}" token="component.placeholder" value="${component.text}"/>
+	</target>
+	
+	<target name="build_tokudb_component">
+		<basename property="tokudb_component.file.basename" file="${tokudb_component.filename}" />
+		
+		<loadfile property="component.text" srcfile="${tokudb_component.filename}"></loadfile>
+		<copy file="${build_data.dir}/tokudb_component.sql" toFile="${tmp.dir}/${tokudb_component.file.basename}" />
+		<replace file="${tmp.dir}/${tokudb_component.file.basename}" token="component.placeholder" value="${component.text}"/>
 	</target>
 
 	
