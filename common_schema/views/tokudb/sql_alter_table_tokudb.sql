@@ -1,8 +1,6 @@
-
---
+-- 
 -- Generate an ALTER TABLE statement for converting tables to TokuDB
---
-
+-- 
 CREATE OR REPLACE
 ALGORITHM = MERGE
 SQL SECURITY INVOKER
