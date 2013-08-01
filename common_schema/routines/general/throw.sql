@@ -17,6 +17,7 @@ main_body: begin
 
   set @common_schema_error := error_message;
   /*!50500
+  SET @common_schema_error := LEFT(@common_schema_error, 128);
   SIGNAL SQLSTATE VALUE '91100' SET MESSAGE_TEXT = @common_schema_error;
    */
   -- MySQL 5.1 does not support SIGNAL. Fallback:
