@@ -1,0 +1,30 @@
+<h3>SYNOPSIS</h3>
+
+<p>
+TokuDB views: views providing insight or operations on TokuDB tables 
+<ul>
+	<li><a title="sql_alter_table_tokudb" href="sql_alter_table_tokudb.html">sql_alter_table_tokudb</a>: estimated InnoDB depth & split factor of key's B+ Tree</li>
+	<li><a title="tokudb_file_map" href="tokudb_file_map.html">tokudb_file_map</a>: number of row cardinality per keys per columns in InnoDB tables</li>
+</ul>
+</p>
+
+<h3>DESCRIPTION</h3>
+<p>
+These views rely on the INNODB_INDEX_STATS feature to be enabled.
+The views are compatible with recent versions of Percona Server (due to changes to INNODB_INDEX_STATS
+schema in Percona Server 5.5.8, these views are incompatible with earlier versions).
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Examine keys selectivity/cardinality on a specific table:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_index_rows WHERE TABLE_SCHEMA='sakila' AND TABLE_NAME='inventory';
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+| TABLE_SCHEMA | TABLE_NAME | INDEX_NAME           | SEQ_IN_INDEX | COLUMN_NAME  | is_last_column_in_index | incremental_row_per_key |
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+| sakila       | inventory  | PRIMARY              |            1 | inventory_id |                       1 |                       1 |
+| sakila       | inventory  | idx_fk_film_id       |            1 | film_id      |                       1 |                       5 |
+| sakila       | inventory  | idx_store_id_film_id |            1 | store_id     |                       0 |                    4478 |
+| sakila       | inventory  | idx_store_id_film_id |            2 | film_id      |                       1 |                       2 |
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+</pre></blockquote>
+
