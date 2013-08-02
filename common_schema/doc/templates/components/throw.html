@@ -10,10 +10,15 @@ Issues an error at the point of invocation, providing with an error message.
 </p>
 
 <p>
-This is done by invoking an invalid command on the server. The result of such invocation will
-break execution of calling code. If this routine is invoked from another routine, the entire
-call stack is aborted. If this routine is called during a transaction, the transaction aborts
-and rolls back.
+	This is done by invoking an invalid command on the server. The result of such invocation will
+	break execution of calling code. If this routine is invoked from another routine, the entire
+	call stack is aborted. If this routine is called during a transaction, the transaction aborts
+	and rolls back.
+</p>
+<p>
+	On a MySQL >= <strong>5.5</strong> server this routine calls upon <strong>SIGNAL</strong>.
+	On a <strong>5.1</strong> server it generates a statement which reads from an invalid table,
+	producing an awkward yet informative error message.
 </p>
 
 <h3>SYNOPSIS</h3>
@@ -36,10 +41,10 @@ and rolls back.
 
 <h3>EXAMPLES</h3>
 	<p>
-		Invoke <i>throw()</i> directly:
+		Invoke <i>throw()</i> directly, on a <strong>5.1</strong> MySQL server:
 	</p>
 	<blockquote><pre>mysql&gt; call throw('Unknown variable type');
-ERROR 1146 (42S02): Table 'error.Unknown variable type' doesn't exist
+ERROR 1644 (91100): Unknown variable type
 
 mysql&gt; SELECT @common_schema_error;
 +-----------------------+
@@ -47,6 +52,12 @@ mysql&gt; SELECT @common_schema_error;
 +-----------------------+
 | Unknown variable type |
 +-----------------------+
+</pre></blockquote>
+	<p>
+		Invoke <i>throw()</i> directly, on a <strong>5.1</strong> MySQL server:
+	</p>
+	<blockquote><pre>mysql&gt; call throw('Unknown variable type');
+ERROR 1146 (42S02): Table 'error.Unknown variable type' doesn't exist
 </pre></blockquote>
 
 	<p>
