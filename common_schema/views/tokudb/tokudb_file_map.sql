@@ -34,6 +34,7 @@ VIEW _tokudb_table_p_filenames_map AS
 
 -- 
 -- 
+-- 
 CREATE OR REPLACE
 ALGORITHM = TEMPTABLE
 SQL SECURITY INVOKER
@@ -41,7 +42,7 @@ VIEW _tokudb_table_filenames_map AS
   SELECT 
     table_schema, 
     substring_index(table_name, '#P#', 1) as table_name,
-    count_files,
+    SUM(count_files) as count_files,
     group_concat(files order by table_name) as files
   FROM
     _tokudb_table_p_filenames_map
@@ -50,6 +51,7 @@ VIEW _tokudb_table_filenames_map AS
 ;
 
 -- 
+-- map TokuDB tables to files and common shell commands
 -- 
 CREATE OR REPLACE
 ALGORITHM = TEMPTABLE

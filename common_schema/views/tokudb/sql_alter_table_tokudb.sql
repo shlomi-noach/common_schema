@@ -11,10 +11,10 @@ VIEW _sql_alter_table_tokudb_internal AS
     ENGINE,
     concat(
       sql_drop_keys, ', ', sql_add_keys, 
-      ', engine=tokudb row_format=tokudb_small key_block_size=0;') as alter_fast_clause,
+      ', engine=tokudb row_format=tokudb_fast key_block_size=0') as alter_fast_clause,
     concat(
       sql_drop_keys, ', ', sql_add_keys, 
-      ', engine=tokudb row_format=tokudb_small key_block_size=0;') as alter_small_clause
+      ', engine=tokudb row_format=tokudb_small key_block_size=0') as alter_small_clause
   FROM 
     sql_alter_table
 ;
