@@ -1,16 +1,55 @@
-<h3>SYNOPSIS</h3>
-
-<p>
-TokuDB views: views providing insight or operations on TokuDB tables 
-<ul>
-	<li><a title="sql_alter_table_tokudb" href="sql_alter_table_tokudb.html">sql_alter_table_tokudb</a>: Generate ALTER TABLE SQL statements for converting tables to TokuDB</li>
-	<li><a title="tokudb_file_map" href="tokudb_file_map.html">tokudb_file_map</a>: map TokuDB tables to files and common shell commands</li>
-</ul>
-</p>
+<h3>NAME</h3>
+tokudb_file_map: map TokuDB tables to files and common shell commands
+<h3>TYPE</h3>
+View
 
 <h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>tokudb_file_map</i> provides a per table listing of underlying TokuDB files.
+</p>
+
 <p>
-These views provide insight and operation on TokuDB tables. They come to overcome limitation in TokuDB (7.0.3 at this time of writing).
+	TokuDB generates a file per index in table. For a partitioned table, that's one file per index per partition,
+	and in any case this amounts to multiple files per table.
+	<br/>TokuDB provides with the INFORMATION_SCHEMA.TokuDB_file_map view; however it is not normalized, and only maps
+	an internal TokuDB entity to file name.
+</p>
+<p>
+	<i>common_schema</i>'s <i>tokudb_file_map</i> lists the files on a per table basis, answering the common question of 
+	<i>"which files represent my table?".</i>
+	<br/>It also adds common shell queries to answer questions such as <i>"what is the total size of files for my table?"</i>
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC tokudb_file_map;
++--------------+------------+------+-----+---------+-------+
+| Field        | Type       | Null | Key | Default | Extra |
++--------------+------------+------+-----+---------+-------+
+| table_schema | text       | YES  |     | NULL    |       |
+| table_name   | text       | YES  |     | NULL    |       |
+| count_files  | bigint(21) | NO   |     | 0       |       |
+| files        | mediumtext | YES  |     | NULL    |       |
+| bash_ls      | mediumtext | YES  |     | NULL    |       |
+| bash_du      | mediumtext | YES  |     | NULL    |       |
++--------------+------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>table_schema</strong>: schema of TokuDB table.</li>
+		<li><strong>table_name</strong>: TokuDB table name.</li>
+		<li><strong>count_files</strong>: number of files representing this table.</li>
+		<li><strong>files</strong>: comma delimited list of files representing this table.</li>
+		<li><strong>bash_ls</strong>: shell <strong>ls</strong> command to show files of this table.</li>
+		<li><strong>bash_du</strong>: shell <strong>du</strong> command to present total size of files representing this table.</li>
+	</ul>
+	Shell commands are to be executed from within the <strong>@@datadir</strong> path, and require file system privileges; this is outside
+	MySQL's scope. 
 </p>
 
 <h3>EXAMPLES</h3>
@@ -25,3 +64,12 @@ table_schema: my_dwh
      bash_du: du -ch ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_algo_ix_a71975_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_cluster_id_ix_a71975_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_date_clustering_type_ix_a71975_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_widget_ix_a71975_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_main_a71975_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_status_a71975_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_algo_ix_a71976_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_cluster_id_ix_a71976_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_date_clustering_type_ix_a71976_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_widget_ix_a71976_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_main_a71976_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_status_a71976_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_algo_ix_a71977_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_cluster_id_ix_a71977_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_date_clustering_type_ix_a71977_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_widget_ix_a71977_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_main_a71977_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_status_a71977_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_algo_ix_a71978_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_cluster_id_ix_a71978_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_date_clustering_type_ix_a71978_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_widget_ix_a71978_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_main_a71978_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_status_a71978_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_algo_ix_a71979_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_cluster_id_ix_a71979_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_date_clustering_type_ix_a71979_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_widget_ix_a71979_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_main_a71979_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_status_a71979_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_algo_ix_a7197a_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_cluster_id_ix_a7197a_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_date_clustering_type_ix_a7197a_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_widget_ix_a7197a_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_main_a7197a_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_status_a7197a_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_algo_ix_a7197b_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_cluster_id_ix_a7197b_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_date_clustering_type_ix_a7197b_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_widget_ix_a7197b_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_main_a7197b_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_status_a7197b_1_18.tokudb | tail -n 1
 </pre></blockquote>
 
+<h3>ENVIRONMENT</h3>
+TokuDB enabled server (>= 5.5)
+
+<h3>SEE ALSO</h3>
+<a href="sql_alter_table_tokudb.html">sql_alter_table_tokudb</a>,
+<a href="sql_range_partitions.html">sql_range_partitions</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
