@@ -23,6 +23,7 @@ VIEW _tokudb_table_p_filenames_map AS
   SELECT 
     table_schema, 
     table_name, 
+    count(*) as count_files,
     group_concat(tokudb_file_map.internal_file_name order by tokudb_file_map.internal_file_name) as files
   FROM
     _tokudb_table_breakdown_map
@@ -40,6 +41,7 @@ VIEW _tokudb_table_filenames_map AS
   SELECT 
     table_schema, 
     substring_index(table_name, '#P#', 1) as table_name,
+    count_files,
     group_concat(files order by table_name) as files
   FROM
     _tokudb_table_p_filenames_map
@@ -56,6 +58,7 @@ VIEW tokudb_file_map AS
   SELECT 
     table_schema,
     table_name,
+    count_files,
     files,
     concat('ls -l ', replace(files, ',', ' ')) as bash_ls,
     concat('du -ch ', replace(files, ',', ' '), ' | tail -n 1') as bash_du
