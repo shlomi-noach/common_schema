@@ -300,9 +300,9 @@ begin
                     or   v_char = '$' then
                         set p_state = 'alphanum';
                     else
-                        if v_char = ':' and v_lookahead not in ('=', '$') then
-                          set p_state = 'label', v_from = v_from + 1;
-                        end if;
+--                        if v_char = ':' and v_lookahead not in ('=', '$') then
+--                          set p_state = 'label', v_from = v_from + 1;
+--                        end if;
                         leave my_loop;
                 end case;
             when 'alphanum' then
@@ -313,9 +313,9 @@ begin
                     or   v_char between '0' and '9' then
                         leave state_case;
                     else
-                        if v_char = ':' and v_lookahead not in ('=', '$') then
-                          set p_state = 'label', v_from = v_from + 1;
-                        end if;
+--                        if v_char = ':' and v_lookahead not in ('=', '$') then
+--                          set p_state = 'label', v_from = v_from + 1;
+--                        end if;
                         leave my_loop;
                 end case;
             when 'integer' then
