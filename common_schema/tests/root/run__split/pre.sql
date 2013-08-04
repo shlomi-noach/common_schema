@@ -62,7 +62,8 @@ create table test_split_multiple_unique(
   UNIQUE KEY `small` (small_val, name),
   UNIQUE KEY `name` (name, ts, small_val),
   UNIQUE KEY `ts` (ts, small_val),
-  UNIQUE KEY `textval` (textval)
+  UNIQUE KEY `textval` (textval),
+  KEY `non_unique_idx` (name, small_val)
 ) engine=innodb;
 
 insert into test_split_multiple_unique

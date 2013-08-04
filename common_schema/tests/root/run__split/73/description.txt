@@ -1,0 +1,1 @@
+expect error on non-unique index parameter for split()
