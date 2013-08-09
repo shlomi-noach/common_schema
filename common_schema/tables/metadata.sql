@@ -23,6 +23,7 @@ INSERT INTO metadata (attribute_name, attribute_value) VALUES
   ('base_components_installed', false),
   ('innodb_plugin_components_installed', false),
   ('percona_server_components_installed', false),
+  ('tokudb_components_installed', false),
   ('license_type', 'GPL'),
   ('license', '
 
@@ -47,5 +48,5 @@ A copy of the GNU General Public License is available at
   ('project_repository', 'https://common-schema.googlecode.com/svn/trunk/'),
   ('project_repository_type', 'svn'),
   ('revision', 'revision.placeholder'),
-  ('version', '2.1')
+  ('version', '2.2')
 ;  
