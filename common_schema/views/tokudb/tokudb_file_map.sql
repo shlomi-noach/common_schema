@@ -1,5 +1,7 @@
+
 -- 
 -- 
+
 CREATE OR REPLACE
 ALGORITHM = TEMPTABLE
 SQL SECURITY INVOKER
@@ -16,6 +18,7 @@ VIEW _tokudb_table_breakdown_map AS
 
 -- 
 -- 
+
 CREATE OR REPLACE
 ALGORITHM = TEMPTABLE
 SQL SECURITY INVOKER
@@ -53,6 +56,7 @@ VIEW _tokudb_table_filenames_map AS
 -- 
 -- map TokuDB tables to files and common shell commands
 -- 
+
 CREATE OR REPLACE
 ALGORITHM = TEMPTABLE
 SQL SECURITY INVOKER
