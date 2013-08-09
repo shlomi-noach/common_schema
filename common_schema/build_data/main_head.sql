@@ -79,3 +79,5 @@ set @common_schema_innodb_plugin_expected := 0;
 set @common_schema_innodb_plugin_installed := 0;
 set @common_schema_percona_server_expected := 0;
 set @common_schema_percona_server_installed := 0;
+set @common_schema_tokudb_expected := 0;
+set @common_schema_tokudb_installed := 0;

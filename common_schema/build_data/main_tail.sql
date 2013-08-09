@@ -36,6 +36,14 @@ WHERE
   attribute_name = 'percona_server_components_installed'
 ;
 
+UPDATE 
+  metadata
+SET 
+  attribute_value = ((@common_schema_tokudb_installed > 0) AND (@common_schema_tokudb_installed = @common_schema_tokudb_expected))
+WHERE 
+  attribute_name = 'tokudb_components_installed'
+;
+
 FLUSH TABLES mysql.db;
 FLUSH TABLES mysql.proc;
 
@@ -67,6 +75,13 @@ SET @message := CONCAT(@message, '\n- Percona Server components: ',
 	WHEN 0 THEN 'not installed'
 	WHEN @common_schema_percona_server_expected THEN 'installed'
     ELSE CONCAT('partial install: ', @common_schema_percona_server_installed, '/', @common_schema_percona_server_expected)	
+  END
+);
+SET @message := CONCAT(@message, '\n- TokuDB components: ', 
+  CASE @common_schema_tokudb_installed
+	WHEN 0 THEN 'not installed'
+	WHEN @common_schema_tokudb_expected THEN 'installed'
+    ELSE CONCAT('partial install: ', @common_schema_tokudb_installed, '/', @common_schema_tokudb_expected)	
   END
 );
 SET @message := CONCAT(@message, '\n');
