@@ -65,6 +65,11 @@ The two pose several limitations on the type of code which can be used from with
 </ul>
 </p>
 
+<p>
+	The <i>common_schema</i> installation process breaks any running scripts (to be changed
+	in the future). Avoid re-installing <i>common_schema</i> while QueryScript code executes.
+</p>
+
 <h4>Performance</h4>
 <p>
 Current implementation of QueryScript utilizes stored routines. That is, a stored routine (e.g. <i>run()</i>)

@@ -206,13 +206,23 @@ The user is always allowed to specify the splitting table, even on single table 
 	<i>split</i> accepts parameters for operation. Normally, <i>split</i> does everything on its own, and does not require instruction.
 	However, the user is given the choice of fine tuning <i>split</i>'s operation by providing any combination of the following paramaters:
 	<ul>
-		<li><strong>size</strong>: number of rows used in each step (minimum: 100; maximum: 50,000; default: 1,000)</li>
+		<li>
+			<strong>index</strong>: 
+			explicit name of index to use for splitting. The index must exist under given name
+			and must be <strong>UNIQUE</strong>, or else an error is thrown. 
+			<br/>By default <i>split</i> chooses the best index
+			for splitting the table without hint.
+		</li>
+		<li>
+			<strong>size</strong>: number of rows used in each step (minimum: 100; maximum: 50,000; default: 1,000)
+		</li>
 		<li>
 			<strong>start</strong>: starting point for the <i>split</i> operation.
 			This is a comma delimited list of values (quoted on multiple values). 
 			<br/>The count of values must match the 
 			number of columns in the index picked by <i>split</i>. Thus, if <i>split</i> picks an
 			AUTO_INCREMENT PRIMARY KEY for the operation, the value is merely a single integer.
+			<br/>It makes most sense to use this parameters in conjunction with <strong>index</strong>.
 			<br/>Compound values such as <strong>'2013-07-05,12,smith'</strong> are valid.
 			<br/>Values do not have to strictly exist in the table: the <i>split</i> operation will begin
 			<i>as of these values</i>, meaning starting at the first row with these exact values 
@@ -227,6 +237,7 @@ The user is always allowed to specify the splitting table, even on single table 
 			<br/>The count of values must match the 
 			number of columns in the index picked by <i>split</i>. Thus, if <i>split</i> picks an
 			AUTO_INCREMENT PRIMARY KEY for the operation, the value is merely a single integer.
+			<br/>It makes most sense to use this parameters in conjunction with <strong>index</strong>.
 			<br/>Compound values such as <strong>'2013-07-05,12,smith'</strong> are valid.
 			<br/>Values do not have to strictly exist in the table: the <i>split</i> operation will run
 			<i>up to these values</i>, meaning stopping at the first row with these exact values 

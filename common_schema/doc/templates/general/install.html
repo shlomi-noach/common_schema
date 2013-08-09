@@ -40,14 +40,26 @@
 </p>
 
 
-<p>Percona Server features are supported for versions >= <strong>5.5.8</strong>. Please note that <i>common_schema</i> will
-install regardless of the version. It will automatically recognize available feature set and install accordingly.
-Likewise, it will install regardless of the availability of InnoDB Plugin and associated INFORMATION_SCHEMA tables.</p>
+<p>
+	Percona Server features are supported for versions >= <strong>5.5.8</strong>. 
+	TokuDB features are supported on TokuDB enabled servers.
+	Please note that <i>common_schema</i> will install regardless of the version. 
+	It will automatically recognize available feature set and install accordingly.
+	Likewise, it will install regardless of the availability of InnoDB Plugin and 
+	associated INFORMATION_SCHEMA tables.
+</p>
 
 <p>
-If you should upgrade your MySQL server, or enable features which were turned off during install of <i>common_schema</i>,
-the new feature set are not automatically available by <i>common_schema</i>, and a re-install of <i>common_schema</i> is required.
+	If you should upgrade your MySQL server, or enable features which were turned off during install of <i>common_schema</i>,
+	the new feature set are not automatically available by <i>common_schema</i>, and a re-install of <i>common_schema</i> is required.
+</p>
 
+<h3>Installation notes</h3>
+
+<p>
+	The installation process drops and creates various tables and routines. In particular,
+	the installation process breaks any running <a href="query_script.html">QueryScript</a> code. 
+	Avoid installing <i>common_schema</i> during QueryScript executions.
 </p>
 
 <h3>Troubleshooting</h3>
