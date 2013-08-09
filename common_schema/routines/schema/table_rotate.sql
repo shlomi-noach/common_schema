@@ -1,7 +1,7 @@
 
 --
--- Create a new account with same privileges as those of given grantee.
--- Initial password for new account is also duplicated from existing account.
+-- Rotate a table logrotate-style: version current table and move aside,
+-- pushing older versions further down the line, 
 --
 
 DELIMITER $$
@@ -23,21 +23,25 @@ begin
   if not table_exists(table_schema, table_name) then
     call throw(concat('Cannot rotate non-existing table: ', mysql_qualify(table_schema), '.', mysql_qualify(table_name)));
   end if;
+ 
+  if IFNULL(rotate_limit, 0) > 0 then
+    -- drop oldest:
+    set rotate_statement := concat(
+        'DROP TABLE IF EXISTS ', 
+        mysql_qualify(table_schema), '.', mysql_qualify(concat(table_name, '__', rotate_limit))
+    );  
+    call exec(rotate_statement);
+  end if;
   
-  set rotate_statement := concat(
-      'DROP TABLE IF EXISTS ', 
-      mysql_qualify(table_schema), '.', mysql_qualify(concat(table_name, '__', rotate_limit))
-  );  
-  call exec(rotate_statement);
-  
+  -- create empty table:
   set rotate_statement := concat(
       'CREATE TABLE ', 
       mysql_qualify(table_schema), '.', mysql_qualify(concat(table_name, '__0')), ' LIKE ',
       mysql_qualify(table_schema), '.', mysql_qualify(table_name)
   );  
   call exec(rotate_statement);
-  
-  
+ 
+  -- rotate all tables:
   set rotate_statement := '';
   set rotate_index := 1;
   while table_exists(table_schema, concat(table_name, '__', rotate_index)) do
