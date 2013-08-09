@@ -1,0 +1,56 @@
+version 2.2
+===========
+- better isolation of QueryScript executions (now identified by server_id & session_id)
+- better cleanup of QueryScript persistent tables in >= 5.5 (utilizing RESIGNAL)
+- throw() utilizes SIGNAL on >= 5.5
+- added "index" parameter to split()
+- added TokuDB views
+- Fixed JSON-to-XML issue
+- added table_rotate() routine
+
+version 2.1
+===========
+QueryScript:
+- global persistent tables (innodb)
+- short-term lived temporary tables (myisam, for split() operation only and only through diagnostics stage, not throughout split operation)
+- split:
+  - better choice of split column (now better heuristic checking all indexed columns & types)
+  - start/stop with multi column specification, multi types support
+  - fixed bugs
+
+- added view: debugged_routines
+- added routine: grant_access()
+- sql_alter_table: provides ADD, DROP indexes clauses
+- sql_range_partitions: added has_maxvalue, count_past, count_future
+- charts:
+  - line_chart(): generates multi line ascii chart
+  - google_line_chart(): generates multi line Google Image Charts URL.
+
+version 2.0
+===========
+- Relicensed with GPL 2
+- redbug (alpha): debugger & debugging API for MySQL stored routines
+- text routines:
+  - replace_sections()
+  - hexcode_text()
+  
+version 1.3
+===========
+QueryScript:
+- split() parameters
+
+security:
+- added duplicate_grantee()
+- added similar_grants()
+
+text:
+- added json_to_xml()
+- added extract_json_value()
+
+general:
+- added query_checksum()
+- added random_hash()
+
+
+older versions not listed
+=========================
