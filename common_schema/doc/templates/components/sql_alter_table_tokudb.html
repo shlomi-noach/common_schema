@@ -10,7 +10,7 @@ View
 </p>
 
 <p>
-	There is a known issue with converting <strong>COMPRESSED</strong> InnoDB tables to TokuDB (<= 7.0.3 at this time).
+	There is a known issue with converting <strong>COMPRESSED</strong> InnoDB tables to TokuDB (<= 7.0.4 at this time).
 	<br/>When the <strong>KEY_BLOCK_SIZE</strong> create option is specified, TokuDB wrongly applies it
 	to all indexes, which makes for file size bloating instead of compression. 
 </p>
