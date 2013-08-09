@@ -1,0 +1,1 @@
+Test second rotate: verify table creation and value presense

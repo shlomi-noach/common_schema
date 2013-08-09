@@ -1,0 +1,1 @@
+Test next rotates: verify limit
