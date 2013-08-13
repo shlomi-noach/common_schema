@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> <strong>2.1</strong> documentation
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -59,14 +59,26 @@
 </p>
 
 
-<p>Percona Server features are supported for versions >= <strong>5.5.8</strong>. Please note that <i>common_schema</i> will
-install regardless of the version. It will automatically recognize available feature set and install accordingly.
-Likewise, it will install regardless of the availability of InnoDB Plugin and associated INFORMATION_SCHEMA tables.</p>
+<p>
+	Percona Server features are supported for versions >= <strong>5.5.8</strong>. 
+	TokuDB features are supported on TokuDB enabled servers.
+	Please note that <i>common_schema</i> will install regardless of the version. 
+	It will automatically recognize available feature set and install accordingly.
+	Likewise, it will install regardless of the availability of InnoDB Plugin and 
+	associated INFORMATION_SCHEMA tables.
+</p>
 
 <p>
-If you should upgrade your MySQL server, or enable features which were turned off during install of <i>common_schema</i>,
-the new feature set are not automatically available by <i>common_schema</i>, and a re-install of <i>common_schema</i> is required.
+	If you should upgrade your MySQL server, or enable features which were turned off during install of <i>common_schema</i>,
+	the new feature set are not automatically available by <i>common_schema</i>, and a re-install of <i>common_schema</i> is required.
+</p>
 
+<h3>Installation notes</h3>
+
+<p>
+	The installation process drops and creates various tables and routines. In particular,
+	the installation process breaks any running <a href="query_script.html">QueryScript</a> code. 
+	Avoid installing <i>common_schema</i> during QueryScript executions.
 </p>
 
 <h3>Troubleshooting</h3>
@@ -137,6 +149,7 @@ schema generation is unable to execute on your server.
 						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
 						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
 						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
 					</ul>						
 					<h3>DATA</h3>
 					<ul>

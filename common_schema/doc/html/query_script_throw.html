@@ -11,7 +11,7 @@
 <body>
 	<div id="main">
 		<div id="header">
-			<h1>common_schema</h1> <strong>2.1</strong> documentation
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
 			<div class="subtitle">DBA's framework for MySQL</div>
 		</div>
 		<div id="contentwrapper">
@@ -34,27 +34,27 @@ statement;
 
 <h3>DESCRIPTION</h3>
 <p> 
-<i>throw</i> is a QueryScript <a href="query_script_statements.html">statement</a> which,
-when invoked, raises an error.
+	<i>throw</i> is a QueryScript <a href="query_script_statements.html">statement</a> which,
+	when invoked, raises an error.
 </p>
 <p>
-When executed from within a <a href="query_script_try_catch.html">try</a> statement, flow resumes at the
-matching <strong>catch</strong> block. 
+	When executed from within a <a href="query_script_try_catch.html">try</a> statement, flow resumes at the
+	matching <strong>catch</strong> block. 
 </p>
 <p>  
-Otherwise, it makes for the (ungraceful) termination of the script's execution. If
-an active transaction is in place, it is rolled back.  
+	Otherwise, it makes for the (ungraceful) termination of the script's execution. If
+	an active transaction is in place, it is rolled back.  
 </p>
 <p>
-<i>throw</i> takes a text parameter, which is the error message. 
-It is stored in the <a href="variables.html#common_schema_error">@common_schema_error</a> variable.
+	<i>throw</i> takes a text parameter, which is the error message. 
+	It is stored in the <a href="variables.html#common_schema_error">@common_schema_error</a> variable.
 </p>
 <p>
-Since <a href="http://dev.mysql.com/doc/refman/5.5/en/signal.html"><strong>SIGNAL</strong></a>
-is only introduced in MySQL 5.5, current implementation of <i>throw</i> uses a dirty trick to raise an error,
-in the form of attempting to <strong>SELECT</strong> from a non-existent table.
-The result is a rather obscure error message, noting that some table does not exist. The name of the 
-non-existing table is actually the error message. 
+<p>
+	On a MySQL >= <strong>5.5</strong> server this statement calls upon 
+	<a href="http://dev.mysql.com/doc/refman/5.5/en/signal.html"><strong>SIGNAL</strong></a>.
+	On a <strong>5.1</strong> server it generates a statement which reads from a non-existent table,
+	producing an awkward yet informative error message.
 </p>
 
 <h3>EXAMPLES</h3>
@@ -70,7 +70,7 @@ while (@x > 0)
     throw 'x is too low!';
 }
 
-ERROR 1146 (42S02): Table 'error.'x is too low!'' doesn't exist
+ERROR 1644 (91100): x is too low!
 
 mysql&gt; select @common_schema_error;
 +----------------------+
@@ -147,6 +147,7 @@ Shlomi Noach
 						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
 						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
 						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
 					</ul>						
 					<h3>DATA</h3>
 					<ul>

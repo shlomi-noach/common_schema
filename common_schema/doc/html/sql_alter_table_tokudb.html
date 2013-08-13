@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>query_script: common_schema documentation</title>
-	<meta name="description" content="query_script: common_schema" />
-	<meta name="keywords" content="query_script: common_schema" />
+	<title>sql_alter_table_tokudb: common_schema documentation</title>
+	<meta name="description" content="sql_alter_table_tokudb: common_schema" />
+	<meta name="keywords" content="sql_alter_table_tokudb: common_schema" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
@@ -16,63 +16,110 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="query_script.html">query_script</a></h2>	
+				<h2><a href="sql_alter_table_tokudb.html">sql_alter_table_tokudb</a></h2>	
+<h3>NAME</h3>
+sql_alter_table_tokudb: Generate ALTER TABLE SQL statements for converting tables to TokuDB
+<h3>TYPE</h3>
+View
 
-<h3>QueryScript is a scripting language for SQL</h3>
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>sql_alter_table_tokudb</i> provides with SQL statements to alter a table to TokuDB in two compression formats, and overcoming issue of KEY_BLOCK_SIZE
+</p>
 
 <p>
-<a href="http://www.queryscript.com"><strong>QueryScript</strong></a> is a programming language aimed for SQL scripting, 
-seamlessly combining scripting power such as flow control & variables with standard SQL statements
-or RDBMS-specific commands.   
+	There is a known issue with converting <strong>COMPRESSED</strong> InnoDB tables to TokuDB (<= 7.0.4 at this time).
+	<br/>When the <strong>KEY_BLOCK_SIZE</strong> create option is specified, TokuDB wrongly applies it
+	to all indexes, which makes for file size bloating instead of compression. 
 </p>
-<strong>common_schema</strong> implements QueryScript for MySQL: it provides the execution mechanism for QueryScript code 
-(see <a href="query_script_execution.html">Execution</a>).
+<p>
+	The only solution known to the author of this tool is to <strong>DROP</strong> all keys, reset the 
+	<strong>KEY_BLOCK_SIZE</strong> to <strong>0</strong> and add all keys again. 
+	Fortunately, this can be done in one (long) <strong>ALTER</strong> statement.
+</p>
+<p>
+	This view provides such statements.
 </p>
 
-<p>
-What does QueryScript look like? Here are a couple examples:
+<h3>STRUCTURE</h3>
+
 <blockquote><pre>
-while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
-{
-  throttle 2;
-}
+mysql&gt; DESC sql_alter_table_tokudb;
++--------------------+-------------+------+-----+---------+-------+
+| Field              | Type        | Null | Key | Default | Extra |
++--------------------+-------------+------+-----+---------+-------+
+| TABLE_SCHEMA       | varchar(64) | NO   |     |         |       |
+| TABLE_NAME         | varchar(64) | NO   |     |         |       |
+| ENGINE             | varchar(64) | YES  |     | NULL    |       |
+| alter_fast_clause  | mediumtext  | YES  |     | NULL    |       |
+| sql_alter_fast     | mediumtext  | YES  |     | NULL    |       |
+| alter_small_clause | mediumtext  | YES  |     | NULL    |       |
+| sql_alter_small    | mediumtext  | YES  |     | NULL    |       |
++--------------------+-------------+------+-----+---------+-------+
 </pre></blockquote>
-<blockquote><pre>
-foreach($table, $schema, $engine: table in sakila)
-{
-  if ($engine = 'InnoDB')
-    ALTER TABLE :$schema.:$table ENGINE=InnoDB ROW_FORMAT=Compact;
-}
-</pre></blockquote>
-</p>
-<p>
-With <strong>QueryScript</strong> one can:
-<ul>
-	<li>Use familiar syntax to solve common DBA maintenance problems</li>
-	<li>Loop through number sequences, constants, tables, schemata</li>
-	<li>Easily iterate query results, providing cursor-like functionality with clean syntax</li>
-	<li>Use conditional statements and statement blocks</li>
-	<li>Create and use variables</li>
-	<li>Expand variables in-place, turning them to constants in queries where variables are not allowed</li>
-</ul>
-</p>
-<p>
-QueryScript programs execute from <i>within the server</i>.
-As opposed to scripts written with Perl, Python or PHP,
-QueryScript code does not need to specify connections, logins nor passwords. 
-There is no connector to install and use, there is no driver setup. There are no plugins. 
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>TABLE_SCHEMA</strong>: schema of current table</li>
+		<li><strong>TABLE_NAME</strong>: current table name</li>
+		<li><strong>ENGINE</strong>: current engine name</li>
+		<li><strong>alter_fast_clause</strong>: 
+			The clause for <strong>ALTER TABLE</strong> to convert current table to TokuDB in <strong>TOKUDB_FAST</strong>
+			(lightweight compression) row format.
+		</li>
+		<li><strong>sql_alter_fast</strong>: 
+			A complete <strong>ALTER TABLE</strong> statement to convert current table to TokuDB in <strong>TOKUDB_FAST</strong>
+			(lightweight compression) row format.
+		</li>
+		<li><strong>alter_small_clause</strong>: 
+			The clause for <strong>ALTER TABLE</strong> to convert current table to TokuDB in <strong>TOKUDB_SMALL</strong>
+			(aggressive compression) row format.
+		</li>
+		<li><strong>sql_alter_small</strong>: 
+			A complete <strong>ALTER TABLE</strong> statement to convert current table to TokuDB in <strong>TOKUDB_SMALL</strong>
+			(aggressive compression) row format.
+		</li>
+		
+	</ul>
 </p>
 
+<p>The SQL statements are not terminated by ';'.</p>
+
+<h3>EXAMPLES</h3>
+<p>Generate ALTER TABLE statements for a test table:</p>
+<blockquote><pre>mysql&gt; create table test.t (
+  id int,
+  c char,
+  dt datetime,
+  d double,
+  PRIMARY KEY (id),
+  KEY (dt, c)
+);
+
+mysql&gt; select * from common_schema.sql_alter_table_tokudb where table_schema='test' and table_name='t' \G
+
+      TABLE_SCHEMA: test
+        TABLE_NAME: t
+            ENGINE: InnoDB
+ alter_fast_clause: DROP KEY `dt`, DROP PRIMARY KEY, ADD KEY `dt`(`dt`,`c`), ADD PRIMARY KEY (`id`), engine=tokudb row_format=tokudb_small key_block_size=0;
+    sql_alter_fast: alter table `test`.`t` DROP KEY `dt`, DROP PRIMARY KEY, ADD KEY `dt`(`dt`,`c`), ADD PRIMARY KEY (`id`), engine=tokudb row_format=tokudb_small key_block_size=0;
+alter_small_clause: DROP KEY `dt`, DROP PRIMARY KEY, ADD KEY `dt`(`dt`,`c`), ADD PRIMARY KEY (`id`), engine=tokudb row_format=tokudb_small key_block_size=0;
+   sql_alter_small: alter table `test`.`t` DROP KEY `dt`, DROP PRIMARY KEY, ADD KEY `dt`(`dt`,`c`), ADD PRIMARY KEY (`id`), engine=tokudb row_format=tokudb_small key_block_size=0;
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+TokuDB enabled server (>= 5.5)
 
 <h3>SEE ALSO</h3>
-<a href="run.html">run()</a>,
-<a href="query_script_execution.html">Execution</a>,
-<a href="query_script_statements.html">Statements</a>
+<a href="sql_alter_table.html">sql_alter_table</a>,
+<a href="tokudb_file_map.html">tokudb_file_map</a>
 
 <h3>AUTHOR</h3>
 Shlomi Noach
-
-
 				<br/>
 			</div>
 			<div id="sidebarwrapper">

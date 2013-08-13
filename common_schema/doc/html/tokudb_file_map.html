@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>tokudb_file_map: common_schema documentation</title>
+	<meta name="description" content="tokudb_file_map: common_schema" />
+	<meta name="keywords" content="tokudb_file_map: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="tokudb_file_map.html">tokudb_file_map</a></h2>	
+<h3>NAME</h3>
+tokudb_file_map: map TokuDB tables to files and common shell commands
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>tokudb_file_map</i> provides a per table listing of underlying TokuDB files.
+</p>
+
+<p>
+	TokuDB generates a file per index in table. For a partitioned table, that's one file per index per partition,
+	and in any case this amounts to multiple files per table.
+	<br/>TokuDB provides with the INFORMATION_SCHEMA.TokuDB_file_map view; however it is not normalized, and only maps
+	an internal TokuDB entity to file name.
+</p>
+<p>
+	<i>common_schema</i>'s <i>tokudb_file_map</i> lists the files on a per table basis, answering the common question of 
+	<i>"which files represent my table?".</i>
+	<br/>It also adds common shell queries to answer questions such as <i>"what is the total size of files for my table?"</i>
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC tokudb_file_map;
++--------------+------------+------+-----+---------+-------+
+| Field        | Type       | Null | Key | Default | Extra |
++--------------+------------+------+-----+---------+-------+
+| table_schema | text       | YES  |     | NULL    |       |
+| table_name   | text       | YES  |     | NULL    |       |
+| count_files  | bigint(21) | NO   |     | 0       |       |
+| files        | mediumtext | YES  |     | NULL    |       |
+| bash_ls      | mediumtext | YES  |     | NULL    |       |
+| bash_du      | mediumtext | YES  |     | NULL    |       |
++--------------+------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>table_schema</strong>: schema of TokuDB table.</li>
+		<li><strong>table_name</strong>: TokuDB table name.</li>
+		<li><strong>count_files</strong>: number of files representing this table.</li>
+		<li><strong>files</strong>: comma delimited list of files representing this table.</li>
+		<li><strong>bash_ls</strong>: shell <strong>ls</strong> command to show files of this table.</li>
+		<li><strong>bash_du</strong>: shell <strong>du</strong> command to present total size of files representing this table.</li>
+	</ul>
+	Shell commands are to be executed from within the <strong>@@datadir</strong> path, and require file system privileges; this is outside
+	MySQL's scope. 
+</p>
+
+<h3>EXAMPLES</h3>
+<p>List TokuDB files for a given table:</p>
+<blockquote><pre>mysql&gt; select * from tokudb_file_map where table_name='my_table' \G
+*************************** 1. row ***************************
+table_schema: my_dwh
+  table_name: my_table
+ count_files: 42
+       files: ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_algo_ix_a71975_3_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_cluster_id_ix_a71975_4_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_date_clustering_type_ix_a71975_5_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_widget_ix_a71975_6_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2010_main_a71975_2_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2010_status_a71975_1_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_algo_ix_a71976_3_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_cluster_id_ix_a71976_4_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_date_clustering_type_ix_a71976_5_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_widget_ix_a71976_6_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2011_main_a71976_2_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2011_status_a71976_1_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_algo_ix_a71977_3_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_cluster_id_ix_a71977_4_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_date_clustering_type_ix_a71977_5_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_widget_ix_a71977_6_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2012_main_a71977_2_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2012_status_a71977_1_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_algo_ix_a71978_3_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_cluster_id_ix_a71978_4_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_date_clustering_type_ix_a71978_5_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_widget_ix_a71978_6_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2013_main_a71978_2_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2013_status_a71978_1_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_algo_ix_a71979_3_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_cluster_id_ix_a71979_4_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_date_clustering_type_ix_a71979_5_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_widget_ix_a71979_6_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2014_main_a71979_2_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2014_status_a71979_1_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_algo_ix_a7197a_3_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_cluster_id_ix_a7197a_4_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_date_clustering_type_ix_a7197a_5_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_widget_ix_a7197a_6_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2015_main_a7197a_2_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_2015_status_a7197a_1_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_algo_ix_a7197b_3_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_cluster_id_ix_a7197b_4_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_date_clustering_type_ix_a7197b_5_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_widget_ix_a7197b_6_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_all_main_a7197b_2_18.tokudb,./_my_dwh_sql_4665_15be_P_trns_pt_all_status_a7197b_1_18.tokudb
+     bash_ls: ls -l ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_algo_ix_a71975_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_cluster_id_ix_a71975_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_date_clustering_type_ix_a71975_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_widget_ix_a71975_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_main_a71975_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_status_a71975_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_algo_ix_a71976_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_cluster_id_ix_a71976_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_date_clustering_type_ix_a71976_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_widget_ix_a71976_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_main_a71976_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_status_a71976_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_algo_ix_a71977_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_cluster_id_ix_a71977_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_date_clustering_type_ix_a71977_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_widget_ix_a71977_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_main_a71977_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_status_a71977_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_algo_ix_a71978_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_cluster_id_ix_a71978_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_date_clustering_type_ix_a71978_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_widget_ix_a71978_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_main_a71978_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_status_a71978_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_algo_ix_a71979_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_cluster_id_ix_a71979_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_date_clustering_type_ix_a71979_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_widget_ix_a71979_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_main_a71979_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_status_a71979_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_algo_ix_a7197a_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_cluster_id_ix_a7197a_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_date_clustering_type_ix_a7197a_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_widget_ix_a7197a_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_main_a7197a_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_status_a7197a_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_algo_ix_a7197b_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_cluster_id_ix_a7197b_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_date_clustering_type_ix_a7197b_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_widget_ix_a7197b_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_main_a7197b_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_status_a7197b_1_18.tokudb
+     bash_du: du -ch ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_algo_ix_a71975_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_cluster_id_ix_a71975_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_date_clustering_type_ix_a71975_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_key_trns_pub_widget_ix_a71975_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_main_a71975_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2010_status_a71975_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_algo_ix_a71976_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_cluster_id_ix_a71976_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_date_clustering_type_ix_a71976_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_key_trns_pub_widget_ix_a71976_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_main_a71976_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2011_status_a71976_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_algo_ix_a71977_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_cluster_id_ix_a71977_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_date_clustering_type_ix_a71977_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_key_trns_pub_widget_ix_a71977_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_main_a71977_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2012_status_a71977_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_algo_ix_a71978_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_cluster_id_ix_a71978_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_date_clustering_type_ix_a71978_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_key_trns_pub_widget_ix_a71978_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_main_a71978_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2013_status_a71978_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_algo_ix_a71979_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_cluster_id_ix_a71979_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_date_clustering_type_ix_a71979_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_key_trns_pub_widget_ix_a71979_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_main_a71979_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2014_status_a71979_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_algo_ix_a7197a_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_cluster_id_ix_a7197a_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_date_clustering_type_ix_a7197a_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_key_trns_pub_widget_ix_a7197a_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_main_a7197a_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_2015_status_a7197a_1_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_algo_ix_a7197b_3_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_cluster_id_ix_a7197b_4_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_date_clustering_type_ix_a7197b_5_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_key_trns_pub_widget_ix_a7197b_6_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_main_a7197b_2_18.tokudb ./_my_dwh_sql_4665_15be_P_trns_pt_all_status_a7197b_1_18.tokudb | tail -n 1
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+TokuDB enabled server (>= 5.5)
+
+<h3>SEE ALSO</h3>
+<a href="sql_alter_table_tokudb.html">sql_alter_table_tokudb</a>,
+<a href="sql_range_partitions.html">sql_range_partitions</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

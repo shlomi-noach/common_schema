@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>query_script: common_schema documentation</title>
-	<meta name="description" content="query_script: common_schema" />
-	<meta name="keywords" content="query_script: common_schema" />
+	<title>table_rotate: common_schema documentation</title>
+	<meta name="description" content="table_rotate: common_schema" />
+	<meta name="keywords" content="table_rotate: common_schema" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
@@ -16,63 +16,142 @@
 		</div>
 		<div id="contentwrapper">
 			<div id="content">
-				<h2><a href="query_script.html">query_script</a></h2>	
+				<h2><a href="table_rotate.html">table_rotate</a></h2>	
+<h3>NAME</h3>
+table_rotate(): rotate a table logrotate-style
+<h3>TYPE</h3>
+Procedure
 
-<h3>QueryScript is a scripting language for SQL</h3>
-
+<h3>DESCRIPTION</h3>
 <p>
-<a href="http://www.queryscript.com"><strong>QueryScript</strong></a> is a programming language aimed for SQL scripting, 
-seamlessly combining scripting power such as flow control & variables with standard SQL statements
-or RDBMS-specific commands.   
+	This routine <i>rotates</i> a table much like <i>logrotate</i> rotates log files.
 </p>
-<strong>common_schema</strong> implements QueryScript for MySQL: it provides the execution mechanism for QueryScript code 
-(see <a href="query_script_execution.html">Execution</a>).
+<p>
+	A call onto <i>table_rotate</i> renames (or versions) given table, while pushing
+	already existing versions tables down the line. A new empty table is created to replace
+	existing table. The "oldest" table is optionally dropped.
+</p>
+<p>
+	Table creation and dropping are done in the background, and table rotation for all
+	tables is done as atomic operation via 
+	<a href="http://dev.mysql.com/doc/refman/5.5/en/rename-table.html">RENAME TABLE</a>.
+</p>
+<p>
+	A rotated table is renamed by appending "__<strong>n</strong>", where <strong>n</strong> is
+	the version number (<strong>1</strong>, <strong>2</strong>, <strong>3</strong>, ...).
 </p>
 
+
+<h3>SYNOPSIS</h3>
 <p>
-What does QueryScript look like? Here are a couple examples:
-<blockquote><pre>
-while (DELETE FROM world.Country WHERE Continent = 'Asia' LIMIT 10)
-{
-  throttle 2;
-}
+<blockquote><pre>table_rotate(
+    IN table_schema varchar(64) charset utf8, 
+    IN table_name varchar(64) charset utf8,
+    IN rotate_limit smallint unsigned
+  ) </pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li>
+    	<strong>table_schema</strong>: schema of table to rotate
+	</li>
+    <li>
+    	<strong>table_name</strong>: name of table to rotate
+	</li>
+    <li>
+    	<strong>rotate_limit</strong>: maximum number of rotated tables to keep.
+    	Negative, <strong>0</strong> or <strong>NULL</strong> imply "no limitation".
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Create a table, populate it, rotate it:</p>
+<blockquote><pre>mysql&gt; create table test.t select 17 as id from dual;
+
+mysql&gt; show tables from test;
++----------------+
+| Tables_in_test |
++----------------+
+| t              |
++----------------+
+
+mysql&gt; select * from test.t;
++----+
+| id |
++----+
+| 17 |
++----+
+
+mysql&gt; <strong>call table_rotate('test', 't', 3);</strong>
+
+mysql&gt; show tables from test;
++----------------+
+| Tables_in_test |
++----------------+
+| t              |
+| t__1           |
++----------------+
+
+mysql&gt; <strong>call table_rotate('test', 't', 3);</strong>
+
+mysql&gt; <strong>call table_rotate('test', 't', 3);</strong>
+
+mysql&gt; show tables from test;
++----------------+
+| Tables_in_test |
++----------------+
+| t              |
+| t__1           |
+| t__2           |
+| t__3           |
++----------------+
+
+mysql&gt; select * from test.t;
+Empty set (0.00 sec)
+
+mysql&gt; select * from test.t__3;
++----+
+| id |
++----+
+| 17 |
++----+
 </pre></blockquote>
-<blockquote><pre>
-foreach($table, $schema, $engine: table in sakila)
-{
-  if ($engine = 'InnoDB')
-    ALTER TABLE :$schema.:$table ENGINE=InnoDB ROW_FORMAT=Compact;
-}
-</pre></blockquote>
-</p>
 <p>
-With <strong>QueryScript</strong> one can:
-<ul>
-	<li>Use familiar syntax to solve common DBA maintenance problems</li>
-	<li>Loop through number sequences, constants, tables, schemata</li>
-	<li>Easily iterate query results, providing cursor-like functionality with clean syntax</li>
-	<li>Use conditional statements and statement blocks</li>
-	<li>Create and use variables</li>
-	<li>Expand variables in-place, turning them to constants in queries where variables are not allowed</li>
-</ul>
-</p>
-<p>
-QueryScript programs execute from <i>within the server</i>.
-As opposed to scripts written with Perl, Python or PHP,
-QueryScript code does not need to specify connections, logins nor passwords. 
-There is no connector to install and use, there is no driver setup. There are no plugins. 
+	Note in the above how the value <strong>17</strong> is found in rotated table 
+	<strong>t__3</strong>, not in newly created empty <strong>t</strong>.
 </p>
 
+<p>Further rotate the table:</p>
+<blockquote><pre>mysql&gt; call table_rotate('test', 't', 3);
+
+mysql&gt; show tables from test;
++----------------+
+| Tables_in_test |
++----------------+
+| t              |
+| t__1           |
+| t__2           |
+| t__3           |
++----------------+
+
+mysql&gt; select * from test.t__3;
+Empty set (0.00 sec)
+</pre></blockquote>
+<p>
+	In the above rotated tables reached the <strong>rotate_limit</strong> count; the oldest
+	was dropped. The value <strong>17</strong> is now lost.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
 
 <h3>SEE ALSO</h3>
-<a href="run.html">run()</a>,
-<a href="query_script_execution.html">Execution</a>,
-<a href="query_script_statements.html">Statements</a>
+<a href="table_exists.html">table_exists()</a>
 
 <h3>AUTHOR</h3>
 Shlomi Noach
-
-
 				<br/>
 			</div>
 			<div id="sidebarwrapper">
