@@ -49,6 +49,7 @@ main_body: begin
   end if;
 
   delete from _qs_variables;
+  delete from _qs_functions;
   
   -- Identify ${my_var} expanded variables. These are initially not identified as a state.
   -- We hack the _sql_tokens table to make these in their own state, combining multiple rows into one,

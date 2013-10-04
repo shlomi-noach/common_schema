@@ -11,7 +11,7 @@ create procedure _declare_local_variables(
    in   id_to      int unsigned,
    in   statement_id_to      int unsigned,
    in   depth int unsigned,
-   variables_array_id int unsigned
+   imploded_variables TEXT
 )
 comment 'Declares local variables'
 language SQL
@@ -34,10 +34,10 @@ main_body: begin
   end if;
   
   -- Start declaration
-  call _get_array_size(variables_array_id, num_variables);
+  set num_variables := get_num_tokens(imploded_variables, ',');
   set variable_index := 1;
   while variable_index <= num_variables do
-    call _get_array_element(variables_array_id, variable_index, local_variable);
+    set local_variable := split_token(imploded_variables, ',', variable_index);
     set user_defined_variable_name := CONCAT('@__qs_local_var_', session_unique_id());
     
     call _declare_local_variable(id_from, statement_id_to, id_to, depth, local_variable, user_defined_variable_name, TRUE);

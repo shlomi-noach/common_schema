@@ -45,6 +45,9 @@ main_body: begin
     declare foreach_statement_id_to int unsigned;
     declare foreach_otherwise_statement_id_from int unsigned;
     declare foreach_otherwise_statement_id_to int unsigned;
+
+    declare function_statement_id_from int unsigned;
+    declare function_statement_id_to int unsigned;
     
     declare split_statement_id_from int unsigned;
     declare split_statement_id_to int unsigned;
@@ -54,7 +57,7 @@ main_body: begin
     declare if_statement_id_to int unsigned;
     declare else_statement_id_from int unsigned;
     declare else_statement_id_to int unsigned;
-
+    
     declare try_statement_error_found tinyint unsigned;
     declare try_statement_id_from int unsigned;
     declare try_statement_id_to int unsigned;
@@ -65,6 +68,11 @@ main_body: begin
     declare foreach_collection text charset utf8;
     declare foreach_variables_array_id int unsigned;
     declare foreach_variables_delaration_id int unsigned;
+
+    declare function_arguments_array_id int unsigned;
+    declare function_arguments_declaration_id int unsigned;
+    declare function_declaration_id int unsigned;
+    declare declared_function_name text charset utf8;
     
     declare split_table_schema tinytext charset utf8;
     declare split_table_name tinytext charset utf8;
@@ -217,6 +225,24 @@ main_body: begin
               end if;
             end if;
             call _drop_array(foreach_variables_array_id);
+	      end;
+        when first_state = 'alpha' AND first_token = 'function' then begin
+	        set function_declaration_id := id_from;
+	        call _consume_function_expression(id_from + 1, id_to, consumed_to_id, depth, function_arguments_array_id, function_arguments_declaration_id, declared_function_name, should_execute_statement);
+
+	        set id_from := consumed_to_id + 1;
+	        -- consume single statement (possible compound by {})
+            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
+	        set function_statement_id_from := id_from;
+	        set function_statement_id_to := consumed_to_id;
+	        call _declare_function(declared_function_name, function_declaration_id, function_arguments_declaration_id, function_statement_id_from, function_statement_id_to, function_arguments_array_id, not should_execute_statement);
+
+            -- if should_execute_statement then
+            --   call _consume_statement(function_statement_id_from, function_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+            -- end if;
+            call _drop_array(function_arguments_array_id);
 	      end;
         when first_state = 'alpha' AND first_token = 'split' then begin
 	        call _consume_split_statement(id_from + 1, id_to, consumed_to_id, depth, split_table_schema, split_table_name, split_injected_action_statement, split_injected_text, split_options, should_execute_statement);

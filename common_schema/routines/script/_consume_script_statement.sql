@@ -67,6 +67,9 @@ main_body: begin
           call eval(statement_arguments);
         end if;
 	  end;
+	when 'invoke' then begin
+		call _consume_function_call_statement(id_from, statement_id_from, statement_id_to, depth, should_execute_statement);
+	  end;
 	when 'pass' then begin
 	    call _expect_nothing(statement_id_from, statement_id_to);
 	  end;
@@ -100,7 +103,7 @@ main_body: begin
 	      call _declare_and_assign_local_variable(id_from, id_to, statement_id_from, @_common_schema_peek_to_id, statement_id_to, depth, should_execute_statement);
 	    else
           call _expect_dynamic_states_list(statement_id_from, statement_id_to, 'query_script variable', tokens_array_id);
-          call _declare_local_variables(id_from, id_to, statement_id_to, depth, tokens_array_id);
+          call _declare_local_variables(id_from, id_to, statement_id_to, depth, _implode_nospace_array(tokens_array_id));
 	    end if;
 	  end;
     when 'input' then begin
@@ -108,7 +111,7 @@ main_body: begin
           call _throw_script_error(id_from, CONCAT('Invalid loop nesting level for INPUT: ', @_common_schema_script_loop_nesting_level));
 	    end if;
 	    call _expect_dynamic_states_list(statement_id_from, statement_id_to, 'query_script variable', tokens_array_id);
-		call _declare_local_variables(id_from, id_to, statement_id_to, depth, tokens_array_id);
+		call _declare_local_variables(id_from, id_to, statement_id_to, depth, _implode_nospace_array(tokens_array_id));
         if should_execute_statement then
           call _assign_input_local_variables(tokens_array_id);
         end if;

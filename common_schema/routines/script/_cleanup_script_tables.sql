@@ -17,6 +17,7 @@ main_body: begin
   if not (@query_script_skip_cleanup is true) then
     delete from _sql_tokens;
     delete from _qs_variables;
+    delete from _qs_functions;
     delete from _script_report_data;
     delete from _split_column_names_table;
   end if;

@@ -22,7 +22,8 @@ modifies sql data
 sql security invoker
 
 main_body: begin
-  -- select *, 'existing',id_variable_declaration from _qs_variables WHERE variable_name = local_variable;
+  -- TODO: this makes the statement "var $e, $e;" valid, since both variables share same declaration id.
+  -- Remove variables with same name as given variable, and which are out of scope:
   delete from _qs_variables WHERE variable_name = local_variable and ((scope_end_id < id_variable_declaration) or (declaration_id >= id_variable_declaration));
 
   -- declare overlapping_variable_exists tinyint unsigned;	

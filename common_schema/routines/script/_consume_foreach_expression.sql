@@ -50,7 +50,7 @@ main_body: begin
 	-- Expect variables declaration:
     call _expect_dynamic_states_list(id_from, id_end_variables_definition-1, 'query_script variable', variables_array_id);
 	set variables_delaration_id := id_from;
-	call _declare_local_variables(id_from, id_to, id_end_variables_definition, depth, variables_array_id);
+	call _declare_local_variables(id_from, id_to, id_end_variables_definition, depth, _implode_nospace_array(variables_array_id));
 		
     -- Get the collection clause:
 	set id_from := id_end_variables_definition + 1;
