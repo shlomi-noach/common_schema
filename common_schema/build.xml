@@ -11,8 +11,8 @@
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="" />
 	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
--->
-	
+
+-->	
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
 	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
@@ -22,15 +22,18 @@
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
 	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
--->
+	-->
 
 	<!--	
 
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
-	<property name="mysql.socket" value="/tmp/mysql_sandbox5610.sock" />
+	<property name="mysql.socket" value="/tmp/mysql_sandbox5612.sock" />
 	-->
-		
+
+	
+	
+	
 	<property name="mysql.database" value="common_schema" />
 
 	<property name="build_data.dir" value="build_data" />
@@ -105,6 +108,7 @@
 			<fileset dir="routines/script/" includes="*.sql" />
 			<fileset dir="routines/script/states" includes="*.sql" />
 			<fileset dir="routines/script/variables" includes="*.sql" />
+			<fileset dir="routines/script/functions" includes="*.sql" />
 			<fileset dir="routines/script/array" includes="*.sql" />
 			<fileset dir="routines/script/array/mxarray" includes="*.sql" />
 			<fileset dir="routines/script/split" includes="*.sql" />
