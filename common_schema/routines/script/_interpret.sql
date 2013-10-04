@@ -82,6 +82,7 @@ main_body: begin
   
   set @_common_schema_script_break_type := NULL;
   set @_common_schema_script_loop_nesting_level := 0;
+  set @_common_schema_script_function_nesting_level := 0;
   set @_common_schema_script_throttle_chunk_start := NULL;
   set @_common_schema_script_start_timestamp := NOW();
   set @_common_schema_script_report_used := false;

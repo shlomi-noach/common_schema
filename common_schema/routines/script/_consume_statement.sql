@@ -227,21 +227,22 @@ main_body: begin
             call _drop_array(foreach_variables_array_id);
 	      end;
         when first_state = 'alpha' AND first_token = 'function' then begin
+            if @_common_schema_script_function_nesting_level > 0 then
+              call _throw_script_error(id_from, 'Function nesting is not allowed');
+            end if;
 	        set function_declaration_id := id_from;
 	        call _consume_function_expression(id_from + 1, id_to, consumed_to_id, depth, function_arguments_array_id, function_arguments_declaration_id, declared_function_name, should_execute_statement);
 
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
+            set @_common_schema_script_function_nesting_level := @_common_schema_script_function_nesting_level + 1;
 	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
+            set @_common_schema_script_function_nesting_level := @_common_schema_script_function_nesting_level - 1;
 	        set function_statement_id_from := id_from;
 	        set function_statement_id_to := consumed_to_id;
 	        call _declare_function(declared_function_name, function_declaration_id, function_arguments_declaration_id, function_statement_id_from, function_statement_id_to, function_arguments_array_id, not should_execute_statement);
 
-            -- if should_execute_statement then
-            --   call _consume_statement(function_statement_id_from, function_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
-            -- end if;
+	        -- function body is not consumed at this stage!
             call _drop_array(function_arguments_array_id);
 	      end;
         when first_state = 'alpha' AND first_token = 'split' then begin
