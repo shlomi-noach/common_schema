@@ -1,0 +1,1 @@
+declare a function with single execution line; expect no errors

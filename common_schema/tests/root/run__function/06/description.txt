@@ -1,0 +1,1 @@
+declare two functions with argument of same name; expect no errors

@@ -1,0 +1,1 @@
+fail on wrong number of arguments

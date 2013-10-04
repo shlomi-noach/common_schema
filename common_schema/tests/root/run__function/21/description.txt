@@ -1,0 +1,1 @@
+invoke nested functions; expect value propagation

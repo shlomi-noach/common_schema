@@ -1,0 +1,1 @@
+declare multiple functions; expect no errors
