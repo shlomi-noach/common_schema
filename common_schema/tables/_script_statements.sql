@@ -20,6 +20,8 @@ INSERT INTO _script_statements VALUES ('check', 'sql');
 INSERT INTO _script_statements VALUES ('checksum', 'sql');
 INSERT INTO _script_statements VALUES ('create ', 'sql');
 INSERT INTO _script_statements VALUES ('delete', 'sql');
+INSERT INTO _script_statements VALUES ('desc', 'sql');
+INSERT INTO _script_statements VALUES ('describe', 'sql');
 INSERT INTO _script_statements VALUES ('do', 'sql');
 INSERT INTO _script_statements VALUES ('drop', 'sql');
 INSERT INTO _script_statements VALUES ('drop user', 'sql');
@@ -51,6 +53,7 @@ INSERT INTO _script_statements VALUES ('update', 'sql');
 --
 INSERT INTO _script_statements VALUES ('echo', 'script');
 INSERT INTO _script_statements VALUES ('eval', 'script');
+INSERT INTO _script_statements VALUES ('invoke', 'script');
 INSERT INTO _script_statements VALUES ('pass', 'script');
 INSERT INTO _script_statements VALUES ('sleep', 'script');
 INSERT INTO _script_statements VALUES ('throttle', 'script');
