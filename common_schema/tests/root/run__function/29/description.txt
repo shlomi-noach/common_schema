@@ -1,0 +1,1 @@
+return from nested function: verify primary function continues

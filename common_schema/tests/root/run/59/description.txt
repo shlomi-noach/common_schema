@@ -1,0 +1,1 @@
+expect error on break which is not in loop.

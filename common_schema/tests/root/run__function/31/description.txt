@@ -1,0 +1,1 @@
+expect error on function with "break" when loop outside function

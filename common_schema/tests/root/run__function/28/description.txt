@@ -1,0 +1,1 @@
+return from function: verify script continues

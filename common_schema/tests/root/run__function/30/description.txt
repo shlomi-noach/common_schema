@@ -1,0 +1,1 @@
+exit from function: verify script terminates
