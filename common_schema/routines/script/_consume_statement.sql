@@ -12,6 +12,7 @@ create procedure _consume_statement(
    in   expect_single tinyint unsigned,
    out  consumed_to_id int unsigned,
    in depth int unsigned,
+   in is_loop tinyint unsigned,
    in should_execute_statement tinyint unsigned
 )
 comment 'Reads (possibly nested) statement'
@@ -81,6 +82,9 @@ main_body: begin
     
     declare reset_query text charset utf8;
 
+    if is_loop then
+      set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
+    end if;
     statement_loop: while id_from <= id_to do
       if @_common_schema_script_break_type IS NOT NULL then
          set consumed_to_id := id_to;
@@ -101,7 +105,7 @@ main_body: begin
   	        if id_end_statement IS NULL then
 	          call _throw_script_error(id_from, 'Unmatched "{" brace');
 	        end if;
-	        call _consume_statement(id_from+1, id_end_statement-1, FALSE, @_common_schema_dummy, depth+1, should_execute_statement);
+	        call _consume_statement(id_from+1, id_end_statement-1, FALSE, @_common_schema_dummy, depth+1, false, should_execute_statement);
 	        set consumed_to_id := id_end_statement;
           end;
         when first_state = 'alpha' AND (SELECT COUNT(*) = 1 FROM _script_statements WHERE _script_statements.statement = first_token) then begin
@@ -114,9 +118,9 @@ main_body: begin
 	        call _consume_expression(id_from + 1, id_to, TRUE, consumed_to_id, expression, expression_statement, should_execute_statement);
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
-	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
+            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
+            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set while_statement_id_from := id_from;
 	        set while_statement_id_to := consumed_to_id;
 	        -- Is there an 'otherwise' clause?
@@ -124,7 +128,7 @@ main_body: begin
 	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'otherwise', NULL, peek_match, @_common_schema_dummy);
 	        if peek_match then
 	          set id_from := consumed_to_id + 1;
-              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, false, FALSE);
 	          set while_otherwise_statement_id_from := id_from;
               set while_otherwise_statement_id_to := consumed_to_id;
 	        end if;
@@ -146,13 +150,13 @@ main_body: begin
                 end if;
                 -- Expression holds true. We (re)visit 'while' block
                 set loop_iteration_count := loop_iteration_count + 1;
-                call _consume_statement(while_statement_id_from, while_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                call _consume_statement(while_statement_id_from, while_statement_id_to, TRUE, @_common_schema_dummy, depth+1, true, TRUE);
               end while;
               if loop_iteration_count = 0 then
                 -- no iterations made.
                 -- If there's an "otherwise" statement -- invoke it!
                 if while_otherwise_statement_id_from IS NOT NULL then
-                  call _consume_statement(while_otherwise_statement_id_from, while_otherwise_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                  call _consume_statement(while_otherwise_statement_id_from, while_otherwise_statement_id_to, TRUE, @_common_schema_dummy, depth+1, false, TRUE);
                 end if;
               end if;
             end if;
@@ -160,9 +164,9 @@ main_body: begin
         when first_state = 'alpha' AND first_token = 'loop' then begin
 	        -- consume single statement (possible compound by {})
 	        set id_from := id_from + 1;
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
-	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
+            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
+            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set while_statement_id_from := id_from;
 	        set while_statement_id_to := consumed_to_id;
 	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'while', NULL, peek_match, @_common_schema_dummy);
@@ -185,7 +189,7 @@ main_body: begin
                   leave interpret_while_loop;
                 end if;
                 -- Execute statement:
-                call _consume_statement(while_statement_id_from, while_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                call _consume_statement(while_statement_id_from, while_statement_id_to, TRUE, @_common_schema_dummy, depth+1, true, TRUE);
                 -- Evaluate 'while' expression:
                 call _evaluate_expression(expression, expression_statement, expression_result);
                 if NOT expression_result then
@@ -199,9 +203,9 @@ main_body: begin
 
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
-	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
+            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
+            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set foreach_statement_id_from := id_from;
 	        set foreach_statement_id_to := consumed_to_id;
 	        update _qs_variables set scope_end_id = foreach_statement_id_to where declaration_id = foreach_variables_delaration_id;
@@ -210,7 +214,7 @@ main_body: begin
 	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'otherwise', NULL, peek_match, @_common_schema_dummy);
 	        if peek_match then
 	          set id_from := consumed_to_id + 1;
-              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, false, FALSE);
 	          set foreach_otherwise_statement_id_from := id_from;
               set foreach_otherwise_statement_id_to := consumed_to_id;
 	        end if;
@@ -220,7 +224,7 @@ main_body: begin
                 -- no iterations made.
                 -- If there's an "otherwise" statement -- invoke it!
                 if foreach_otherwise_statement_id_from IS NOT NULL then
-                  call _consume_statement(foreach_otherwise_statement_id_from, foreach_otherwise_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                  call _consume_statement(foreach_otherwise_statement_id_from, foreach_otherwise_statement_id_to, TRUE, @_common_schema_dummy, depth+1, true, TRUE);
                 end if;
               end if;
             end if;
@@ -236,7 +240,7 @@ main_body: begin
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
             set @_common_schema_script_function_nesting_level := @_common_schema_script_function_nesting_level + 1;
-	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, false, FALSE);
             set @_common_schema_script_function_nesting_level := @_common_schema_script_function_nesting_level - 1;
 	        set function_statement_id_from := id_from;
 	        set function_statement_id_to := consumed_to_id;
@@ -250,9 +254,9 @@ main_body: begin
 
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
-	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
-            set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
+            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
+            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set split_statement_id_from := id_from;
 	        set split_statement_id_to := consumed_to_id;
             if should_execute_statement then
@@ -265,7 +269,7 @@ main_body: begin
 	        call _consume_expression(id_from + 1, id_to, TRUE, consumed_to_id, expression, expression_statement, should_execute_statement);
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, false, FALSE);
 	        set if_statement_id_from := id_from;
 	        set if_statement_id_to := consumed_to_id;
 	        -- Is there an 'else' clause?
@@ -273,7 +277,7 @@ main_body: begin
 	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'else', NULL, peek_match, @_common_schema_dummy);
 	        if peek_match then
 	          set id_from := consumed_to_id + 1;
-              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, false, FALSE);
 	          set else_statement_id_from := id_from;
               set else_statement_id_to := consumed_to_id;
 	        end if;
@@ -282,11 +286,11 @@ main_body: begin
               call _evaluate_expression(expression, expression_statement, expression_result);
               if expression_result then
                 -- "if" condition holds!
-                call _consume_statement(if_statement_id_from, if_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                call _consume_statement(if_statement_id_from, if_statement_id_to, TRUE, @_common_schema_dummy, depth+1, false, TRUE);
               else
                 -- If there's an "else" statement -- invoke it!
                 if else_statement_id_from IS NOT NULL then
-                  call _consume_statement(else_statement_id_from, else_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                  call _consume_statement(else_statement_id_from, else_statement_id_to, TRUE, @_common_schema_dummy, depth+1, false, TRUE);
                 end if;
               end if;
             end if;
@@ -294,14 +298,14 @@ main_body: begin
         when first_state = 'alpha' AND first_token = 'try' then begin
 	        -- consume single statement (possible compound by {})
             set id_from := id_from + 1;
-            call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+            call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, false, FALSE);
             set try_statement_id_from := id_from;
             set try_statement_id_to := consumed_to_id;
             -- There must be an 'catch' clause
             call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'catch', NULL, peek_match, @_common_schema_dummy);
 	        if peek_match then
               set id_from := consumed_to_id + 1;
-              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, FALSE);
+              call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, false, FALSE);
               set catch_statement_id_from := id_from;
               set catch_statement_id_to := consumed_to_id;
             else
@@ -311,12 +315,16 @@ main_body: begin
             if should_execute_statement then
               call _consume_try_statement(try_statement_id_from, try_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE, try_statement_error_found);
               if try_statement_error_found then
-                call _consume_statement(catch_statement_id_from, catch_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
+                call _consume_statement(catch_statement_id_from, catch_statement_id_to, TRUE, @_common_schema_dummy, depth+1, false, TRUE);
               end if;
             end if;
 	      end;
-        when first_state = 'alpha' AND first_token in ('break', 'return') then begin
+        when first_state = 'alpha' AND first_token in ('break', 'return', 'exit') then begin
 	        call _expect_statement_delimiter(id_from + 1, id_to, consumed_to_id);
+            if first_token = 'break' and @_common_schema_script_loop_nesting_level = 0 and not should_execute_statement then
+              -- nothing to break; discard.
+              call _throw_script_error(id_from, '''break'' found, but code not inside loop');
+            end if;
 	        if should_execute_statement then
 	          set @_common_schema_script_break_type := first_token;
 	        end if;
@@ -340,6 +348,10 @@ main_body: begin
       set id_from := consumed_to_id + 1;
     end while;
     set id_from := consumed_to_id + 1;
+    if is_loop then
+      set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
+    end if;
+    
 
     -- End of scope
     -- Reset local variables: remove mapping to user-defined-variables; reset value snapshots if any.

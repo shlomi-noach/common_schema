@@ -94,11 +94,11 @@ main_body: begin
   call _declare_local_variable(0, 0, id_to, 0, '$found_rows', '@query_script_found_rows', FALSE);
   
   -- First, do syntax validation: go through the code, but execute nothing:
-  call _consume_statement(id_from, id_to, FALSE, id_to, 0, FALSE);
+  call _consume_statement(id_from, id_to, FALSE, id_to, 0, false, FALSE);
   -- Now, if need be, execute it:
   if should_execute_statement then
     -- delete from _qs_variables;
-    call _consume_statement(id_from, id_to, FALSE, id_to, 0, TRUE);
+    call _consume_statement(id_from, id_to, FALSE, id_to, 0, false, TRUE);
   end if;
   
   if @_common_schema_script_report_used then

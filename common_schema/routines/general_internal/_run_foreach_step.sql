@@ -26,7 +26,7 @@ main_body: begin
     call run(execute_query);
   elseif id_from IS NOT NULL then
     call _assign_input_local_variables(variables_array_id);
-    call _consume_statement(id_from, id_to, expect_single, consumed_to_id, depth, should_execute_statement);
+    call _consume_statement(id_from, id_to, expect_single, consumed_to_id, depth, true, should_execute_statement);
   else
     -- Panic. Should not get here.
     call throw('_run_foreach_step(): neither queries nor script position provided');

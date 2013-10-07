@@ -69,6 +69,11 @@ main_body: begin
 	  end;
 	when 'invoke' then begin
 		call _consume_function_call_statement(id_from, statement_id_from, statement_id_to, depth, should_execute_statement);
+        if @_common_schema_script_break_type IS NOT NULL then
+          if @_common_schema_script_break_type = 'return' then
+            set @_common_schema_script_break_type := NULL;
+          end if;
+        end if;
 	  end;
 	when 'pass' then begin
 	    call _expect_nothing(statement_id_from, statement_id_to);

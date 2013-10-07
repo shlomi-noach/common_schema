@@ -100,7 +100,7 @@ main_body: begin
       set @query_script_split_index_name := @_query_script_split_index_name;
       call _split_set_step_clause_and_ranges_local_variables(comparison_clause);
     
-      call _consume_statement(id_from, id_to, expect_single, consumed_to_id, depth, should_execute_statement);
+      call _consume_statement(id_from, id_to, expect_single, consumed_to_id, depth, true, should_execute_statement);
 
       if @_common_schema_script_break_type IS NOT NULL then
         if @_common_schema_script_break_type = 'break' then

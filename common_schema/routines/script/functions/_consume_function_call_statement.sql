@@ -103,7 +103,7 @@ main_body: begin
 	  call exec(push_query);
 
 	  -- And execute function code!
-	  call _consume_statement(function_scope_start_id, function_scope_end_id, TRUE, @_common_schema_dummy, depth+1, TRUE);
+	  call _consume_statement(function_scope_start_id, function_scope_end_id, TRUE, @_common_schema_dummy, depth+1, false, TRUE);
     end if;
 end;
 //
