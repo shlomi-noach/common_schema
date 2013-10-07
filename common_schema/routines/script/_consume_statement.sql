@@ -92,7 +92,7 @@ main_body: begin
       end if;
 
       SELECT level, token, state FROM _sql_tokens WHERE id = id_from INTO statement_level, first_token, first_state;
-      -- ~~~ select depth, id_from, id_to, statement_level, first_token;
+
       case
         when first_state in ('whitespace', 'single line comment', 'multi line comment') then begin
 	        -- Ignore whitespace
@@ -118,9 +118,7 @@ main_body: begin
 	        call _consume_expression(id_from + 1, id_to, TRUE, consumed_to_id, expression, expression_statement, should_execute_statement);
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
 	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
-            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set while_statement_id_from := id_from;
 	        set while_statement_id_to := consumed_to_id;
 	        -- Is there an 'otherwise' clause?
@@ -164,9 +162,7 @@ main_body: begin
         when first_state = 'alpha' AND first_token = 'loop' then begin
 	        -- consume single statement (possible compound by {})
 	        set id_from := id_from + 1;
-            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
 	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
-            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set while_statement_id_from := id_from;
 	        set while_statement_id_to := consumed_to_id;
 	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'while', NULL, peek_match, @_common_schema_dummy);
@@ -203,9 +199,7 @@ main_body: begin
 
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
 	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
-            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set foreach_statement_id_from := id_from;
 	        set foreach_statement_id_to := consumed_to_id;
 	        update _qs_variables set scope_end_id = foreach_statement_id_to where declaration_id = foreach_variables_delaration_id;
@@ -254,14 +248,11 @@ main_body: begin
 
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level + 1;
 	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
-            -- set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
 	        set split_statement_id_from := id_from;
 	        set split_statement_id_to := consumed_to_id;
             if should_execute_statement then
              begin end;
-               -- call _split(split_table_schema, split_table_name);
                call _split(split_table_schema, split_table_name, split_options, split_injected_action_statement, split_injected_text, split_statement_id_from, split_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE);
             end if;
 	      end;

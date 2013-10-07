@@ -22,13 +22,10 @@ modifies sql data
 sql security invoker
 
 main_body: begin
-  -- declare continue handler for 1052 set try_statement_error_found = 1051;
-  -- declare continue handler for 1146 set try_statement_error_found = 1146;
   declare continue handler for SQLEXCEPTION set try_statement_error_found = true;
   
   set try_statement_error_found := false;
   call _consume_statement(id_from, id_to, expect_single, consumed_to_id, depth, false, should_execute_statement);
-  -- select try_statement_error_found;
 end;
 //
 
