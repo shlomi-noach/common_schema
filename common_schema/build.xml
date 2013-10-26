@@ -95,6 +95,7 @@
 		<mkdir dir="${build.dir}" />
 		<concat destfile="${build.dir}/${sql.base_components.output.file}">
 			<fileset dir="tables/" includes="*.sql" />
+			<fileset dir="tables/common_schema_version_control/" includes="*.sql" />
 
 			<fileset dir="routines/chart/" includes="*.sql" />
 			<fileset dir="routines/debug/" includes="*.sql" />
@@ -115,6 +116,7 @@
 			<fileset dir="routines/script/split/analyze" includes="*.sql" />
 			<fileset dir="routines/text/" includes="*.sql" />
 			<fileset dir="routines/time/" includes="*.sql" />
+			<fileset dir="routines/version_control/" includes="*.sql" />
 			<!--
 			<fileset dir="routines/math/" includes="*.sql" />			
 			-->			
