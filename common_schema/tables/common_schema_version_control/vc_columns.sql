@@ -1,0 +1,27 @@
+
+CREATE TABLE IF NOT EXISTS common_schema_version_control.vc_columns (
+  vc_columns_id BIGINT UNSIGNED AUTO_INCREMENT, 
+  vc_snapshot_id BIGINT UNSIGNED NOT NULL,
+  TABLE_CATALOG varchar(512) NOT NULL DEFAULT '',
+  TABLE_SCHEMA varchar(64) NOT NULL DEFAULT '',
+  TABLE_NAME varchar(64) NOT NULL DEFAULT '',
+  COLUMN_NAME varchar(64) NOT NULL DEFAULT '',
+  ORDINAL_POSITION bigint(21) unsigned NOT NULL DEFAULT '0',
+  COLUMN_DEFAULT longtext,
+  IS_NULLABLE varchar(3) NOT NULL DEFAULT '',
+  DATA_TYPE varchar(64) NOT NULL DEFAULT '',
+  CHARACTER_MAXIMUM_LENGTH bigint(21) unsigned DEFAULT NULL,
+  CHARACTER_OCTET_LENGTH bigint(21) unsigned DEFAULT NULL,
+  NUMERIC_PRECISION bigint(21) unsigned DEFAULT NULL,
+  NUMERIC_SCALE bigint(21) unsigned DEFAULT NULL,
+  CHARACTER_SET_NAME varchar(32) DEFAULT NULL,
+  COLLATION_NAME varchar(32) DEFAULT NULL,
+  COLUMN_TYPE longtext NOT NULL,
+  COLUMN_KEY varchar(3) NOT NULL DEFAULT '',
+  EXTRA varchar(27) NOT NULL DEFAULT '',
+  PRIVILEGES varchar(80) NOT NULL DEFAULT '',
+  COLUMN_COMMENT varchar(1024) NOT NULL DEFAULT '',
+  PRIMARY KEY (vc_columns_id),
+  UNIQUE KEY snapshot_schema_table_uidx (vc_snapshot_id, TABLE_SCHEMA, TABLE_NAME)
+) ENGINE=InnoDB 
+;

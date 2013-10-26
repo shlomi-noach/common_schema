@@ -63,6 +63,7 @@
 -- Uncomment if you want a clean build:
 -- DROP DATABASE IF EXISTS common_schema;
 
+create database if not exists common_schema_version_control;
 CREATE DATABASE IF NOT EXISTS common_schema;
 ALTER DATABASE common_schema DEFAULT CHARACTER SET 'utf8' DEFAULT COLLATE 'utf8_general_ci';
 
