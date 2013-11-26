@@ -1,1 +1,1 @@
-fail on function with existing argument name
+allow function with existing argument name
