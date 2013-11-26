@@ -201,8 +201,16 @@ main_body: begin
 	        -- consume single statement (possible compound by {})
 	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, true, FALSE);
 	        set foreach_statement_id_from := id_from;
+
 	        set foreach_statement_id_to := consumed_to_id;
-	        update _qs_variables set scope_end_id = foreach_statement_id_to where declaration_id = foreach_variables_delaration_id;
+	        update 
+	            _qs_variables 
+	          set 
+	            scope_end_id = foreach_statement_id_to 
+	          where 
+	            declaration_id = foreach_variables_delaration_id
+	            and (function_scope = _get_current_variables_function_scope())
+	          ;
 	        -- Is there an 'otherwise' clause?
 	        set foreach_otherwise_statement_id_from := NULL;
 	        call _consume_if_exists(consumed_to_id + 1, id_to, consumed_to_id, 'otherwise', NULL, peek_match, @_common_schema_dummy);
@@ -225,17 +233,17 @@ main_body: begin
             call _drop_array(foreach_variables_array_id);
 	      end;
         when first_state = 'alpha' AND first_token = 'function' then begin
-            if @_common_schema_script_function_nesting_level > 0 then
+            if @_common_schema_script_function_scope != '' then
               call _throw_script_error(id_from, 'Function nesting is not allowed');
             end if;
 	        set function_declaration_id := id_from;
-	        call _consume_function_expression(id_from + 1, id_to, consumed_to_id, depth, function_arguments_array_id, function_arguments_declaration_id, declared_function_name, should_execute_statement);
+	        call _consume_function_expression(id_from + 1, id_to, consumed_to_id, 1, function_arguments_array_id, function_arguments_declaration_id, declared_function_name, should_execute_statement);
 
 	        set id_from := consumed_to_id + 1;
 	        -- consume single statement (possible compound by {})
-            set @_common_schema_script_function_nesting_level := @_common_schema_script_function_nesting_level + 1;
-	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, depth+1, false, FALSE);
-            set @_common_schema_script_function_nesting_level := @_common_schema_script_function_nesting_level - 1;
+            call _push_current_variables_function_scope(declared_function_name);
+	        call _consume_statement(id_from, id_to, TRUE, consumed_to_id, 1, false, FALSE);
+            call _pop_current_variables_function_scope();
 	        set function_statement_id_from := id_from;
 	        set function_statement_id_to := consumed_to_id;
 	        call _declare_function(declared_function_name, function_declaration_id, function_arguments_declaration_id, function_statement_id_from, function_statement_id_to, function_arguments_array_id, not should_execute_statement);
@@ -346,9 +354,23 @@ main_body: begin
 
     -- End of scope
     -- Reset local variables: remove mapping to user-defined-variables; reset value snapshots if any.
-    SELECT GROUP_CONCAT('SET ', mapped_user_defined_variable_name, ' := NULL ' SEPARATOR ';') FROM _qs_variables WHERE declaration_depth = depth INTO reset_query;
+    SELECT 
+        GROUP_CONCAT('SET ', mapped_user_defined_variable_name, ' := NULL ' SEPARATOR ';') 
+      FROM 
+        _qs_variables 
+      WHERE 
+        declaration_depth = depth
+        and (function_scope = _get_current_variables_function_scope())
+      INTO reset_query;
     call exec(reset_query);
-    UPDATE _qs_variables SET value_snapshot = NULL WHERE declaration_depth = depth;
+    UPDATE 
+        _qs_variables 
+      SET 
+        value_snapshot = NULL 
+      WHERE 
+        declaration_depth = depth
+        and (function_scope = _get_current_variables_function_scope())
+      ;
 end;
 //
 

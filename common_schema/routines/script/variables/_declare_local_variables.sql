@@ -26,7 +26,15 @@ main_body: begin
   declare user_defined_variable_name varchar(65) charset ascii;
   declare declaration_is_new tinyint unsigned default 0;
   
-  SELECT (COUNT(*) = 0) FROM _qs_variables WHERE declaration_id = id_from INTO declaration_is_new;
+  SELECT 
+      (COUNT(*) = 0) 
+    FROM 
+      _qs_variables 
+    WHERE 
+      declaration_id = id_from
+      and (function_scope = _get_current_variables_function_scope())
+    INTO 
+      declaration_is_new;
   if not declaration_is_new then
     -- Apparently there is a loop, since this id has already been visited and the variables in this id have already been declared.
     -- There is no need to do anything. The previous end-of-the-loop caused the mapped user defined variables to be reset to NULL. 

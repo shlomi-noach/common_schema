@@ -40,12 +40,17 @@ main_body: begin
     _sql_tokens 
     LEFT JOIN _qs_variables ON (
       /* Try to match an expanded  query script variable */
-      (state = 'expanded query_script variable' AND _extract_expanded_query_script_variable_name(token) = _qs_variables.variable_name AND _qs_variables.variable_name  = expanded_variable_name) /* expanded */ 
+      (state = 'expanded query_script variable' AND _extract_expanded_query_script_variable_name(token) = _qs_variables.variable_name
+      and _qs_variables.function_scope IN ('', _get_current_variables_function_scope())
+      and _qs_variables.variable_name  = expanded_variable_name) /* expanded */ 
       and (id_from between _qs_variables.declaration_id and _qs_variables.scope_end_id)
     )
   where 
     (id between id_from and id_to) 
-  INTO 
+  order by
+    function_scope desc
+  limit 1
+  into
     variable_token;
 end;
 //

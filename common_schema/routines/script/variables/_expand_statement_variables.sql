@@ -30,28 +30,43 @@ main_body: begin
   SELECT 
     GROUP_CONCAT(
       case
-        when _qs_variables.mapped_user_defined_variable_name IS NOT NULL then
+        when _qs_variables_this_function.mapped_user_defined_variable_name IS NOT NULL then
           case
-            when state = 'expanded query_script variable' then _qs_variables.value_snapshot /* expanded */ 
-            else _qs_variables.mapped_user_defined_variable_name /* non-expanded */
+            when state = 'expanded query_script variable' then _qs_variables_this_function.value_snapshot /* expanded */ 
+            else _qs_variables_this_function.mapped_user_defined_variable_name /* non-expanded */
+          end
+        when _qs_variables_global.mapped_user_defined_variable_name IS NOT NULL then
+          case
+            when state = 'expanded query_script variable' then _qs_variables_global.value_snapshot /* expanded */ 
+            else _qs_variables_global.mapped_user_defined_variable_name /* non-expanded */
           end
         else token /* not a query script variable at all */
       end 
-      ORDER BY id SEPARATOR ''
+      ORDER BY id ASC SEPARATOR ''
     ) 
   FROM 
     _sql_tokens 
-    LEFT JOIN _qs_variables ON (
+    LEFT JOIN _qs_variables AS _qs_variables_this_function ON (
       /* Try to match a query script variable, or an expanded  query script variable */
       (
-        (state = 'expanded query_script variable' AND _extract_expanded_query_script_variable_name(token) = _qs_variables.variable_name) /* expanded */ 
-        or (state = 'query_script variable' AND token = _qs_variables.variable_name) /* non-expanded */
+        (state = 'expanded query_script variable' AND _extract_expanded_query_script_variable_name(token) = _qs_variables_this_function.variable_name) /* expanded */ 
+        or (state = 'query_script variable' AND token = _qs_variables_this_function.variable_name) /* non-expanded */
       )
-      and (id_from between _qs_variables.declaration_id and _qs_variables.scope_end_id)
+      and (id_from between _qs_variables_this_function.declaration_id and _qs_variables_this_function.scope_end_id)
+      and _qs_variables_this_function.function_scope = _get_current_variables_function_scope()
+    )
+    LEFT JOIN _qs_variables AS _qs_variables_global ON (
+      /* Try to match a query script variable, or an expanded  query script variable */
+      (
+        (state = 'expanded query_script variable' AND _extract_expanded_query_script_variable_name(token) = _qs_variables_global.variable_name) /* expanded */ 
+        or (state = 'query_script variable' AND token = _qs_variables_global.variable_name) /* non-expanded */
+      )
+      and (id_from between _qs_variables_global.declaration_id and _qs_variables_global.scope_end_id)
+      and _qs_variables_global.function_scope = ''
     )
   where 
     (id between id_from and id_to) 
-  INTO 
+  into 
     expanded_statement;
   set expanded_statement := trim_wspace(expanded_statement);
 end;

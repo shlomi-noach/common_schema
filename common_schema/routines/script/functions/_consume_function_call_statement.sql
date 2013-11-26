@@ -91,19 +91,25 @@ main_body: begin
 	  	call _throw_script_error(id_from, concat('Expected ', expected_num_arguments, ' arguments, found ', num_arguments));
 	  end if;
 	  
+      call _push_current_variables_function_scope(matched_function_name);
 	  call _declare_local_variables(function_arguments_declaration_id, function_scope_end_id, function_scope_end_id, depth, imploded_function_arguments);
 
 	  -- push values into function arguments:
 	  select 
 	      group_concat(mapped_user_defined_variable_name order by mapped_user_defined_variable_name separator ',')
-	    from _qs_variables
-	    where declaration_id = function_arguments_declaration_id
-	    into mapped_user_defined_variable_names;
+	    from 
+	      _qs_variables
+	    where 
+	      declaration_id = function_arguments_declaration_id
+	      and (function_scope = _get_current_variables_function_scope())
+	    into 
+	      mapped_user_defined_variable_names;
 	  set push_query := concat('select ', statement_arguments, ' into ', mapped_user_defined_variable_names);
 	  call exec(push_query);
 
 	  -- And execute function code!
-	  call _consume_statement(function_scope_start_id, function_scope_end_id, TRUE, @_common_schema_dummy, depth+1, false, TRUE);
+	  call _consume_statement(function_scope_start_id, function_scope_end_id, TRUE, @_common_schema_dummy, depth, false, TRUE);
+      call _pop_current_variables_function_scope();
     end if;
 end;
 //

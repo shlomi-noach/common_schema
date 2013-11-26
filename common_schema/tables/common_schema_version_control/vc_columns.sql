@@ -22,6 +22,6 @@ CREATE TABLE IF NOT EXISTS common_schema_version_control.vc_columns (
   PRIVILEGES varchar(80) NOT NULL DEFAULT '',
   COLUMN_COMMENT varchar(1024) NOT NULL DEFAULT '',
   PRIMARY KEY (vc_columns_id),
-  UNIQUE KEY snapshot_schema_table_uidx (vc_snapshot_id, TABLE_SCHEMA, TABLE_NAME)
+  UNIQUE KEY snapshot_schema_table_column_uidx (vc_snapshot_id, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME)
 ) ENGINE=InnoDB 
 ;

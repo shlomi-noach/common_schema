@@ -26,7 +26,15 @@ main_body: begin
   set variable_index := 1;
   while variable_index <= num_variables do
     call _get_array_element(variables_array_id, variable_index, local_variable);
-    SELECT mapped_user_defined_variable_name FROM _qs_variables WHERE variable_name = local_variable INTO user_defined_variable_name;
+    SELECT 
+        mapped_user_defined_variable_name 
+      FROM 
+        _qs_variables 
+      WHERE 
+        variable_name = local_variable
+        and (function_scope = _get_current_variables_function_scope())
+      INTO 
+        user_defined_variable_name;
     
     set reset_query := CONCAT('SET ', user_defined_variable_name, ' := @_query_script_input_col', variable_index);
     call exec_single(reset_query);

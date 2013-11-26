@@ -33,7 +33,13 @@ main_body: begin
     if ROW_COUNT() = 0 and throw_when_exists then
       call _throw_script_error(function_declaration_id, CONCAT('Duplicate function name: ', declare_function_name));
     end if;
-	update _qs_variables set scope_end_id = function_scope_end_id where declaration_id = function_arguments_declaration_id;
+	update 
+	    _qs_variables 
+	  set 
+	    scope_end_id = function_scope_end_id 
+	  where 
+	    declaration_id = function_arguments_declaration_id
+	    ;
 end;
 //
 

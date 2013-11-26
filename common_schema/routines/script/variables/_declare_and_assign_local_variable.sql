@@ -30,7 +30,15 @@ main_body: begin
     
   call _expect_state(statement_id_from, id_to, 'query_script variable', true, @_common_schema_dummy, local_variable);
 
-  SELECT (COUNT(*) = 0) FROM _qs_variables WHERE declaration_id = id_from INTO declaration_is_new;
+  SELECT 
+      (COUNT(*) = 0) 
+    FROM 
+      _qs_variables 
+    WHERE 
+      declaration_id = id_from
+      and (function_scope = _get_current_variables_function_scope())
+    INTO 
+      declaration_is_new;
   if declaration_is_new then
     set user_defined_variable_name := CONCAT('@__qs_local_var_', session_unique_id());
     call _declare_local_variable(id_from, statement_id_to, id_to, depth, local_variable, user_defined_variable_name, TRUE);
@@ -39,11 +47,16 @@ main_body: begin
   if should_execute_statement then
     call _expand_statement_variables(assign_id+1, statement_id_to, set_expression, @_common_schema_dummy, should_execute_statement);
   
-    -- select GROUP_CONCAT(token order by id separator '') from _sql_tokens where id between assign_id+1 AND statement_id_to-1 into set_expression;
-    select CONCAT('SET ', mapped_user_defined_variable_name, ' := ', set_expression) from _qs_variables where variable_name = local_variable and declaration_depth = depth into set_statement;
+    select 
+        CONCAT('SET ', mapped_user_defined_variable_name, ' := ', set_expression) 
+      from 
+        _qs_variables 
+      where 
+        variable_name = local_variable 
+        and declaration_depth = depth
+        and (function_scope = _get_current_variables_function_scope())
+      into set_statement;
     call exec(set_statement);
-    -- SELECT GROUP_CONCAT('SET ', mapped_user_defined_variable_name, ' := NULL ' SEPARATOR ';') FROM _qs_variables WHERE declaration_depth = depth INTO reset_query;
-    
   end if;
 end;
 //

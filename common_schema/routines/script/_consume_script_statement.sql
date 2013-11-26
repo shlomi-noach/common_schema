@@ -68,7 +68,7 @@ main_body: begin
         end if;
 	  end;
 	when 'invoke' then begin
-		call _consume_function_call_statement(id_from, statement_id_from, statement_id_to, depth, should_execute_statement);
+		call _consume_function_call_statement(id_from, statement_id_from, statement_id_to, 1, should_execute_statement);
         if @_common_schema_script_break_type IS NOT NULL then
           if @_common_schema_script_break_type = 'return' then
             set @_common_schema_script_break_type := NULL;
