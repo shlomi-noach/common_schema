@@ -83,7 +83,7 @@ main_body: begin
         set table_definitions_found := true;
         set table_definitions_id_from := starting_id + 1;
         -- now find the terminating token: WHERE, ORDER or LIMIT (or end of line)
-        select MIN(id) from _sql_tokens where (id between table_definitions_id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) in ('where', 'group', 'having', 'order', 'limit', 'procedure', 'into', 'for', 'lock') into terminating_id;
+        select MIN(id) from _sql_tokens where (id between table_definitions_id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) in ('partition', 'where', 'group', 'having', 'order', 'limit', 'procedure', 'into', 'for', 'lock') into terminating_id;
         if terminating_id is not null then
           set table_definitions_id_to := terminating_id - 1;
         else
