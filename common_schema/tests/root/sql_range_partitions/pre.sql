@@ -35,6 +35,22 @@ PARTITION BY RANGE (UNIX_TIMESTAMP(report_updated)) (
 );
 
 
+
+drop table if exists test_sql_range_partitions_minute_no_maxvalue;
+CREATE TABLE test_sql_range_partitions_minute_no_maxvalue (
+    report_id INT NOT NULL,
+    report_status VARCHAR(20) NOT NULL,
+    report_updated TIMESTAMP NOT NULL 
+)
+PARTITION BY RANGE (UNIX_TIMESTAMP(report_updated)) (
+    PARTITION p0 VALUES LESS THAN (UNIX_TIMESTAMP('2008-01-01 00:00:00')),
+    PARTITION p1 VALUES LESS THAN (UNIX_TIMESTAMP('2008-01-01 00:01:00')),
+    PARTITION p2 VALUES LESS THAN (UNIX_TIMESTAMP('2008-01-01 00:02:00')),
+    PARTITION p3 VALUES LESS THAN (UNIX_TIMESTAMP('2008-01-01 00:03:00')),
+    PARTITION p4 VALUES LESS THAN (UNIX_TIMESTAMP('2008-01-01 00:04:00'))
+);
+
+
 drop table if exists test_sql_range_partitions_weekly;
 CREATE TABLE test_sql_range_partitions_weekly (
   `id` int(11) DEFAULT NULL,
