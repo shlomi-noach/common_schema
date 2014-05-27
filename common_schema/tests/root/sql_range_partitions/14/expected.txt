@@ -1,0 +1,1 @@
+alter table `test_cs`.`test_sql_range_partitions_minute_no_maxvalue` add partition (partition `p_20080101000500` values less than (1199138700) /* 2008-01-01 00:05:00 */ )

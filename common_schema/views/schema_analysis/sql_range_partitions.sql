@@ -48,10 +48,14 @@ VIEW _sql_range_partitions_base AS
     unquote(p0.PARTITION_DESCRIPTION) as unquoted_description,
     p0.PARTITION_DESCRIPTION >= TO_DAYS('1000-01-01') as valid_from_days,
     p1.PARTITION_DESCRIPTION - p0.PARTITION_DESCRIPTION as diff,
+    TIMESTAMPDIFF(MINUTE, _as_datetime(unquote(p0.PARTITION_DESCRIPTION)), _as_datetime(unquote(p1.PARTITION_DESCRIPTION))) AS diff_minute,
+    TIMESTAMPDIFF(HOUR, _as_datetime(unquote(p0.PARTITION_DESCRIPTION)), _as_datetime(unquote(p1.PARTITION_DESCRIPTION))) AS diff_hour,
     TIMESTAMPDIFF(DAY, _as_datetime(unquote(p0.PARTITION_DESCRIPTION)), _as_datetime(unquote(p1.PARTITION_DESCRIPTION))) AS diff_day,
     TIMESTAMPDIFF(WEEK, _as_datetime(unquote(p0.PARTITION_DESCRIPTION)), _as_datetime(unquote(p1.PARTITION_DESCRIPTION))) AS diff_week,
     TIMESTAMPDIFF(MONTH, _as_datetime(unquote(p0.PARTITION_DESCRIPTION)), _as_datetime(unquote(p1.PARTITION_DESCRIPTION))) AS diff_month,
     TIMESTAMPDIFF(YEAR, _as_datetime(unquote(p0.PARTITION_DESCRIPTION)), _as_datetime(unquote(p1.PARTITION_DESCRIPTION))) AS diff_year,
+    TIMESTAMPDIFF(MINUTE, _as_datetime(FROM_UNIXTIME(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_UNIXTIME(p1.PARTITION_DESCRIPTION))) AS diff_minute_from_unixtime,
+    TIMESTAMPDIFF(HOUR, _as_datetime(FROM_UNIXTIME(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_UNIXTIME(p1.PARTITION_DESCRIPTION))) AS diff_hour_from_unixtime,
     TIMESTAMPDIFF(DAY, _as_datetime(FROM_UNIXTIME(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_UNIXTIME(p1.PARTITION_DESCRIPTION))) AS diff_day_from_unixtime,
     TIMESTAMPDIFF(WEEK, _as_datetime(FROM_UNIXTIME(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_UNIXTIME(p1.PARTITION_DESCRIPTION))) AS diff_week_from_unixtime,
     TIMESTAMPDIFF(MONTH, _as_datetime(FROM_UNIXTIME(p0.PARTITION_DESCRIPTION)), _as_datetime(FROM_UNIXTIME(p1.PARTITION_DESCRIPTION))) AS diff_month_from_unixtime,
@@ -81,10 +85,14 @@ VIEW _sql_range_partitions_diff AS
     table_schema,
     table_name,
     if(count(distinct(diff)) = 1, min(diff), 0) as diff, 
+    if(count(distinct(diff_minute)) = 1, min(diff_minute), 0) as diff_minute, 
+    if(count(distinct(diff_hour)) = 1, min(diff_hour), 0) as diff_hour, 
     if(count(distinct(diff_day)) = 1, min(diff_day), 0) as diff_day, 
     if(count(distinct(diff_week)) = 1, min(diff_week), 0) as diff_week, 
     if(count(distinct(diff_month)) = 1, min(diff_month), 0) as diff_month, 
     if(count(distinct(diff_year)) = 1, min(diff_year), 0) as diff_year, 
+    if(count(distinct(diff_minute_from_unixtime)) = 1, min(diff_minute_from_unixtime), 0) as diff_minute_from_unixtime, 
+    if(count(distinct(diff_hour_from_unixtime)) = 1, min(diff_hour_from_unixtime), 0) as diff_hour_from_unixtime, 
     if(count(distinct(diff_day_from_unixtime)) = 1, min(diff_day_from_unixtime), 0) as diff_day_from_unixtime, 
     if(count(distinct(diff_week_from_unixtime)) = 1, min(diff_week_from_unixtime), 0) as diff_week_from_unixtime, 
     if(count(distinct(diff_month_from_unixtime)) = 1, min(diff_month_from_unixtime), 0) as diff_month_from_unixtime, 
@@ -115,6 +123,8 @@ VIEW _sql_range_partitions_analysis AS
       when diff_month_from_unixtime != 0 then unix_timestamp(from_unixtime(max_partition_description) + interval diff_month_from_unixtime month)
       when diff_week_from_unixtime != 0 then unix_timestamp(from_unixtime(max_partition_description) + interval diff_week_from_unixtime week)
       when diff_day_from_unixtime != 0 then unix_timestamp(from_unixtime(max_partition_description) + interval diff_day_from_unixtime day)
+      when diff_hour_from_unixtime != 0 then unix_timestamp(from_unixtime(max_partition_description) + interval diff_hour_from_unixtime hour)
+      when diff_minute_from_unixtime != 0 then unix_timestamp(from_unixtime(max_partition_description) + interval diff_minute_from_unixtime minute)
       when diff_year_from_days != 0 then to_days(from_days(max_partition_description) + interval diff_year_from_days year)
       when diff_month_from_days != 0 then to_days(from_days(max_partition_description) + interval diff_month_from_days month)
       when diff_week_from_days != 0 then to_days(from_days(max_partition_description) + interval diff_week_from_days week)
@@ -123,6 +133,8 @@ VIEW _sql_range_partitions_analysis AS
       when diff_month != 0 then max_partition_description + interval diff_month month
       when diff_week != 0 then max_partition_description + interval diff_week week
       when diff_day != 0 then max_partition_description + interval diff_day day
+      when diff_hour != 0 then max_partition_description + interval diff_hour hour
+      when diff_minute != 0 then max_partition_description + interval diff_minute minute
       when diff != 0 then max_partition_description + diff
       else NULL
     end, '.', 1) as next_partition_description,
@@ -131,6 +143,8 @@ VIEW _sql_range_partitions_analysis AS
       when diff_month_from_unixtime != 0 then (from_unixtime(max_partition_description) + interval diff_month_from_unixtime month)
       when diff_week_from_unixtime != 0 then (from_unixtime(max_partition_description) + interval diff_week_from_unixtime week)
       when diff_day_from_unixtime != 0 then (from_unixtime(max_partition_description) + interval diff_day_from_unixtime day)
+      when diff_hour_from_unixtime != 0 then (from_unixtime(max_partition_description) + interval diff_hour_from_unixtime hour)
+      when diff_minute_from_unixtime != 0 then (from_unixtime(max_partition_description) + interval diff_minute_from_unixtime minute)
       when diff_year_from_days != 0 then (from_days(max_partition_description) + interval diff_year_from_days year)
       when diff_month_from_days != 0 then (from_days(max_partition_description) + interval diff_month_from_days month)
       when diff_week_from_days != 0 then (from_days(max_partition_description) + interval diff_week_from_days week)
@@ -139,19 +153,21 @@ VIEW _sql_range_partitions_analysis AS
       when diff_month != 0 then max_partition_description + interval diff_month month
       when diff_week != 0 then max_partition_description + interval diff_week week
       when diff_day != 0 then max_partition_description + interval diff_day day
+      when diff_hour != 0 then max_partition_description + interval diff_hour hour
+      when diff_minute != 0 then max_partition_description + interval diff_minute minute
       when diff != 0 then max_partition_description + diff
       else NULL
     end, '.', 1) as next_partition_human_description,
     case
-      when (diff_year_from_unixtime != 0 or diff_month_from_unixtime != 0 or diff_week_from_unixtime or diff_day_from_unixtime != 0) then count_past_from_unixtime
+      when (diff_year_from_unixtime != 0 or diff_month_from_unixtime != 0 or diff_week_from_unixtime or diff_day_from_unixtime != 0 or diff_hour_from_unixtime != 0 or diff_minute_from_unixtime != 0) then count_past_from_unixtime
       when (diff_year_from_days != 0 or diff_month_from_days != 0 or diff_week_from_days != 0 or diff_day_from_days != 0) then count_past_from_days
-      when (diff_year != 0 or diff_month != 0 or diff_week != 0 or diff_day != 0) then count_past_timestamp
+      when (diff_year != 0 or diff_month != 0 or diff_week != 0 or diff_day != 0 or diff_hour != 0 or diff_minute != 0) then count_past_timestamp
       else NULL
     end as count_past_partitions,
     case
-      when (diff_year_from_unixtime != 0 or diff_month_from_unixtime != 0 or diff_week_from_unixtime or diff_day_from_unixtime != 0) then count_future_from_unixtime
+      when (diff_year_from_unixtime != 0 or diff_month_from_unixtime != 0 or diff_week_from_unixtime or diff_day_from_unixtime != 0 or diff_hour_from_unixtime != 0 or diff_minute_from_unixtime != 0) then count_future_from_unixtime
       when (diff_year_from_days != 0 or diff_month_from_days != 0 or diff_week_from_days != 0 or diff_day_from_days != 0) then count_future_from_days
-      when (diff_year != 0 or diff_month != 0 or diff_week != 0 or diff_day != 0) then count_future_timestamp
+      when (diff_year != 0 or diff_month != 0 or diff_week != 0 or diff_day != 0 or diff_hour != 0 or diff_minute != 0) then count_future_timestamp
       else NULL
     end as count_future_partitions
   from
