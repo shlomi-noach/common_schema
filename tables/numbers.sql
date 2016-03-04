@@ -16,18 +16,16 @@ INSERT IGNORE INTO numbers (n) SELECT
   @counter := @counter+1 AS counter 
 FROM
   (
-    SELECT 
-      NULL
-    FROM
-      INFORMATION_SCHEMA.SESSION_VARIABLES
-    LIMIT 64
+    select NULL from
+    (select 1 union select 2 union select 3 union select 4) a
+    join (select 1 union select 2 union select 3 union select 4) b
+    join (select 1 union select 2 union select 3 union select 4) c
   ) AS select1,
   (
-    SELECT 
-      NULL
-    FROM
-      INFORMATION_SCHEMA.SESSION_VARIABLES
-    LIMIT 64
+    select NULL from
+    (select 1 union select 2 union select 3 union select 4) a
+    join (select 1 union select 2 union select 3 union select 4) b
+    join (select 1 union select 2 union select 3 union select 4) c
   ) AS select2,
   (
     SELECT 
