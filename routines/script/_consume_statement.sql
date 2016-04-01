@@ -24,24 +24,24 @@ main_body: begin
     declare first_token text;
     declare first_state text;
     declare statement_level int unsigned;
-    declare id_end_statement int unsigned; 
-    
+    declare id_end_statement int unsigned;
+
     declare statement_delimiter_found tinyint unsigned;
-    
+
     declare expression text charset utf8;
     declare expression_statement text charset utf8;
     declare expression_result tinyint unsigned;
-    
+
     declare peek_match tinyint unsigned;
     declare matched_token text charset utf8;
-    
+
     declare loop_iteration_count bigint unsigned;
-    
+
     declare while_statement_id_from int unsigned;
     declare while_statement_id_to int unsigned;
     declare while_otherwise_statement_id_from int unsigned;
     declare while_otherwise_statement_id_to int unsigned;
-    
+
     declare foreach_statement_id_from int unsigned;
     declare foreach_statement_id_to int unsigned;
     declare foreach_otherwise_statement_id_from int unsigned;
@@ -49,7 +49,7 @@ main_body: begin
 
     declare function_statement_id_from int unsigned;
     declare function_statement_id_to int unsigned;
-    
+
     declare split_statement_id_from int unsigned;
     declare split_statement_id_to int unsigned;
     declare split_options varchar(2048) charset utf8;
@@ -58,7 +58,7 @@ main_body: begin
     declare if_statement_id_to int unsigned;
     declare else_statement_id_from int unsigned;
     declare else_statement_id_to int unsigned;
-    
+
     declare try_statement_error_found tinyint unsigned;
     declare try_statement_id_from int unsigned;
     declare try_statement_id_to int unsigned;
@@ -74,12 +74,12 @@ main_body: begin
     declare function_arguments_declaration_id int unsigned;
     declare function_declaration_id int unsigned;
     declare declared_function_name text charset utf8;
-    
+
     declare split_table_schema tinytext charset utf8;
     declare split_table_name tinytext charset utf8;
     declare split_injected_action_statement text charset utf8;
     declare split_injected_text text charset utf8;
-    
+
     declare reset_query text charset utf8;
 
     if is_loop then
@@ -91,7 +91,11 @@ main_body: begin
          leave statement_loop;
       end if;
 
-      SELECT level, token, state FROM _sql_tokens WHERE id = id_from INTO statement_level, first_token, first_state;
+      set @_statement_level=null, @_first_token=null, @_first_state=null;
+      SELECT level, token, state FROM _sql_tokens WHERE id = id_from INTO @_statement_level, @_first_token, @_first_state;
+      set statement_level=@_statement_level;
+      set first_token=@_first_token;
+      set first_state=@_first_state;
 
       case
         when first_state in ('whitespace', 'single line comment', 'multi line comment') then begin
@@ -101,7 +105,8 @@ main_body: begin
 	      end;
         when first_state = 'left braces' then begin
 	        -- Start new block
-            SELECT MIN(id) FROM _sql_tokens WHERE id > id_from AND state = 'right braces' AND level = statement_level INTO id_end_statement;
+            SELECT MIN(id) FROM _sql_tokens WHERE id > id_from AND state = 'right braces' AND level = statement_level INTO @_id_end_statement;
+            set id_end_statement=@_id_end_statement;
   	        if id_end_statement IS NULL then
 	          call _throw_script_error(id_from, 'Unmatched "{" brace');
 	        end if;
@@ -203,11 +208,11 @@ main_body: begin
 	        set foreach_statement_id_from := id_from;
 
 	        set foreach_statement_id_to := consumed_to_id;
-	        update 
-	            _qs_variables 
-	          set 
-	            scope_end_id = foreach_statement_id_to 
-	          where 
+	        update
+	            _qs_variables
+	          set
+	            scope_end_id = foreach_statement_id_to
+	          where
 	            declaration_id = foreach_variables_delaration_id
 	            and (function_scope = _get_current_variables_function_scope())
 	          ;
@@ -310,7 +315,7 @@ main_body: begin
             else
               call _throw_script_error(id_from, CONCAT('Expected "catch" on try-catch block'));
             end if;
-            
+
             if should_execute_statement then
               call _consume_try_statement(try_statement_id_from, try_statement_id_to, TRUE, @_common_schema_dummy, depth+1, TRUE, try_statement_error_found);
               if try_statement_error_found then
@@ -337,7 +342,9 @@ main_body: begin
             end if;
 	        set consumed_to_id := id_from;
 	      end;
-	    else begin 
+	    else begin
+        select * from _sql_tokens;
+        select first_state;
 		    call _throw_script_error(id_from, CONCAT('Unsupported token: "', first_token, '"'));
 		  end;
       end case;
@@ -350,24 +357,25 @@ main_body: begin
     if is_loop then
       set @_common_schema_script_loop_nesting_level := @_common_schema_script_loop_nesting_level - 1;
     end if;
-    
+
 
     -- End of scope
     -- Reset local variables: remove mapping to user-defined-variables; reset value snapshots if any.
-    SELECT 
-        GROUP_CONCAT('SET ', mapped_user_defined_variable_name, ' := NULL ' SEPARATOR ';') 
-      FROM 
-        _qs_variables 
-      WHERE 
+    SELECT
+        GROUP_CONCAT('SET ', mapped_user_defined_variable_name, ' := NULL ' SEPARATOR ';')
+      FROM
+        _qs_variables
+      WHERE
         declaration_depth = depth
         and (function_scope = _get_current_variables_function_scope())
-      INTO reset_query;
+      INTO @_reset_query;
+    set reset_query=@_reset_query;
     call exec(reset_query);
-    UPDATE 
-        _qs_variables 
-      SET 
-        value_snapshot = NULL 
-      WHERE 
+    UPDATE
+        _qs_variables
+      SET
+        value_snapshot = NULL
+      WHERE
         declaration_depth = depth
         and (function_scope = _get_current_variables_function_scope())
       ;

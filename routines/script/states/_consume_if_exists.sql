@@ -14,7 +14,7 @@ create procedure _consume_if_exists(
    in   expected_states text charset utf8,
    out  token_has_matched tinyint unsigned,
    out  matched_token text charset utf8
-) 
+)
 comment 'Consumes token or state if indeed exists'
 language SQL
 deterministic
@@ -24,7 +24,10 @@ sql security invoker
 main_body: begin
   call _skip_spaces(id_from, id_to);
   set token_has_matched := FALSE;
-  SELECT token, ((token = expected_token) OR FIND_IN_SET(state, REPLACE(expected_states, '|', ','))) IS TRUE FROM _sql_tokens WHERE id = id_from INTO matched_token, token_has_matched;
+  set @_matched_token=null, @_token_has_matched=FALSE;
+  SELECT token, ((token = expected_token) OR FIND_IN_SET(state, REPLACE(expected_states, '|', ','))) IS TRUE FROM _sql_tokens WHERE id = id_from INTO @_matched_token, @_token_has_matched;
+  set matched_token=@_matched_token;
+  set token_has_matched=@_token_has_matched;
   if token_has_matched then
     set consumed_to_id = id_from;
   end if;

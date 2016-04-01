@@ -21,24 +21,26 @@ main_body: begin
   declare local_variable varchar(65) charset ascii;
   declare user_defined_variable_name varchar(65) charset ascii;
   declare reset_query text charset ascii;
-  
+
   call _get_array_size(variables_array_id, num_variables);
   set variable_index := 1;
   while variable_index <= num_variables do
     call _get_array_element(variables_array_id, variable_index, local_variable);
-    SELECT 
-        mapped_user_defined_variable_name 
-      FROM 
-        _qs_variables 
-      WHERE 
+    set @_user_defined_variable_name=null;
+    SELECT
+        mapped_user_defined_variable_name
+      FROM
+        _qs_variables
+      WHERE
         variable_name = local_variable
         and (function_scope = _get_current_variables_function_scope())
-      INTO 
-        user_defined_variable_name;
-    
+      INTO
+        @_user_defined_variable_name;
+    set user_defined_variable_name=@_user_defined_variable_name;
+
     set reset_query := CONCAT('SET ', user_defined_variable_name, ' := @_query_script_input_col', variable_index);
     call exec_single(reset_query);
-    
+
     set variable_index := variable_index + 1;
   end while;
 end;

@@ -17,8 +17,10 @@ sql security invoker
 
 main_body: begin
   declare query_script text charset utf8;
-  
-  select script_text from _named_scripts where script_name = named_script_name into query_script;
+
+  set @_query_script=null;
+  select script_text from _named_scripts where script_name = named_script_name into @_query_script;
+  set query_script=@_query_script;
   if query_script is null then
     call throw(CONCAT('Unknown script: ', named_script_name));
   end if;

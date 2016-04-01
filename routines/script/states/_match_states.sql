@@ -1,5 +1,5 @@
 --
--- Given a state (or optional states), expect a dynamic length comma 
+-- Given a state (or optional states), expect a dynamic length comma
 -- delimited list where each element is given state(s).
 --
 
@@ -21,7 +21,7 @@ create procedure _match_states(
    out  tokens_array_id VARCHAR(16) charset ascii,
    out  single_matched_token text charset utf8,
    out	consumed_to_id int unsigned
-) 
+)
 comment 'Expects a state or raises error'
 language SQL
 deterministic
@@ -34,7 +34,7 @@ main_body: begin
   declare states_index int unsigned;
   declare repeat_index int unsigned;
   declare expected_states text charset utf8;
-  
+
   if return_tokens_array_id then
     call _create_array(tokens_array_id);
   end if;
@@ -43,7 +43,7 @@ main_body: begin
   if num_states = 0 then
     call _throw_script_error(id_from, 'Internal error: num_states = 0 in _match_states');
   end if;
-  
+
   -- repeat_count = 0 means undefined length, dynamic.
   set states_have_matched := true;
   set repeat_index := 1;
@@ -62,7 +62,11 @@ main_body: begin
       end if;
       set expected_states := split_token(expected_states_list, ',', states_index);
 
-      select token, FIND_IN_SET(state, REPLACE(expected_states, '|', ',')) is true from _sql_tokens where id = id_from into single_matched_token, state_has_matched;
+      set @_state_has_matched=false;
+      set @_single_matched_token=null;
+      select token, FIND_IN_SET(state, REPLACE(expected_states, '|', ',')) is true from _sql_tokens where id = id_from into @_single_matched_token, @_state_has_matched;
+      set single_matched_token=@_single_matched_token;
+      set state_has_matched=@_state_has_matched;
       if state_has_matched then
         set consumed_to_id := id_from;
         if return_tokens_array_id then
@@ -73,18 +77,20 @@ main_body: begin
         leave repeat_loop;
       end if;
       set id_from := id_from + 1;
-      
+
       set states_index := states_index + 1;
     end while;
     -- End reading single-occurence of expected states.
     -- We now expect delimiters, if appliccable (NULL delimiter means no delimiter expected)
     if repeat_delimiter_state != 'whitespace' then
       -- If expected delimiter is whitespace, well, we want to consume it,
-      -- not skip it... 
+      -- not skip it...
       call _skip_spaces(id_from, id_to);
     end if;
     if repeat_delimiter_state is not null then
-      select token, (state = repeat_delimiter_state) from _sql_tokens where id = id_from into @_common_schema_dummy, state_has_matched;
+      set @_state_has_matched=false;
+      select token, (state = repeat_delimiter_state) from _sql_tokens where id = id_from into @_common_schema_dummy, @_state_has_matched;
+      set state_has_matched=@_state_has_matched;
       if not state_has_matched then
         -- Could not find dilimiter.
         -- This is fine for last repeat-step, or when there is
@@ -98,7 +104,7 @@ main_body: begin
       set id_from := id_from + 1;
     end if;
     -- Phew, got here: this means a delimiter is matched.
-    set repeat_index := repeat_index + 1; 
+    set repeat_index := repeat_index + 1;
   end while;
 
   if states_have_matched then
@@ -107,7 +113,7 @@ main_body: begin
       -- don't care about the rest
       leave main_body;
     end if;
- 
+
     -- Do not allow trailing states: expect nothing more but spaces or statement delimiter
     call _skip_spaces(id_from, id_to);
     call _skip_end_of_statement(id_from, id_to);
@@ -115,7 +121,7 @@ main_body: begin
       set states_have_matched := false;
     end if;
   end if;
-  
+
   if not states_have_matched then
     -- This entire routine fails: there is no match
     if throw_on_mismatch then

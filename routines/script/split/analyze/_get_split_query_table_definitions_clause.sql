@@ -26,71 +26,79 @@ main_body: begin
     declare starting_id int unsigned;
     declare terminating_id int unsigned;
     declare following_select_id int unsigned;
-    
+
     set table_definitions_found := false;
     set table_definitions_id_from := null;
     set table_definitions_id_to := null;
-    
+
     if split_query_type = 'unsupported' then
       leave main_body;
     end if;
-    
-    select level from _sql_tokens where id = id_from into statement_level;
+
+    set @_statement_level=null;
+    select level from _sql_tokens where id = id_from into @_statement_level;
+    set statement_level=@_statement_level;
 
     if split_query_type = 'update' then
-      select MIN(id) from _sql_tokens where (id between id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) = 'set' into terminating_id;
+      select MIN(id) from _sql_tokens where (id between id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) = 'set' into @_terminating_id;
+      set terminating_id=@_terminating_id;
       if terminating_id is not null then
         set table_definitions_found := true;
         set table_definitions_id_from := id_from + 1;
         set table_definitions_id_to := terminating_id - 1;
       end if;
-      leave main_body;    
+      leave main_body;
     end if;
 
     if split_query_type = 'delete' then
       -- find FROM
-      select MIN(id) from _sql_tokens where (id between id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) = 'from' into starting_id;
+      select MIN(id) from _sql_tokens where (id between id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) = 'from' into @_starting_id;
+      set starting_id=@_starting_id;
       if starting_id is not null then
         set table_definitions_found := true;
         set table_definitions_id_from := starting_id + 1;
         -- But if there's USING, then override:
-        select MIN(id) from _sql_tokens where (id between table_definitions_id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) = 'using' into starting_id;
+        select MIN(id) from _sql_tokens where (id between table_definitions_id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) = 'using' into @_starting_id;
+        set starting_id=@_starting_id;
         if starting_id is not null then
           set table_definitions_id_from := starting_id + 1;
         end if;
         -- now find the terminating token: WHERE, ORDER or LIMIT (or end of line)
-        select MIN(id) from _sql_tokens where (id between table_definitions_id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) in ('where', 'order', 'limit') into terminating_id;
+        select MIN(id) from _sql_tokens where (id between table_definitions_id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) in ('where', 'order', 'limit') into @_terminating_id;
+        set terminating_id=@_terminating_id;
         if terminating_id is not null then
           set table_definitions_id_to := terminating_id - 1;
         else
           set table_definitions_id_to := id_to;
         end if;
       end if;
-      leave main_body;    
+      leave main_body;
     end if;
 
     if split_query_type in ('insert_select', 'replace_select') then
-      -- We know for sure the 'INSERT' or 'REPLACE' are followed by a 'SELECT'. 
-      -- It just so happens that there's nothing special about it: we can parse the query 
+      -- We know for sure the 'INSERT' or 'REPLACE' are followed by a 'SELECT'.
+      -- It just so happens that there's nothing special about it: we can parse the query
       -- as if it were a SELECT query: we just look for the FROM clause.
       set split_query_type := 'select';
     end if;
 
     if split_query_type = 'select' then
       -- find FROM
-      select MIN(id) from _sql_tokens where (id between id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) = 'from' into starting_id;
+      select MIN(id) from _sql_tokens where (id between id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) = 'from' into @_starting_id;
+      set starting_id=@_starting_id;
       if starting_id is not null then
         set table_definitions_found := true;
         set table_definitions_id_from := starting_id + 1;
         -- now find the terminating token: WHERE, ORDER or LIMIT (or end of line)
-        select MIN(id) from _sql_tokens where (id between table_definitions_id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) in ('partition', 'where', 'group', 'having', 'order', 'limit', 'procedure', 'into', 'for', 'lock') into terminating_id;
+        select MIN(id) from _sql_tokens where (id between table_definitions_id_from and id_to) and level = statement_level and state = 'alpha' and LOWER(token) in ('partition', 'where', 'group', 'having', 'order', 'limit', 'procedure', 'into', 'for', 'lock') into @_terminating_id;
+        set terminating_id=@_terminating_id;
         if terminating_id is not null then
           set table_definitions_id_to := terminating_id - 1;
         else
           set table_definitions_id_to := id_to;
         end if;
       end if;
-      leave main_body;    
+      leave main_body;
     end if;
 end;
 //

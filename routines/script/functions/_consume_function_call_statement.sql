@@ -37,7 +37,7 @@ main_body: begin
 	declare push_query text charset utf8;
 	declare mapped_user_defined_variable_names text charset utf8;
 	declare counter int unsigned;
-	
+
     call _expect_state(statement_id_from, statement_id_to, 'alpha|alphanum', true, consumed_to_id, matched_function_name);
 	call _expect_function_exists(statement_id_from, matched_function_name);
     if should_execute_statement then
@@ -52,58 +52,76 @@ main_body: begin
 	  set statement_arguments := unwrap(statement_arguments);
 	  set statement_arguments := trim_wspace(statement_arguments);
 
+    set
+      @_expected_num_arguments=null,
+      @_imploded_function_arguments=null,
+      @_function_arguments_declaration_id=null,
+      @_function_scope_start_id=null,
+      @_function_scope_end_id=null
+      ;
 	  -- grab hold of info:
-	  select 
+	  select
 	      count_function_arguments,
 	      function_arguments,
 	      arguments_declaration_id,
-	      scope_start_id, 
+	      scope_start_id,
 	      scope_end_id
 	    from
 	      _qs_functions
 	    where
 	      function_name = matched_function_name
-	    into 
-	      expected_num_arguments,
-	      imploded_function_arguments,
-	      function_arguments_declaration_id,
-	      function_scope_start_id,
-	      function_scope_end_id
+	    into
+	      @_expected_num_arguments,
+	      @_imploded_function_arguments,
+	      @_function_arguments_declaration_id,
+	      @_function_scope_start_id,
+	      @_function_scope_end_id
 	    ;
+    set
+      expected_num_arguments=@_expected_num_arguments,
+      imploded_function_arguments=@_imploded_function_arguments,
+      function_arguments_declaration_id=@_function_arguments_declaration_id,
+      function_scope_start_id=@_function_scope_start_id,
+      function_scope_end_id=@_function_scope_end_id
+      ;
 	  -- validate num arguments provided is same as in function declaration
 	  if statement_arguments = '' then
 	    set num_arguments := 0;
 	  else
-	    select 
-	  	    count(*) 
-	  	  from 
+      set @_num_arguments=null;
+	    select
+	  	    count(*)
+	  	  from
 	  	    _sql_tokens,
 	  	    (select level as arguments_level from _sql_tokens where id = statement_id_from) sel_arguments_level
-	  	  where 
+	  	  where
 	  	    id >= statement_id_from and id <= statement_id_to
 	  	    and state = 'comma'
 	  	    and level = arguments_level
-	  	  into num_arguments;
+	  	  into @_num_arguments;
+        set num_arguments=@_num_arguments;
         set num_arguments := num_arguments + 1;
 	  end if;
-	  
+
 	  if num_arguments != expected_num_arguments then
 	  	call _throw_script_error(id_from, concat('Expected ', expected_num_arguments, ' arguments, found ', num_arguments));
 	  end if;
-	  
+
       call _push_current_variables_function_scope(matched_function_name);
 	  call _declare_local_variables(function_arguments_declaration_id, function_scope_end_id, function_scope_end_id, depth, imploded_function_arguments);
 
 	  -- push values into function arguments:
-	  select 
+    set @_mapped_user_defined_variable_names=null;
+	  select
 	      group_concat(mapped_user_defined_variable_name order by mapped_user_defined_variable_name separator ',')
-	    from 
+	    from
 	      _qs_variables
-	    where 
+	    where
 	      declaration_id = function_arguments_declaration_id
 	      and (function_scope = _get_current_variables_function_scope())
-	    into 
-	      mapped_user_defined_variable_names;
+	    into
+	      @_mapped_user_defined_variable_names;
+    set mapped_user_defined_variable_names=@_mapped_user_defined_variable_names;
 	  set push_query := concat('select ', statement_arguments, ' into ', mapped_user_defined_variable_names);
 	  call exec(push_query);
 

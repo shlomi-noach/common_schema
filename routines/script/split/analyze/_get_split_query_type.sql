@@ -22,17 +22,24 @@ sql security invoker
 main_body: begin
     declare statement_level int unsigned;
     declare statement_type tinytext charset utf8 default null;
-    
+
     set split_query_type := 'unsupported';
     set split_query_following_select_id := null;
-    
+
     call _skip_spaces(id_from, id_to);
-    SELECT id, level, LOWER(token) FROM _sql_tokens WHERE id = id_from AND state = 'alpha' INTO split_query_id_from, statement_level, statement_type;
-    
+    set @_split_query_id_from=null, @_statement_level=null, @_statement_type=null;
+    SELECT id, level, LOWER(token) FROM _sql_tokens WHERE id = id_from AND state = 'alpha' INTO @_split_query_id_from, @_statement_level, @_statement_type;
+    set
+      split_query_id_from=@_split_query_id_from,
+      statement_level=@_statement_level,
+      statement_type=@_statement_type
+    ;
+
 	if statement_type in ('insert', 'replace') then
-      SELECT MIN(id) FROM _sql_tokens WHERE id > id_from AND id <= id_to AND level = statement_level AND state = 'alpha' AND LOWER(token) = 'select' INTO split_query_following_select_id;
+      SELECT MIN(id) FROM _sql_tokens WHERE id > id_from AND id <= id_to AND level = statement_level AND state = 'alpha' AND LOWER(token) = 'select' INTO @_split_query_following_select_id;
+      set split_query_following_select_id=@_split_query_following_select_id;
     end if;
-    
+
     if statement_type = 'delete' then
       set split_query_type := 'delete';
     elseif statement_type = 'update' then

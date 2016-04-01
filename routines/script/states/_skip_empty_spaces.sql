@@ -18,10 +18,11 @@ deterministic
 reads sql data
 sql security invoker
 main_body: begin
-    select min(id) from _sql_tokens 
-      where id >= id_from and id <= id_to 
-      and (state, CHAR_LENGTH(token)) != ('whitespace', 0) 
-    into id_from;
+    select min(id) from _sql_tokens
+      where id >= id_from and id <= id_to
+      and (state, CHAR_LENGTH(token)) != ('whitespace', 0)
+    into @_id_from;
+    set id_from=@_id_from;
     if id_from is null then
       set id_from := id_to + 1;
     end if;

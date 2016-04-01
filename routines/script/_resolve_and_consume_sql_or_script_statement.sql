@@ -25,9 +25,11 @@ sql security invoker
 main_body: begin
   declare resolve_statement_type text charset utf8;
   declare token_has_matched tinyint unsigned default FALSE;
-  
-  select statement_type from _script_statements where statement = statement_token into resolve_statement_type;
-  
+
+  set @_resolve_statement_type=null;
+  select statement_type from _script_statements where statement = statement_token into @_resolve_statement_type;
+  set resolve_statement_type=@_resolve_statement_type;
+
   case resolve_statement_type
     when 'sql' then begin
 	    call _consume_sql_statement(id_from, statement_id_to, should_execute_statement);

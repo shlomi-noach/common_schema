@@ -20,8 +20,10 @@ main_body: begin
     declare full_message varchar(2048);
     declare error_pos int unsigned;
 
-    SELECT LEFT(GROUP_CONCAT(token ORDER BY id SEPARATOR ''), 80), SUBSTRING_INDEX(GROUP_CONCAT(start ORDER BY id), ',', 1) FROM _sql_tokens WHERE id >= id_from INTO full_message, error_pos;
-    
+    SELECT LEFT(GROUP_CONCAT(token ORDER BY id SEPARATOR ''), 80), SUBSTRING_INDEX(GROUP_CONCAT(start ORDER BY id), ',', 1) FROM _sql_tokens WHERE id >= id_from INTO @_full_message, @_error_pos;
+    set full_message=@_full_message;
+    set error_pos=@_error_pos;
+
     set full_message := CONCAT('QueryScript error: [', message, '] at ', error_pos, ': "', full_message, '"');
     call throw(full_message);
 end;

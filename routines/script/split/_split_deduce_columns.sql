@@ -1,11 +1,11 @@
--- 
--- 
--- 
+--
+--
+--
 
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS _split_deduce_columns $$
-CREATE PROCEDURE _split_deduce_columns(split_table_schema varchar(128), split_table_name varchar(128), requested_index_name varchar(128)) 
+CREATE PROCEDURE _split_deduce_columns(split_table_schema varchar(128), split_table_name varchar(128), requested_index_name varchar(128))
 MODIFIES SQL DATA
 SQL SECURITY INVOKER
 COMMENT 'split values by columns...'
@@ -15,16 +15,18 @@ begin
   declare split_num_column tinyint unsigned;
 
   call _split_generate_dependency_tables(split_table_schema, split_table_name, requested_index_name);
-  
-  SELECT 
+
+  SELECT
       column_names, count_column_in_index, index_name
-    FROM 
-      _split_candidate_keys_recommended 
-    WHERE 
-      table_schema = split_table_schema AND table_name = split_table_name 
-    INTO split_column_names, split_num_column, @_query_script_split_index_name
+    FROM
+      _split_candidate_keys_recommended
+    WHERE
+      table_schema = split_table_schema AND table_name = split_table_name
+    INTO @_split_column_names, @_split_num_column, @_query_script_split_index_name
   ;
-    
+  set split_column_names=@_split_column_names;
+  set split_num_column=@_split_num_column;
+
   call _split_cleanup_dependency_tables();
 
   if (requested_index_name is not null) and ((requested_index_name = @_query_script_split_index_name) IS NOT TRUE) then
@@ -51,16 +53,16 @@ begin
       CONCAT('@_split_column_variable_range_end_', n)
     from
       numbers
-    where 
+    where
       n between 1 and split_num_column
   ;
-  
+
   select
     group_concat(mysql_qualify(column_name) order by column_order)
   from
     _split_column_names_table
   into
-    @_query_script_split_columns;    
+    @_query_script_split_columns;
 end $$
 
 DELIMITER ;

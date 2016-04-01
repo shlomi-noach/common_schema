@@ -20,8 +20,9 @@ let num_tests=0
 
 cd $TESTS_ROOT_PATH
 
+echo mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --host=localhost --socket=$MYSQL_SOCKET $MYSQL_SCHEMA
 if [ -f pre.sql ] ; then
-	mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < pre.sql
+	mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --host=localhost --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < pre.sql
 	if [ $? -ne 0 ] ; then
 	  echo "Test startup failed on pre.sql"
 	  exit 1
@@ -34,7 +35,7 @@ do
 	echo "Testing family: ${TEST_FAMILY_PATH}"
 	cd $TESTS_ROOT_PATH/$TEST_FAMILY_PATH
 	if [ -f pre.sql ] ; then
-		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < pre.sql
+		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --host=localhost --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < pre.sql
 		if [ $? -ne 0 ] ; then
 		  echo "Test family ${TEST_FAMILY_PATH} failed on pre.sql"
 		  exit 1
@@ -53,18 +54,18 @@ do
 			export TEST_BRIEF_DESCRIPTION=""
 		fi
 		echo "  ${TEST_FAMILY_PATH}/${TEST_PATH}: ${TEST_BRIEF_DESCRIPTION}"
-		
+
 		# prepare test
 		if [ -f pre.sql ] ; then
-			mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < pre.sql
+			mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --host=localhost --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < pre.sql
 			if [ $? -ne 0 ] ; then
 			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed on pre.sql"
 			  exit 1
 			fi
 		fi
-		
+
 		# execute test code
-		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA --silent --raw < test.sql > ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE} 2> ${TEST_OUTPUT_PATH}/${TEST_ERROR_FILE}
+		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --host=localhost --socket=$MYSQL_SOCKET $MYSQL_SCHEMA --silent --raw < test.sql > ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE} 2> ${TEST_OUTPUT_PATH}/${TEST_ERROR_FILE}
 		if [ $? -eq 0 ] ; then
 			# No errors thrown by test itself; check test results
 			if [ -f error_expected.txt ] ; then
@@ -80,7 +81,7 @@ do
 				  echo "**   Output:   ${TEST_OUTPUT_PATH}/${TEST_OUTPUT_FILE}"
 				  echo "**   Expected: $(pwd)/expected.txt"
 				  echo "**   Diff:     ${TEST_OUTPUT_PATH}/${DIFF_OUTPUT_FILE}"
-				  
+
 				  exit 1
 				fi
 			elif [ -f expect_no_error.txt ] ; then
@@ -110,7 +111,7 @@ do
 
 		# post test code (typically cleanup)
 		if [ -f post.sql ] ; then
-			mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
+			mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --host=localhost --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
 			if [ $? -ne 0 ] ; then
 			  echo "Test ${TEST_FAMILY_PATH}/${TEST_PATH} failed on post.sql"
 			  exit 1
@@ -120,7 +121,7 @@ do
 	done
 	# Post family code (typicaly cleanup)
 	if [ -f post.sql ] ; then
-		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
+		mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --host=localhost --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
 		if [ $? -ne 0 ] ; then
 		  echo "Test family ${TEST_FAMILY_PATH} failed on post.sql"
 		  exit 1
@@ -130,7 +131,7 @@ done
 
 cd $TESTS_ROOT_PATH
 if [ -f post.sql ] ; then
-	mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
+	mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD --host=localhost --socket=$MYSQL_SOCKET $MYSQL_SCHEMA < post.sql
 	if [ $? -ne 0 ] ; then
 	  echo "Test cleanup failed on post.sql"
 	  exit 1
