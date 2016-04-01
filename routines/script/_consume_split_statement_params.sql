@@ -24,7 +24,7 @@ sql security invoker
 main_body: begin
     declare expanded_statement mediumtext charset utf8;
     declare options_value mediumtext charset utf8;
-    
+
     call _skip_spaces(id_from, id_to);
 
     set split_table_schema := null;
@@ -33,7 +33,6 @@ main_body: begin
     set found_explicit_table := false;
 
     call _expand_statement_variables(id_from, id_to, expanded_statement, @_common_schema_dummy, should_execute_statement);
-    -- select GROUP_CONCAT(token order by id separator '') from _sql_tokens where id between id_from AND id_to into split_options;
     if _is_options_format(expanded_statement) then
       set split_options := expanded_statement;
       set options_value := get_option(split_options, 'table');
@@ -49,14 +48,14 @@ main_body: begin
     else
       begin
         -- watch out for table_schema.table_name
-        declare peek_match_to int unsigned default NULL; 
+        declare peek_match_to int unsigned default NULL;
         declare table_array_id varchar(16);
-        
+
         call _create_array(table_array_id);
         call _peek_states_list(id_from, id_to, 'alpha|alphanum|quoted identifier|expanded query_script variable,dot,alpha|alphanum|quoted identifier|expanded query_script variable', false, false, true, table_array_id, peek_match_to);
         if peek_match_to > 0 then
           -- we have table_schema.table_name, and no statement
-          call _get_array_element(table_array_id, '1', split_table_schema);		
+          call _get_array_element(table_array_id, '1', split_table_schema);
           call _get_array_element(table_array_id, '3', split_table_name);
           call _expand_single_variable(id_from, id_to, split_table_schema, should_execute_statement);
           call _expand_single_variable(id_from, id_to, split_table_name, should_execute_statement);

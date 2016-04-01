@@ -6,16 +6,16 @@
 	</taskdef>
 
 
-	
+
 	<!--
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="" />
 	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
 
--->	
+-->
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
-	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
+	<property name="mysql.socket" value="/var/folders/m2/jxhw5r550fbcj96cg_9j8xx40000gn/T//mysql_sandbox22293.sock" />
 
 	<!--
 
@@ -24,16 +24,16 @@
 	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
 	-->
 
-	<!--	
+	<!--
 
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
 	<property name="mysql.socket" value="/tmp/mysql_sandbox5612.sock" />
 	-->
 
-	
-	
-	
+
+
+
 	<property name="mysql.database" value="common_schema" />
 
 	<property name="build_data.dir" value="build_data" />
@@ -49,20 +49,20 @@
 
 	<property name="doc.templates.dir" value="doc/templates" />
 	<property name="doc.html.dir" value="doc/html" />
-	
+
 	<property name="doc.sql.tmp.file" value="doc_sql.txt" />
 
-	
+
 	<target name="all" depends="build">
 	</target>
 
-	
+
 	<target name="clean">
 		<delete dir="${build.dir}" />
 		<delete dir="${dist.dir}" />
 		<delete dir="${tmp.dir}" />
 	</target>
-	
+
 
 	<target name="undeploy">
 		<antcall target="exec_mysql_command">
@@ -70,7 +70,7 @@
 		</antcall>
 	</target>
 
-	
+
 	<target name="revnumber" description="Get the SVN greatest revision number">
 		<mkdir dir="${tmp.dir}" />
 		<exec dir="." executable="svn" output="ant-tmp/svn_output" failifexecutionfails="false" description="Get SVN info for all files recursively">
@@ -90,7 +90,7 @@
 		<echo>revision: ${svn.revision}</echo>
 	</target>
 
-	
+
 	<target name="build_base_components" depends="revnumber">
 		<mkdir dir="${build.dir}" />
 		<concat destfile="${build.dir}/${sql.base_components.output.file}">
@@ -118,15 +118,15 @@
 			<fileset dir="routines/time/" includes="*.sql" />
 			<fileset dir="routines/version_control/" includes="*.sql" />
 			<!--
-			<fileset dir="routines/math/" includes="*.sql" />			
-			-->			
+			<fileset dir="routines/math/" includes="*.sql" />
+			-->
 			<!--
 			<fileset dir="autocache/tables/" includes="*.sql" />
 			<fileset dir="autocache/routines/" includes="*.sql" />
 			<fileset dir="autocache/views_internal/" includes="*.sql" />
 			<fileset dir="autocache/views/" includes="*.sql" />
 			-->
-			
+
 			<fileset dir="views/schema_analysis/" includes="*.sql" />
 			<fileset dir="views/data_dimension/" includes="*.sql" />
 			<fileset dir="views/debug/" includes="*.sql" />
@@ -139,8 +139,8 @@
 		</concat>
 		<replace file="${build.dir}/${sql.base_components.output.file}" token="revision.placeholder" value="${svn.revision}"/>
 	</target>
-	
-	
+
+
 	<target name="build_additional_components">
 		<delete dir="${tmp.dir}" />
 		<mkdir dir="${tmp.dir}" />
@@ -164,32 +164,32 @@
 		</concat>
 		<delete dir="${tmp.dir}" />
 	</target>
-	
+
 	<target name="build_innodb_plugin_component">
 		<basename property="innodb_plugin_component.file.basename" file="${innodb_plugin_component.filename}" />
-		
+
 		<loadfile property="component.text" srcfile="${innodb_plugin_component.filename}"></loadfile>
 		<copy file="${build_data.dir}/innodb_plugin_component.sql" toFile="${tmp.dir}/${innodb_plugin_component.file.basename}" />
 		<replace file="${tmp.dir}/${innodb_plugin_component.file.basename}" token="component.placeholder" value="${component.text}"/>
 	</target>
-	
+
 	<target name="build_percona_server_component">
 		<basename property="percona_server_component.file.basename" file="${percona_server_component.filename}" />
-		
+
 		<loadfile property="component.text" srcfile="${percona_server_component.filename}"></loadfile>
 		<copy file="${build_data.dir}/percona_server_component.sql" toFile="${tmp.dir}/${percona_server_component.file.basename}" />
 		<replace file="${tmp.dir}/${percona_server_component.file.basename}" token="component.placeholder" value="${component.text}"/>
 	</target>
-	
+
 	<target name="build_tokudb_component">
 		<basename property="tokudb_component.file.basename" file="${tokudb_component.filename}" />
-		
+
 		<loadfile property="component.text" srcfile="${tokudb_component.filename}"></loadfile>
 		<copy file="${build_data.dir}/tokudb_component.sql" toFile="${tmp.dir}/${tokudb_component.file.basename}" />
 		<replace file="${tmp.dir}/${tokudb_component.file.basename}" token="component.placeholder" value="${component.text}"/>
 	</target>
 
-	
+
 	<target name="build_scripts">
 		<delete file="${build.dir}/${sql.scripts.output.file}" />
 		<foreach param="script.filename" target="build_script">
@@ -198,7 +198,7 @@
 			</path>
 		</foreach>
 	</target>
-	
+
 	<target name="build_script">
 		<basename property="script.file.basename" file="${script.filename}" suffix=".sql"/>
 		<loadfile property="script.text" srcfile="${script.filename}"></loadfile>
@@ -212,7 +212,7 @@
 		</concat>
 	</target>
 
-	
+
 	<target name="build" depends="revnumber, build_base_components, build_additional_components, build_scripts">
 		<concat destfile="${build.dir}/${sql.build.output.file}">
 			<fileset file="${build_data.dir}/main_head.sql" />
@@ -220,22 +220,22 @@
 			<fileset file="${build.dir}/${sql.additional_components.output.file}" />
 			<fileset file="${build.dir}/${sql.scripts.output.file}" />
 			<fileset file="${build.dir}/${sql.help.output.file}" />
-			<fileset file="${build_data.dir}/main_tail.sql" />		
+			<fileset file="${build_data.dir}/main_tail.sql" />
 		</concat>
 	</target>
-	
-	
+
+
 	<target name="deploy" depends="build">
 		<antcall target="deploy_file">
 			<param name="common_schema_sql_file" value="${build.dir}/${sql.build.output.file}" />
 		</antcall>
 	</target>
 
-	
+
 	<target name="dist" depends="clean, build, doc_sql, revnumber, test">
 		<mkdir dir="${dist.dir}" />
 		<propertyregex property="release_filename" input="${sql.build.output.file}" regexp="(.*).sql" select="\1-r${svn.revision}.sql" />
-		
+
 		<loadfile property="doc_sql" srcfile="${build.dir}/${sql.help.output.file}"></loadfile>
 		<copy file="${build.dir}/${sql.build.output.file}" tofile="${dist.dir}/${release_filename}" />
 		<replace file="${dist.dir}/${release_filename}" token="doc_sql.placeholder" value="${doc_sql}"/>
@@ -259,6 +259,7 @@
 			<arg value="--user=${mysql.user}" />
 			<arg value="--password=${mysql.password}" />
 			<arg value="--socket=${mysql.socket}" />
+			<arg value="--host=localhost" />
 		</exec>
 	</target>
 
@@ -273,11 +274,12 @@
 			<arg value="--user=${mysql.user}" />
 			<arg value="--password=${mysql.password}" />
 			<arg value="--socket=${mysql.socket}" />
+			<arg value="--host=localhost" />
 			<arg value="--execute=${mysql_command}" />
 		</exec>
 	</target>
 
-	
+
 	<target name="doc" depends="revnumber">
 		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}/css">
 		</copy>
@@ -310,7 +312,7 @@
 			<arg value="${doc.html.dir}/"/>
 		</exec>
 	</target>
-	
+
 	<target name="component_doc">
 		<basename property="doc_basename" file="${component_doc_filename}" />
 		<basename property="component_name" file="${component_doc_filename}" suffix=".html" />
@@ -320,9 +322,9 @@
 		</concat>
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${component_name}" />
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${component_name}" />
-		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>		
+		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>
 	</target>
-	
+
 	<target name="generaldoc">
 		<basename property="doc_basename" file="${generaldoc_filename}" />
 		<basename property="docname" file="${generaldoc_filename}" suffix=".html" />
@@ -332,10 +334,10 @@
 		</concat>
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${docname}" />
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${docname}" />
-		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>		
+		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>
 	</target>
-	
-	
+
+
 	<target name="doc_sql">
 		<mkdir dir="${tmp.dir}" />
 		<mkdir dir="${build.dir}" />
@@ -352,7 +354,7 @@
 		</foreach>
 		<delete dir="${tmp.dir}" />
 	</target>
-	
+
 	<target name="page_doc_sql">
 		<basename property="doc_basename" file="${page_doc_filename}" />
 		<basename property="page_doc_name" file="${page_doc_filename}" suffix=".html" />
@@ -375,7 +377,7 @@
 		</concat>
 	</target>
 
-	
+
 	<target name="test">
 		<echo>Testing</echo>
 		<exec executable="bash" dir="${tests.dir}" failonerror="true">
@@ -385,8 +387,8 @@
 			<arg value="${mysql.socket}" />
 		</exec>
 	</target>
-	
-	
+
+
 	<target name="__test__">
 		<echo>${basedir}</echo>
 		<echo>${abc}</echo>

@@ -20,11 +20,12 @@ sql security invoker
 main_body: begin
 	set states_list := IFNULL(states_list, '');
 	set tokens_list := LOWER(IFNULL(tokens_list, ''));
-    select min(id) from _sql_tokens 
-      where id >= id_from and id <= id_to 
-      and FIND_IN_SET(state, states_list) = 0 
-      and FIND_IN_SET(LOWER(token), tokens_list) = 0 
-    into id_from;
+    select min(id) from _sql_tokens
+      where id >= id_from and id <= id_to
+      and FIND_IN_SET(state, states_list) = 0
+      and FIND_IN_SET(LOWER(token), tokens_list) = 0
+    into @_id_from;
+    set id_from=@_id_from;
     if id_from is null then
       set id_from := id_to + 1;
     end if;

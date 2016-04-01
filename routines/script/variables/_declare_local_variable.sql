@@ -24,22 +24,16 @@ sql security invoker
 main_body: begin
   -- TODO: this makes the statement "var $e, $e;" valid, since both variables share same declaration id.
   -- Remove variables with same name as given variable, and which are out of scope:
-  delete 
-    from 
-      _qs_variables 
-    WHERE 
-      variable_name = local_variable 
+  delete
+    from
+      _qs_variables
+    WHERE
+      variable_name = local_variable
       and ((scope_end_id < id_variable_declaration) or (declaration_id >= id_variable_declaration))
       and (function_scope = _get_current_variables_function_scope())
   ;
 
-  -- declare overlapping_variable_exists tinyint unsigned;	
-  -- select (count(*) > 0) from _qs_variables where variable_name = local_variable and id_variable_declaration between declaration_id and scope_end_id into overlapping_variable_exists;
-  -- if overlapping_variable_exists and throw_when_exists then
-  --   call _throw_script_error(id_from, CONCAT('Duplicate local variable: ', local_variable));
-  -- end if;
-   
-  INSERT IGNORE INTO _qs_variables (server_id, session_id, function_scope, variable_name, mapped_user_defined_variable_name, declaration_depth, declaration_id, scope_end_id) 
+  INSERT IGNORE INTO _qs_variables (server_id, session_id, function_scope, variable_name, mapped_user_defined_variable_name, declaration_depth, declaration_id, scope_end_id)
     VALUES (_get_server_id(), CONNECTION_ID(), _get_current_variables_function_scope(), local_variable, user_defined_variable_name, depth, id_variable_declaration, id_to);
   if ROW_COUNT() = 0 and throw_when_exists then
     call _throw_script_error(id_variable_declaration, CONCAT('Duplicate local variable: ', local_variable));

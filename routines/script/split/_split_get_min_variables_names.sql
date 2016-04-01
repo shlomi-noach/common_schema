@@ -1,24 +1,25 @@
--- 
--- 
+--
+--
 DELIMITER $$
 
 DROP function IF EXISTS _split_get_min_variables_names $$
-CREATE function _split_get_min_variables_names() 
+CREATE function _split_get_min_variables_names()
   returns TEXT CHARSET utf8
 DETERMINISTIC
 READS SQL DATA
 SQL SECURITY INVOKER
 COMMENT ''
 
-BEGIN	
+BEGIN
   declare return_value TEXT CHARSET utf8;
-  
-  select 
+
+  select
       group_concat(min_variable_name order by column_order separator ', ')
     from
       _split_column_names_table
-    into return_value
+    into @_return_value
     ;
+  set return_value=@_return_value;
   return return_value;
 END $$
 

@@ -1,11 +1,11 @@
--- 
--- 
--- 
+--
+--
+--
 
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS _split_init_variables $$
-CREATE PROCEDURE _split_init_variables() 
+CREATE PROCEDURE _split_init_variables()
 READS SQL DATA
 SQL SECURITY INVOKER
 COMMENT ''
@@ -13,7 +13,7 @@ COMMENT ''
 begin
   declare queries text default NULL;
 
-  select 
+  select
     GROUP_CONCAT(
       'set ', min_variable_name, ' := NULL; ',
       'set ', max_variable_name, ' := NULL; ',
@@ -22,8 +22,9 @@ begin
       separator ''
     )
     from _split_column_names_table
-    into queries;
-    
+    into @_queries;
+  set queries=@_queries;
+
   call exec(queries);
 end $$
 

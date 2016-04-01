@@ -23,32 +23,36 @@ sql security invoker
 main_body: begin
     declare first_state text;
     declare expression_level int unsigned;
-    declare id_end_expression int unsigned; 
+    declare id_end_expression int unsigned;
     declare expanded_variables TEXT CHARSET utf8;
     declare expanded_variables_found tinyint unsigned;
-    
+
     set expression_statement := NULL ;
-    
+
     call _skip_spaces(id_from, id_to);
-    SELECT level, state FROM _sql_tokens WHERE id = id_from INTO expression_level, first_state;
+    set @_expression_level=null, @_first_state=null;
+    SELECT level, state FROM _sql_tokens WHERE id = id_from INTO @_expression_level, @_first_state;
+    set expression_level=@_expression_level;
+    set first_state=@_first_state;
 
     if (first_state = 'left parenthesis') then
-      SELECT MIN(id) FROM _sql_tokens WHERE id > id_from AND state = 'right parenthesis' AND level = expression_level INTO id_end_expression;
+      SELECT MIN(id) FROM _sql_tokens WHERE id > id_from AND state = 'right parenthesis' AND level = expression_level INTO @_id_end_expression;
+      set id_end_expression=@_id_end_expression;
   	  if id_end_expression IS NULL then
 	    call _throw_script_error(id_from, 'Unmatched "(" parenthesis');
 	  end if;
 	  set id_from := id_from + 1;
       call _skip_spaces(id_from, id_to);
-      
+
       call _expand_statement_variables(id_from, id_end_expression-1, expression, expanded_variables_found, should_execute_statement);
-      -- SELECT GROUP_CONCAT(token ORDER BY id SEPARATOR '') FROM _sql_tokens WHERE id BETWEEN id_from AND id_end_expression-1 INTO expression;
-      
+
       -- Note down the statement (if any) of the expression:
-      SELECT token FROM _sql_tokens WHERE id = id_from AND state = 'alpha' INTO expression_statement;
+      set @_expression_statement=null;
+      SELECT token FROM _sql_tokens WHERE id = id_from AND state = 'alpha' INTO @_expression_statement;
+      set expression_statement=@_expression_statement;
       if ((expression is NULL) or (trim_wspace(expression) = '')) and (should_execute_statement or not expanded_variables_found) then
         call _throw_script_error(id_from, 'Found empty expression');
       end if;
-      -- ~~~ select expression, expression_statement;
       set consumed_to_id := id_end_expression;
     else
       if require_parenthesis then
