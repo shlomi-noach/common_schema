@@ -360,6 +360,7 @@
 		<basename property="page_doc_name" file="${page_doc_filename}" suffix=".html" />
 		<echo message="Generating documentation for ${page_doc_name} page" />
 		<exec executable="html2text">
+			<arg value="-nobs"/>
 			<arg value="-ascii"/>
 			<arg value="-width"/>
 			<arg value="78"/>
