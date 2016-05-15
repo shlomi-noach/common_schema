@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>sql_grants: common_schema documentation</title>
+	<meta name="description" content="sql_grants: common_schema" />
+	<meta name="keywords" content="sql_grants: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="sql_grants.html">sql_grants</a></h2>	
+<h3>NAME</h3>
+sql_grants: generate SQL GRANT/REVOKE statements for existing accounts; provide with GRANT metadata
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>sql_grants</i> presents metadata for existing accounts, and generates SQL queries for granting/revoking their privileges set.
+</p>
+
+<p>
+It is a one-stop-shop for getting the set of privileges per account, per privilege level (db, schema, table, column, routine). 
+The view lists the set of privileges per account in several formats:
+<ul>
+	<li>In comma delimited format (e.g. <strong>SELECT, INSERT, UPDATE, EXECUTE</strong>)</li>
+	<li>In <strong>GRANT</strong> syntax</li>
+	<li>In <strong>REVOKE</strong> syntax</li>
+</ul>
+</p>
+<p>
+The original <strong>mysql</strong> privileges tables, or the INFORMATION_SCHEMA <strong>*_PRIVILEGES</strong> views 
+make for a per-domain distinction of privileges: a table for per-schema privileges; a table for per-table privileges, etc.
+</p>
+<p>
+The only existing alternative to that is the <strong>SHOW GRANTS FOR</strong> command. 
+Alas, it is not a proper SQL query, and does not provide with structured result.</p>
+
+<p>The <i>sql_grants</i> view provides with structured results, easily filtered or searched.</p>
+
+<p>This view builds on <a href="routine_privileges.html">routine_privileges</a>.</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.sql_grants;
++--------------------+--------------+------+-----+---------+-------+
+| Field              | Type         | Null | Key | Default | Extra |
++--------------------+--------------+------+-----+---------+-------+
+| GRANTEE            | varchar(81)  | NO   |     |         |       |
+| user               | char(16)     | NO   |     |         |       |
+| host               | char(60)     | NO   |     |         |       |
+| priv_level         | varchar(133) | NO   |     |         |       |
+| priv_level_name    | varchar(7)   | NO   |     |         |       |
+| object_schema      | varchar(64)  | YES  |     | NULL    |       |
+| object_name        | varchar(64)  | YES  |     | NULL    |       |
+| current_privileges | mediumtext   | YES  |     | NULL    |       |
+| IS_GRANTABLE       | varchar(3)   | YES  |     | NULL    |       |
+| sql_grant          | longtext     | YES  |     | NULL    |       |
+| sql_revoke         | longtext     | YES  |     | NULL    |       |
+| sql_drop_user      | varchar(91)  | NO   |     |         |       |
++--------------------+--------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>GRANTEE</strong>: grantee's account</li>
+	<li><strong>user</strong>: account user part</li>
+	<li><strong>host</strong>: account host part</li>
+	<li><strong>priv_level</strong>: the domain on which the privileges are set (e.g. <strong>*.*</strong>, <strong>sakila.*</strong>)</li>
+	<li><strong>priv_level_name</strong>: description of priv_level: <strong>'user'</strong>, <strong>'schema'</strong>, <strong>'table'</strong>, <strong>'column'</strong>, <strong>'routine'</strong></li>
+	<li><strong>object_schema</strong>: name of schema in which object lies. Applies for table, column, routine; otherwise NULL</li>
+	<li><strong>object_name</strong>: name of object for which grants apply. Applies for schema, table, column, routine; otherwise NULL</li>
+	<li><strong>current_privileges</strong>: comma delimited list of privileges assigned to account on current privilege level</li>
+	<li><strong>IS_GRANTABLE</strong>: does current account have the GRANT privileges on this domain? <strong>'Yes'</strong> or <strong>'NO'</strong></li>
+	<li><strong>sql_grant</strong>: 
+		A <strong>GRANT</strong> query to generate current set of privileges.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+	<li><strong>sql_revoke</strong>: 
+		A <strong>REVOKE</strong> query to revoke current set of privileges.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+	<li><strong>sql_drop_user</strong>: 
+		A <strong>DROP USER</strong> query to drop account.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+</ul>
+
+<p>The view is in 1st normal form. The <strong>sql_drop_user</strong> column applies to a grantee in general, unrelated to the current domain.</p>
+
+<h3>EXAMPLES</h3>
+<p>Generate all content for the 'apps' user:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.sql_grants WHERE user = 'apps'\G
+*************************** 1. row ***************************
+           GRANTEE: 'apps'@'%'
+              user: apps
+              host: %
+        priv_level: *.*
+   priv_level_name: user
+     object_schema: NULL
+       object_name: NULL
+current_privileges: USAGE
+      IS_GRANTABLE: NO
+         sql_grant: GRANT USAGE ON *.* TO 'apps'@'%' IDENTIFIED BY PASSWORD ''
+        sql_revoke: 
+     sql_drop_user: DROP USER 'apps'@'%'
+*************************** 2. row ***************************
+           GRANTEE: 'apps'@'%'
+              user: apps
+              host: %
+        priv_level: `test`.*
+   priv_level_name: schema
+     object_schema: NULL
+       object_name: test
+current_privileges: DELETE, INSERT, SELECT, UPDATE
+      IS_GRANTABLE: NO
+         sql_grant: GRANT DELETE, INSERT, SELECT, UPDATE ON `test`.* TO 'apps'@'%'
+        sql_revoke: REVOKE DELETE, INSERT, SELECT, UPDATE ON `test`.* FROM 'apps'@'%'
+     sql_drop_user: DROP USER 'apps'@'%'
+*************************** 3. row ***************************
+           GRANTEE: 'apps'@'%'
+              user: apps
+              host: %
+        priv_level: `sakila`.`film`
+   priv_level_name: column
+     object_schema: sakila
+       object_name: film
+current_privileges: SELECT (description, film_id, title), UPDATE (description)
+      IS_GRANTABLE: YES
+         sql_grant: GRANT SELECT (description, film_id, title), UPDATE (description) ON `sakila`.`film` TO 'apps'@'%' WITH GRANT OPTION
+        sql_revoke: REVOKE SELECT (description, film_id, title), UPDATE (description), GRANT OPTION ON `sakila`.`film` FROM 'apps'@'%'
+     sql_drop_user: DROP USER 'apps'@'%'
+</pre></blockquote>
+
+<p>Show privileges per domain for 'other_user'@'localhost'</p>
+<blockquote><pre>mysql&gt; SELECT priv_level, current_privileges FROM common_schema.sql_grants WHERE GRANTEE = '\'other_user\'@\'localhost\'';
++------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| priv_level | current_privileges                                                                                                                                                                           |
++------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| *.*        | USAGE                                                                                                                                                                                        |
+| `world`.*  | ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE |
++------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</pre></blockquote>
+<p>Generate <strong>REVOKE</strong> statements for all users:</p>
+<blockquote><pre>mysql&gt; SELECT sql_revoke FROM common_schema.sql_grants WHERE sql_revoke != '';
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| sql_revoke                                                                                                                                                                                                                                                                                                                                                   |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| REVOKE DELETE, INSERT, SELECT, UPDATE ON `test`.* FROM 'apps'@'%'                                                                                                                                                                                                                                                                                            |
+| REVOKE SELECT (description, film_id, title), UPDATE (description), GRANT OPTION ON `sakila`.`film` FROM 'apps'@'%'                                                                                                                                                                                                                                           |
+| REVOKE PROCESS ON *.* FROM 'monitoring_user'@'localhost'                                                                                                                                                                                                                                                                                                     |
+| REVOKE ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, INDEX, INSERT, LOCK TABLES, REFERENCES, SELECT, SHOW VIEW, TRIGGER, UPDATE ON `world`.* FROM 'other_user'@'localhost'                                                                                                               |
+| REVOKE REPLICATION SLAVE ON *.* FROM 'replication'@'10.0.0.%'                                                                                                                                                                                                                                                                                                |
+| REVOKE ALTER, ALTER ROUTINE, CREATE, CREATE ROUTINE, CREATE TEMPORARY TABLES, CREATE USER, CREATE VIEW, DELETE, DROP, EVENT, EXECUTE, FILE, INDEX, INSERT, LOCK TABLES, PROCESS, REFERENCES, RELOAD, REPLICATION CLIENT, REPLICATION SLAVE, SELECT, SHOW DATABASES, SHOW VIEW, SHUTDOWN, SUPER, TRIGGER, UPDATE, GRANT OPTION ON *.* FROM 'root'@'127.0.0.1' |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+</pre></blockquote>
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="routine_privileges.html">routine_privileges</a>,
+<a href="similar_grants.html">similar_grants</a>,
+<a href="sql_show_grants.html">sql_show_grants</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>routine_privileges: common_schema documentation</title>
+	<meta name="description" content="routine_privileges: common_schema" />
+	<meta name="keywords" content="routine_privileges: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="routine_privileges.html">routine_privileges</a></h2>	
+<h3>NAME</h3>
+routine_privileges: INFORMATION_SCHEMA-like view on routines privileges
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p>INFORMATION_SCHEMA maps the <strong>mysql</strong> privileges tables into <strong>*_PRIVILEGES</strong> views.
+However, it only maps <strong>users</strong>, <strong>db</strong>, <strong>tables_priv</strong>, <strong>columns_priv</strong>, 
+and it fails mapping the <strong>procs_priv</strong> table. This is an inconsistency within INFORMATION_SCHEMA (see <a href="http://bugs.mysql.com/bug.php?id=61596">bug #61596</a>).
+</p>
+
+<p><i>routine_privileges</i> implements what the author believes to be the definition of ROUTINE_PRIVILEGES within INFORMATION_SCHEMA should be. 
+It follows up on the <strong>*_PRIVILEGES</strong> tables conventions.</p>
+
+<p>The view presents with grantees, and their set of privileges on specific routines (functions & procedures).</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC routine_privileges;
++-----------------+------------------------------+------+-----+---------+-------+
+| Field           | Type                         | Null | Key | Default | Extra |
++-----------------+------------------------------+------+-----+---------+-------+
+| GRANTEE         | varchar(81)                  | YES  |     | NULL    |       |
+| ROUTINE_CATALOG | binary(0)                    | YES  |     | NULL    |       |
+| ROUTINE_SCHEMA  | char(64)                     | NO   |     |         |       |
+| ROUTINE_NAME    | char(64)                     | NO   |     |         |       |
+| ROUTINE_TYPE    | enum('FUNCTION','PROCEDURE') | NO   |     | NULL    |       |
+| PRIVILEGE_TYPE  | varchar(27)                  | YES  |     | NULL    |       |
+| IS_GRANTABLE    | varchar(3)                   | NO   |     |         |       |
++-----------------+------------------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>GRANTEE</strong>: grantee's account</li>
+	<li><strong>ROUTINE_CATALOG</strong>: unused; NULL</li>
+	<li><strong>ROUTINE_SCHEMA</strong>: schema in which routines is located</li>
+	<li><strong>ROUTINE_NAME</strong>: name of routine</li>
+	<li><strong>ROUTINE_TYPE</strong>: 'FUNCTION' or 'PROECEDURE'</li>
+	<li><strong>PRIVILEGE_TYPE</strong>: single privilege (e.g. 'EXECUTE' or 'ALTER ROUTINE')</li>
+	<li><strong>IS_GRANTABLE</strong>: whether the grantee is grantable on this routine. 
+	This is a de-normalized column, following the convention of the <strong>*_PRIVILEGES</strong> tables in INFORMATION_SCHEMA</li>
+</ul>
+
+<p>The view is denormalized. While the <strong>mysql.procs_privs</strong> table lists the set of privileges per account in one row, 
+this view breaks the privileges to distinct rows. Also, the 'Grant' privilege is not listed on its own, but rather as an extra column.</p>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.routine_privileges ORDER BY GRANTEE, ROUTINE_SCHEMA, ROUTINE_NAME;
++--------------------------+-----------------+----------------+----------------------------+--------------+----------------+--------------+
+| GRANTEE                  | ROUTINE_CATALOG | ROUTINE_SCHEMA | ROUTINE_NAME               | ROUTINE_TYPE | PRIVILEGE_TYPE | IS_GRANTABLE |
++--------------------------+-----------------+----------------+----------------------------+--------------+----------------+--------------+
+| 'apps'@'%'               | NULL            | sakila         | get_customer_balance       | FUNCTION     | EXECUTE        | YES          |
+| 'other_user'@'localhost' | NULL            | sakila         | film_in_stock              | PROCEDURE    | ALTER ROUTINE  | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | film_in_stock              | PROCEDURE    | EXECUTE        | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | get_customer_balance       | FUNCTION     | ALTER ROUTINE  | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | get_customer_balance       | FUNCTION     | EXECUTE        | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | inventory_held_by_customer | FUNCTION     | ALTER ROUTINE  | NO           |
+| 'other_user'@'localhost' | NULL            | sakila         | inventory_held_by_customer | FUNCTION     | EXECUTE        | NO           |
+| 'world_user'@'localhost' | NULL            | sakila         | get_customer_balance       | FUNCTION     | EXECUTE        | YES          |
+| 'world_user'@'localhost' | NULL            | sakila         | get_customer_balance       | FUNCTION     | ALTER ROUTINE  | YES          |
++--------------------------+-----------------+----------------+----------------------------+--------------+----------------+--------------+
+</pre></blockquote>
+
+<p>Compare with:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM mysql.procs_priv;
++-----------+--------+------------+----------------------------+--------------+----------------+-----------------------------+---------------------+
+| Host      | Db     | User       | Routine_name               | Routine_type | Grantor        | Proc_priv                   | Timestamp           |
++-----------+--------+------------+----------------------------+--------------+----------------+-----------------------------+---------------------+
+| %         | sakila | apps       | get_customer_balance       | FUNCTION     | root@localhost | Execute,Grant               | 2011-06-22 14:29:01 |
+| localhost | sakila | world_user | get_customer_balance       | FUNCTION     | root@localhost | Execute,Alter Routine,Grant | 2011-06-22 14:29:18 |
+| localhost | sakila | other_user | get_customer_balance       | FUNCTION     | root@localhost | Execute,Alter Routine       | 2011-06-22 14:29:25 |
+| localhost | sakila | other_user | inventory_held_by_customer | FUNCTION     | root@localhost | Execute,Alter Routine       | 2011-06-22 14:30:12 |
+| localhost | sakila | other_user | film_in_stock              | PROCEDURE    | root@localhost | Execute,Alter Routine       | 2011-06-22 14:30:46 |
++-----------+--------+------------+----------------------------+--------------+----------------+-----------------------------+---------------------+
+</pre></blockquote>
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="sql_grants.html">sql_grants</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

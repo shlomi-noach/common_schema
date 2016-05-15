@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>replace_sections: common_schema documentation</title>
+	<meta name="description" content="replace_sections: common_schema" />
+	<meta name="keywords" content="replace_sections: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="replace_sections.html">replace_sections</a></h2>	
+<h3>NAME</h3>
+replace_sections(): search and replace text appearing between section start/end
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	Replace sections in a text, identified by start/end tokens, with a given replacement
+	string. Back-referencing supported. 
+</p>
+<p>
+	This function allows to replace one or more occurrences of text with a replacement text.
+	The replaced text is such that appears between a <i>section start</i> and
+	<i>section end</i> texts. The section start/end texts themselves are stripped
+	during the replacement process.
+</p>
+<p>
+	The replacement text may be constant, but may also use the <strong>'\\0'</strong>
+	back-reference to indicate the original text.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>replace_sections(
+    txt TEXT CHARSET utf8, 
+    section_start TEXT charset utf8,
+    section_end TEXT charset utf8,
+    replacement_text TEXT CHARSET utf8
+  ) 
+  RETURNS TEXT CHARSET utf8
+  NO SQL </pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>txt</strong>: text to manipulate</li>
+    <li><strong>section_start</strong>: text identifying beginning of section</li>
+    <li><strong>section_end</strong>: text identifying end of section</li>
+    <li><strong>replacement_text</strong>: text to inject in place of sections. May contain
+    	the special <strong>'\\0'</strong> back-reference</li>.
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Strip anything between braces:</p>
+<blockquote><pre>mysql&gt; select replace_sections('Me (myself) I', '(', ')', '') as result;
++--------+
+| result |
++--------+
+| Me  I  |
++--------+
+</pre></blockquote>
+
+<p>Remove all HTML tags, assume "&lt;" & "&gt;" do not appear throughout text:</p>
+<blockquote><pre>mysql&gt; select replace_sections('The &lt;b&gt;quick&lt;/b&gt; brown &lt;b&gt;fox&lt;/b&gt;', 
+        '&lt;', '&gt;', '') as result;
++---------------------+
+| result              |
++---------------------+
+| The quick brown fox |
++---------------------+
+</pre></blockquote>
+
+<p>Remove only &lt;b&gt; HTML tags, retain enclosed text:</p>
+<blockquote><pre>mysql&gt; select replace_sections(
+        'The &lt;b&gt;quick&lt;/b&gt; &lt;span&gt;brown&lt;/span&gt; &lt;b&gt;fox&lt;/b&gt;', 
+        '&lt;b&gt;', '&lt;/b&gt;', 
+        '\\0') as result;
++----------------------------------+
+| result                           |
++----------------------------------+
+| The quick &lt;span&gt;brown&lt;/span&gt; fox |
++----------------------------------+
+</pre></blockquote>
+
+<p>Convert <strong>b</strong> tags to <strong>span</strong> tags, retain enclosed text:</p>
+<blockquote><pre>mysql&gt; select replace_sections(
+        'The &lt;b&gt;quick&lt;/b&gt; brown &lt;b&gt;fox&lt;/b&gt;', 
+        '&lt;b&gt;', '&lt;/b&gt;', 
+        '&lt;span&gt;\\0&lt;/span&gt;') as result;
++-----------------------------------------------+
+| result                                        |
++-----------------------------------------------+
+| The &lt;span&gt;quick&lt;/span&gt; brown &lt;span&gt;fox&lt;/span&gt; |
++-----------------------------------------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="replace_all.html">replace_all()</a>,
+<a href="trim_wspace.html">trim_wspace()</a>
+
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

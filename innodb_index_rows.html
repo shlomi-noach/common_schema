@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>innodb_index_rows: common_schema documentation</title>
+	<meta name="description" content="innodb_index_rows: common_schema" />
+	<meta name="keywords" content="innodb_index_rows: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="innodb_index_rows.html">innodb_index_rows</a></h2>	
+<h3>NAME</h3>
+innodb_index_rows: Number of row cardinality per keys per columns in InnoDB tables
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>innodb_index_rows</i> extends the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server, and presents with information on InnoDB keys cardinality as per indexed column.
+</p>
+
+<p>
+The Percona Server INNODB_INDEX_STATS table presents with cardinality values per index, per indexed column. 
+That is, it lets us know the average number of rows expected to be found in an index for some key.
+</p>
+
+<p>For single column keys, this is simple enough. However, for compound indexes 
+(indexes over multiple columns), this information becomes even more interesting, 
+as it lets us examine the reduction in cardinality (and improvement of selectivity) per column. 
+However, the Percona Server patch only informs us with numbers. 
+</p>
+
+<p><i>innodb_index_rows</i> extends that information and adds column information. 
+It lists column names and their sequence within the key, and provides with easier to read format.</p>
+
+<p>This view depends upon the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server.  
+</p>
+
+<p>
+Note that Percona Server 5.5.8-20.0 version introduced changes to the INNODB_INDEX_STATS schema.
+This view is compatible with the new schema, and is incompatible with older releases.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_index_rows;
++-------------------------+---------------------+------+-----+---------+-------+
+| Field                   | Type                | Null | Key | Default | Extra |
++-------------------------+---------------------+------+-----+---------+-------+
+| TABLE_SCHEMA            | varchar(64)         | NO   |     |         |       |
+| TABLE_NAME              | varchar(64)         | NO   |     |         |       |
+| INDEX_NAME              | varchar(64)         | NO   |     |         |       |
+| SEQ_IN_INDEX            | bigint(2)           | NO   |     | 0       |       |
+| COLUMN_NAME             | varchar(64)         | NO   |     |         |       |
+| is_last_column_in_index | int(1)              | NO   |     | 0       |       |
+| incremental_row_per_key | bigint(67) unsigned | YES  |     | NULL    |       |
++-------------------------+---------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: Table schema of examined index</li>
+	<li><strong>TABLE_NAME</strong>: Examined index' table</li>
+	<li><strong>INDEX_NAME</strong>: name of index examined</li>
+	<li><strong>SEQ_IN_INDEX</strong>: position of column within index (<strong>1</strong> based)</li>
+	<li><strong>COLUMN_NAME</strong>: name of column within index</li>
+	<li><strong>is_last_column_in_index</strong>: boolean, <strong>1</strong> if current column is last in index definition.
+		<br/>The last column in an index is of particular interest since the number of rows per last column signifies the index's maximum selectivity</li>
+	<li><strong>incremental_row_per_key</strong>: Cardinality (number of values per key) of index up to and including current column</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Examine index cardinality on a specific table (discussion follows):</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_index_rows WHERE TABLE_SCHEMA='sakila' AND TABLE_NAME='inventory';
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+| TABLE_SCHEMA | TABLE_NAME | INDEX_NAME           | SEQ_IN_INDEX | COLUMN_NAME  | is_last_column_in_index | incremental_row_per_key |
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+| sakila       | inventory  | PRIMARY              |            1 | inventory_id |                       1 |                       1 |
+| sakila       | inventory  | idx_fk_film_id       |            1 | film_id      |                       1 |                       5 |
+| sakila       | inventory  | idx_store_id_film_id |            1 | store_id     |                       0 |                    4478 |
+| sakila       | inventory  | idx_store_id_film_id |            2 | film_id      |                       1 |                       2 |
++--------------+------------+----------------------+--------------+--------------+-------------------------+-------------------------+
+</pre></blockquote>
+
+<p>Compare with call to INFORMATION_SCHEMA.INNODB_INDEX_STATS:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM INFORMATION_SCHEMA.INNODB_INDEX_STATS WHERE TABLE_SCHEMA='sakila' AND TABLE_NAME='inventory';
++--------------+------------+----------------------+--------+--------------+-------------------+------------------+
+| table_schema | table_name | index_name           | fields | rows_per_key | index_total_pages | index_leaf_pages |
++--------------+------------+----------------------+--------+--------------+-------------------+------------------+
+| sakila       | inventory  | PRIMARY              |      1 | 1            |                10 |                9 |
+| sakila       | inventory  | idx_fk_film_id       |      2 | 5, 1         |                 5 |                4 |
+| sakila       | inventory  | idx_store_id_film_id |      3 | 4478, 2, 0   |                 7 |                6 |
++--------------+------------+----------------------+--------+--------------+-------------------+------------------+
+</pre></blockquote>
+<p>
+
+<p>And compare with table definition:</p>
+<blockquote><pre>mysql&gt; SHOW CREATE TABLE sakila.inventory \G
+
+       Table: inventory
+Create Table: CREATE TABLE `inventory` (
+  `inventory_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `film_id` smallint(5) unsigned NOT NULL,
+  `store_id` tinyint(3) unsigned NOT NULL,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`inventory_id`),
+  KEY `idx_fk_film_id` (`film_id`),
+  KEY `idx_store_id_film_id` (`store_id`,`film_id`),
+  CONSTRAINT `fk_inventory_store` FOREIGN KEY (`store_id`) REFERENCES `store` (`store_id`) ON UPDATE CASCADE,
+  CONSTRAINT `fk_inventory_film` FOREIGN KEY (`film_id`) REFERENCES `film` (`film_id`) ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4582 DEFAULT CHARSET=utf8
+</pre></blockquote>
+<p>
+
+In the above example, note the following:
+<ul>
+	<li>The <i>PRIMARY</i> key is on <i>inventory_id</i> column, hence contains one column exactly. Since it is UNIQUE, it is certain to have <strong>1</strong> row per key.</li>
+	<li>The <i>idx_fk_film_id</i> index is non unique. The INFORMATION_SCHEMA.INNODB_INDEX_STATS table lists two values for that column, although it only indexes one column only.
+	This is because it implicitly includes the PRIMARY key for that table (as with all InnoDB keys). However, in <i>innodb_index_rows</i> only the explicitly indexed columns are listed.</li>
+	<li>The <i>idx_fk_film_id</i> index provides with <strong>5</strong> rows per <strong>film_id</strong> value (this is of course an average estimation).</li>
+	<li>The <i>idx_store_id_film_id</i> key is a compound index over two columns. If we use this index on filtering by <strong>store_id</strong> only, we
+		expect to get <strong>4478</strong> per <strong>store_id</strong>. If we <i>also</i> filter by <strong>film_id</strong>, we expect to get fewer results:
+		we only expect <strong>2</strong> rows per <strong>store_id</strong>:<strong>film_id</strong> combination.</li>
+</ul>
+</p>
+
+<h3>ENVIRONMENT</h3>
+Percona Server &gt;= 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
+
+<h3>SEE ALSO</h3>
+<a href="innodb_index_stats.html">innodb_index_stats</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

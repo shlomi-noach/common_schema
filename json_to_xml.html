@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>json_to_xml: common_schema documentation</title>
+	<meta name="description" content="json_to_xml: common_schema" />
+	<meta name="keywords" content="json_to_xml: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="json_to_xml.html">json_to_xml</a></h2>	
+<h3>NAME</h3>
+json_to_xml(): Convert valid JSON to equivalent XML
+<h3>TYPE</h3>
+Function
+
+<h3>DESCRIPTION</h3>
+<p>
+	<i>json_to_xml()</i> accepts text in <a href="http://www.json.org/">JSON</a> format,
+	and converts it to its XML equivalent.
+</p>
+<p>
+	Both JSON and XML are commonly used to describe objects and properties; both allow
+	for tree-like structure. Both are strict (to some level) in data definition.
+</p>
+<p>
+	<i>json_to_xml()</i> assumes a valid JSON input, and returns its XML equivalent, such that:
+	<ul>
+		<li>
+			Internal structural tests on JSON format apply. 
+			In any case of failure the function returns <strong>NULL</strong>
+		</li>
+		<li>
+			Produced XML is consisted of elements and text. No attributes generated.
+		</li>
+		<li>
+			Names are mapped to nodes. Simple values are mapped to text. Object values to
+			subnodes. Arrays to multiple nodes.
+		</li>
+		<li>
+			XML text is automatically encoded (e.g. the <strong>"&gt;"</strong> character converted to <strong>"&amp;gt;"</strong>). 
+			XML node names are not encoded.
+		</li>
+		<li>
+			Result XML is not beautified (no spaces or indentation between elements)
+		</li>
+	</ul>
+</p>
+
+<p>
+	NOTE: this function is CPU intensive. This solution should ideally be implemented through
+	built-in functions, not stored routines.
+</p>
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>json_to_xml(
+    json_text TEXT CHARSET utf8
+) RETURNS TEXT CHARSET utf8</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li><strong>json_text</strong>: a valid JSON formatted text.
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+<p>Convert JSON to XML:</p>
+<blockquote><pre>mysql&gt; SET @json := '
+{
+  "menu": {
+    "id": "file",
+    "value": "File",
+    "popup": {
+      "menuitem": [
+        {"value": "New", "onclick": "CreateNewDoc()"},
+        {"value": "Open", "onclick": "OpenDoc()"},
+        {"value": "Close", "onclick": "CloseDoc()"}
+      ]
+    }
+  }
+}
+';
+
+mysql&gt; SELECT json_to_xml(@json) AS xml \G
+*************************** 1. row ***************************
+xml: &lt;menu&gt;&lt;id&gt;file&lt;/id&gt;&lt;value&gt;File&lt;/value&gt;&lt;popup&gt;&lt;menuitem&gt;&lt;value&gt;New&lt;/value&gt;&lt;onclick&gt;CreateNewDoc()&lt;/onclick&gt;&lt;/menuitem&gt;&lt;menuitem&gt;&lt;value&gt;Open&lt;/value&gt;&lt;onclick&gt;OpenDoc()&lt;/onclick&gt;&lt;/menuitem&gt;&lt;menuitem&gt;&lt;value&gt;Close&lt;/value&gt;&lt;onclick&gt;CloseDoc()&lt;/onclick&gt;&lt;/menuitem&gt;&lt;/popup&gt;&lt;/menu&gt;
+</pre></blockquote>
+
+<p>Beautified form of the above result:</p>
+<blockquote><pre>
+&lt;menu&gt;
+  &lt;id&gt;file&lt;/id&gt;
+  &lt;value&gt;File&lt;/value&gt;
+  &lt;popup&gt;
+    &lt;menuitem&gt;
+      &lt;value&gt;New&lt;/value&gt;
+      &lt;onclick&gt;CreateNewDoc()&lt;/onclick&gt;
+    &lt;/menuitem&gt;
+    &lt;menuitem&gt;
+      &lt;value&gt;Open&lt;/value&gt;
+      &lt;onclick&gt;OpenDoc()&lt;/onclick&gt;
+    &lt;/menuitem&gt;
+    &lt;menuitem&gt;
+      &lt;value&gt;Close&lt;/value&gt;
+      &lt;onclick&gt;CloseDoc()&lt;/onclick&gt;
+    &lt;/menuitem&gt;
+  &lt;/popup&gt;
+&lt;/menu&gt;
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="encode_xml.html">encode_xml()</a>,
+<a href="extract_json_value.html">extract_json_value()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>risks: common_schema documentation</title>
+	<meta name="description" content="risks: common_schema" />
+	<meta name="keywords" content="risks: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="risks.html">risks</a></h2>	
+<p>This is not the usual "It's your responsibility" stuff. Please read through.</p>
+
+<p>
+<i>common_schema</i> is a database schema. It includes routines, views and tables. 
+The risks of using this schema are those affected by issuing queries against its views or routines.
+</p>
+
+<p>
+In particular, most of the views rely on INFORMATION_SCHEMA views.
+</p>
+
+<p>
+MySQL's INFORMATION_SCHEMA views are not all equal. Some are pretty lightweight (like PROCESSLIST); 
+some take a bit more time to evaluate (like GLOBAL_STATUS) but do not impose locks affecting your data. 
+</p>
+
+<p>Some views, however, require getting metadata for tables, and in fact, require metadata for all
+tables at once. First and foremost: the TABLES table, but also COLUMNS, STATISTICS etc. 
+Performing even the simplest query on one of these views may cause, in extreme cases, lockdown of
+your database for long minutes. The author has also witnessed databases crash because of
+queries on such tables. 
+See also: 
+<a href="http://www.xaprb.com/blog/2009/10/29/making-changes-to-many-tables-at-once/">Making changes to many tables at once</a>, 
+<a href="http://www.pythian.com/news/8633/how-to-tell-when-using-information_schema-might-crash-your-database/">How to tell when using INFORMATION_SCHEMA might crash your database</a>.
+Consider setting <strong>innodb_stats_on_metadata=0</strong> as suggested in 
+<a href="http://www.mysqlperformanceblog.com/2011/12/23/solving-information_schema-slowness/">Solving INFORMATION_SCHEMA slowness</a>.
+</p>
+
+<p>It is safer to perform such heavyweight queries on a replicating slave. A slave may actually
+sustain less "damage" from these queries due to its single-threaded writing mode, making for
+less contention on table locks. At least this is the author's experience; no guarantees made.</p>
+
+<p>
+The good news is that those views relying on heavyweight INFORMATION_SCHEMA tables are those
+you don't mind running on the slave, or on an offline machine. These views usually analyze your
+table structure, data size, keys, AUTO_INCREMENT columns, etc. They don't have anything in particular
+for monitoring a live, running server. Some of these views don't actually require data to work on, just a schema.
+</p>
+
+<p>Examples of <i>common_schema</i> views which rely on heavyweight INFORMATION_SCHEMA tables:</p>
+<ul>
+	<li><a title="no_pk_innodb_tables" href="no_pk_innodb_tables.html">no_pk_innodb_tables</a></li>
+	<li><a title="redundant_keys" href="redundant_keys.html">redundant_keys</a></li>
+	<li><a title="sql_alter_table" href="sql_alter_table.html">sql_alter_table</a></li>
+	<li><a title="sql_foreign_keys" href="sql_foreign_keys.html">sql_foreign_keys</a></li>
+	<li><a title="table_charset" href="table_charset.html">table_charset</a></li>
+	<li><a title="text_columns" href="text_columns.html">text_columns</a></li>
+	<li><a title="auto_increment_columns" href="auto_increment_columns.html">auto_increment_columns</a></li>
+	<li><a title="data_size_per_engine" href="data_size_per_engine.html">data_size_per_engine</a></li>
+	<li><a title="data_size_per_schema" href="data_size_per_schema.html">data_size_per_schema</a></li>
+	<li><a title="innodb_index_rows" href="innodb_index_rows.html">innodb_index_rows</a></li>
+</ul>
+
+<p>The list above may change, or may not reflect the actual state of views & functions.</p>
+
+<p><i>common_schema</i> views which are <i>lightweight</i> are the various 
+  <a title="process" href="process_views.html">process</a>, 
+  <a title="security" href="security_views.html">security</a>, 
+  <a title="monitoring" href="monitoring_views.html">monitoring</a>, 
+  <a title="InnoDB plugin" href="innodb_plugin_views.html">InnoDB plugin</a> and 
+  <a title="Percona Server" href="percona_server_views.html">Percona Server</a> views. 
+</p>
+
+<p>Of course, just as would be able to drop your database being a super user, you could also
+use <i>common_schema</i> to execute destructive queries. Many routines support the 
+<strong>@common_schema_dryrun</strong> user variable; use it (set it to <strong>1</strong>) 
+if you're not sure about expected results.</p>
+
+<p>You should also note that <i>"common_schema"</i> is hard coded into the distribution files; 
+if you have a schema after the same name, make sure to change <i>"common_schema"</i> in the distribution file.</p>
+
+<p>And, <i>it's your responsibility</i>. By using <i>common_schema</i>, your agree to its license:</p>
+<h3>LICENSE</h3>
+common_schema is released under the GPL license.
+<blockquote><pre>
+common_schema - DBA's Framework for MySQL
+Copyright (C) 2011-2013, Shlomi Noach
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+A copy of the GNU General Public License is available at
+<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>
+</pre></blockquote>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

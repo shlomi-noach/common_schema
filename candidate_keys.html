@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>candidate_keys: common_schema documentation</title>
+	<meta name="description" content="candidate_keys: common_schema" />
+	<meta name="keywords" content="candidate_keys: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="candidate_keys.html">candidate_keys</a></h2>	
+<h3>NAME</h3>
+candidate_keys: Listing of prioritized candidate keys: keys which are UNIQUE, by order of best-use. 
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>candidate_keys</i> lists candidate keys for all tables. Each candidate key gets a score: a lower score is given to "better" keys.</p>
+
+<p>Candidate keys are, technically, simply <strong>UNIQUE KEY</strong>s. Conceptually, these are keys whose values are able to represent tuples (rows).
+Such keys can be used by different operations on a table, such as separating it to chunks, breaking long, heavy weight operations into 
+smaller, faster operations.</p>
+<p>
+MySQL's <strong>PRIMARY KEY</strong>s must not cover NULLable columns. This view indicates whether a key has NULLable columns. While technically this means the key is not 
+an immediate candidate (trying to turn it into <strong>PRIMARY KEY</strong> will fail due to NULLable columns), such keys are nevertheless listed, 
+as often times columns are created NULLable by mistake; that is: many times a NULLable column never has NULL values. 
+In such cases, an <strong>ALTER TABLE MODIFY COLUMN</strong> is required so as to make the key a true candidate key. 
+</p>
+<p>
+Not all candidate keys are the same. Some are "better" than others in terms of space and I/O. A <strong>UNIQUE KEY</strong> over a couple of 
+<strong>INTEGER</strong> columns is smaller (hence "better") than a <strong>UNIQUE KEY</strong> over a <strong>VARCHAR(192)</strong> field (e.g. some URL). 
+It is easier to walk through the table using smaller keys, since less search is involved. 
+</p>
+<p>
+<i>candidate_keys</i> provides with a heuristic ranking of candidate keys within a table. Each candidate key receives a 
+<strong>candidate_key_rank_in_table</strong> rank (score). The smaller the better; so "better" keys can be detected using <strong>ORDER BY</strong>.
+</p>
+
+<p>The heuristic works as follows:
+<ul>
+	<li>Non-character-typed columns get better score than character-typed columns. Only first column in index is compared in this heuristic.</li>
+	<li>Smaller data types get better score than larger data types (e.g. <strong>INT</strong> is smaller than <strong>DATETIME</strong>). 
+		Only first column in index is compared in this heuristic.</li>
+	<li>Keys covering fewer columns get better score</li>
+	<li>There is no preference for <strong>PRIMARY KEY</strong>s, although with InnoDB they are technically fastest in access to row data due to the 
+	    clustering index structure of InnoDB tables. Consult the <strong>is_primary</strong> column to prefer <strong>PRIMARY KEY</strong>s.</li>
+</ul>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.candidate_keys;
++-----------------------------+---------------------+------+-----+---------+-------+
+| Field                       | Type                | Null | Key | Default | Extra |
++-----------------------------+---------------------+------+-----+---------+-------+
+| table_schema                | varchar(64)         | NO   |     |         |       |
+| table_name                  | varchar(64)         | NO   |     |         |       |
+| index_name                  | varchar(64)         | NO   |     |         |       |
+| has_nullable                | int(1)              | NO   |     | 0       |       |
+| is_primary                  | int(1)              | NO   |     | 0       |       |
+| column_names                | longtext            | YES  |     | NULL    |       |
+| count_column_in_index       | bigint(21)          | NO   |     | 0       |       |
+| data_type                   | varchar(64)         | NO   |     |         |       |
+| character_set_name          | varchar(32)         | YES  |     | NULL    |       |
+| candidate_key_rank_in_table | bigint(23) unsigned | YES  |     | NULL    |       |
++-----------------------------+---------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>table_schema</strong>: schema of candidate key</li>
+	<li><strong>table_name</strong>: table of candidate key</li>
+	<li><strong>index_name</strong>: name of candidate key</li>
+	<li><strong>has_nullable</strong>: <strong>1</strong> if any column in this index is NULLable; <strong>0</strong> if all columns are NOT NULL</li>
+	<li><strong>is_primary</strong>: <strong>1</strong> if this key is PRIMARY, <strong>0</strong> otherwise.</li>
+	<li><strong>column_names</strong>: names of columns covered by key</li>
+	<li><strong>count_column_in_index</strong>: number of columns covered by key</li>
+	<li><strong>data_type</strong>: data type of first column covered by key</li>
+	<li><strong>character_set_name</strong>: character set name of first column covered by key, or <strong>NULL</strong> if not character-typed</li>
+	<li><strong>candidate_key_rank_in_table</strong>: rank (score) of index within table. Lower is "better". It makes no sense to compare ranks between keys of different tables.</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Show candidate key ranking for tables in <strong>sakila</strong></p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.candidate_keys WHERE TABLE_SCHEMA='sakila';
++--------------+---------------+--------------------+--------------+------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
+| table_schema | table_name    | index_name         | has_nullable | is_primary | column_names                         | count_column_in_index | data_type | character_set_name | candidate_key_rank_in_table |
++--------------+---------------+--------------------+--------------+------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
+| sakila       | actor         | PRIMARY            |            0 |          1 | actor_id                             |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | address       | PRIMARY            |            0 |          1 | address_id                           |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | category      | PRIMARY            |            0 |          1 | category_id                          |                     1 | tinyint   | NULL               |                           1 |
+| sakila       | city          | PRIMARY            |            0 |          1 | city_id                              |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | country       | PRIMARY            |            0 |          1 | country_id                           |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | customer      | PRIMARY            |            0 |          1 | customer_id                          |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | film          | PRIMARY            |            0 |          1 | film_id                              |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | film_actor    | PRIMARY            |            0 |          1 | actor_id,film_id                     |                     2 | smallint  | NULL               |                       65538 |
+| sakila       | film_category | PRIMARY            |            0 |          1 | film_id,category_id                  |                     2 | smallint  | NULL               |                       65538 |
+| sakila       | film_text     | PRIMARY            |            0 |          1 | film_id                              |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | inventory     | PRIMARY            |            0 |          1 | inventory_id                         |                     1 | mediumint | NULL               |                      589825 |
+| sakila       | language      | PRIMARY            |            0 |          1 | language_id                          |                     1 | tinyint   | NULL               |                           1 |
+| sakila       | payment       | PRIMARY            |            0 |          1 | payment_id                           |                     1 | smallint  | NULL               |                       65537 |
+| sakila       | rental        | PRIMARY            |            0 |          1 | rental_id                            |                     1 | int       | NULL               |                      131073 |
+| sakila       | rental        | rental_date        |            0 |          0 | rental_date,inventory_id,customer_id |                     3 | datetime  | NULL               |                      327683 |
+| sakila       | staff         | PRIMARY            |            0 |          1 | staff_id                             |                     1 | tinyint   | NULL               |                           1 |
+| sakila       | store         | idx_unique_manager |            0 |          0 | manager_staff_id                     |                     1 | tinyint   | NULL               |                           1 |
+| sakila       | store         | PRIMARY            |            0 |          1 | store_id                             |                     1 | tinyint   | NULL               |                           1 |
++--------------+---------------+--------------------+--------------+------------+--------------------------------------+-----------------------+-----------+--------------------+-----------------------------+
+</pre></blockquote>
+<p>
+In the above we can see tables <strong>film</strong> and <strong>store</strong> each have <strong>2</strong> possible candidate keys.
+</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="candidate_keys_recommended.html">candidate_keys_recommended</a>,
+<a href="no_pk_innodb_tables.html">no_pk_innodb_tables</a>,
+<a href="redundant_keys.html">redundant_keys</a>,
+<a href="sql_foreign_keys.html">sql_foreign_keys</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

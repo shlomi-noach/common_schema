@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>sql_range_partitions: common_schema documentation</title>
+	<meta name="description" content="sql_range_partitions: common_schema" />
+	<meta name="keywords" content="sql_range_partitions: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="sql_range_partitions.html">sql_range_partitions</a></h2>	
+<h3>NAME</h3>
+sql_range_partitions: Generate SQL statements for managing range partitions
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p>
+	<i>sql_range_partitions</i> provides with SQL statements to create/drop 
+	partitions in a <strong>RANGE</strong> or <strong>RANGE COLUMNS</strong> partitioned table 
+</p>
+
+<p>
+	It generates the <strong>DROP PARTITION</strong> statement required to drop the oldest
+	partition, and the  <strong>ADD PARTITION</strong> or <strong>REORGANIZE PARTITION</strong>
+	statement for generating the next partition in sequence.
+</p>
+
+<p>
+	This view auto-deduces the "next in sequence" partition value. It handles consistent
+	partitioning schemes, where the interval of values between partitions makes some sense.
+	Such an interval can be a constant value, but can also be a time-based interval.
+</p>
+
+<p>
+	The view supports MySQL <strong>5.1</strong> as well as <strong>5.5</strong>.  
+	<strong>5.1</strong> requires an integer partitioning key, thereby forcing users to 
+	convert such values	as timestamps to integers via <strong>UNIX_TIMESTAMP()</strong>, 
+	<strong>TO_DAYS()</strong> etc. <i>sql_range_partitions</i> reverse engineers this
+	conversion so as to compute the next in sequence <strong>LESS THAN</strong> value.
+</p>
+
+<p>
+	It handles views with a <strong>LESS THAN MAXVALUE</strong> partition by reorganizing
+	such partition into a "normal" partition followed by a new
+	<strong>LESS THAN MAXVALUE</strong> one. 
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC sql_range_partitions;
++--------------------------+---------------+------+-----+---------+-------+
+| Field                    | Type          | Null | Key | Default | Extra |
++--------------------------+---------------+------+-----+---------+-------+
+| table_schema             | varchar(64)   | NO   |     |         |       |
+| table_name               | varchar(64)   | NO   |     |         |       |
+| count_partitions         | bigint(21)    | NO   |     | 0       |       |
+| count_past_partitions    | decimal(23,0) | YES  |     | NULL    |       |
+| count_future_partitions  | decimal(23,0) | YES  |     | NULL    |       |
+| has_maxvalue             | decimal(23,0) | YES  |     | NULL    |       |
+| sql_drop_first_partition | varchar(284)  | YES  |     | NULL    |       |
+| sql_add_next_partition   | longblob      | YES  |     | NULL    |       |
++--------------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>table_schema</strong>: schema of partitioned table table</li>
+	<li><strong>table_name</strong>: table partitioned by <strong>RANGE</strong> or <strong>RANGE COLUMNS</strong></li>
+	<li><strong>count_partitions</strong>: number of partitions in table</li>
+	<li><strong>count_past_partitions</strong>: in the case partitions are recognized to be by
+		some temporal representation, the number of partitions that are in the past.</li>
+	<li><strong>count_future_partitions</strong>: in the case partitions are recognized to be by
+		some temporal representation, the number of partitions that are in the future (including NOW).</li>
+	<li><strong>has_maxvalue</strong>: <strong>1</strong> is the table has a 
+		<strong>LESS THAN MAXVALUE</strong> partition, <strong>0</strong> otherwise.</li>
+	<li><strong>sql_drop_first_partition</strong>: 
+		A SQL statement which drops the first partition.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+	<li><strong>sql_add_next_partition</strong>: 
+		A SQL statement which adds the "next in sequence" partition.
+		<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+	</li>
+</ul>
+
+<p>The SQL statements are not terminated by ';'.</p>
+
+<h3>EXAMPLES</h3>
+
+<p>Show drop/reorganize statements for a partitioned table with <strong>MAXVALUE</strong> partition:</p>
+<blockquote><pre>mysql&gt; CREATE TABLE test.quarterly_report_status (
+    report_id INT NOT NULL,
+    report_status VARCHAR(20) NOT NULL,
+    report_updated TIMESTAMP NOT NULL 
+)
+PARTITION BY RANGE (UNIX_TIMESTAMP(report_updated)) (
+    PARTITION p0 VALUES LESS THAN (UNIX_TIMESTAMP('2008-01-01 00:00:00')),
+    PARTITION p1 VALUES LESS THAN (UNIX_TIMESTAMP('2008-04-01 00:00:00')),
+    PARTITION p2 VALUES LESS THAN (UNIX_TIMESTAMP('2008-07-01 00:00:00')),
+    PARTITION p3 VALUES LESS THAN (UNIX_TIMESTAMP('2008-10-01 00:00:00')),
+    PARTITION p4 VALUES LESS THAN (UNIX_TIMESTAMP('2009-01-01 00:00:00')),
+    PARTITION p5 VALUES LESS THAN (UNIX_TIMESTAMP('2009-04-01 00:00:00')),
+    PARTITION p6 VALUES LESS THAN (MAXVALUE)
+);
+
+mysql&gt; SELECT * FROM sql_range_partitions WHERE table_name='quarterly_report_status' \G
+*************************** 1. row ***************************
+            table_schema: test
+              table_name: quarterly_report_status
+        count_partitions: 7
+   count_past_partitions: 6
+ count_future_partitions: 0
+            has_maxvalue: 1
+sql_drop_first_partition: alter table `test`.`quarterly_report_status` drop partition `p0`
+  sql_add_next_partition: alter table `test`.`quarterly_report_status` reorganize partition `p6` into (partition `p_20090701000000` values less than (1246395600) /* 2009-07-01 00:00:00 */ , partition p_maxvalue values less than MAXVALUE)
+</pre></blockquote>
+<p>
+	The above query was issued in the year <strong>2013</strong>, and so all partitions
+	are considered as <i>in the past</i>. The <strong>MAXVALUE</strong> partition is considered
+	neither as past nor future (although it will contain any future rows). This is so that
+	<strong>count_future_partitions</strong> makes for the number of partitions strictly
+	specifying future dates.
+</p>
+
+
+<p>Add next partition:</p>
+<blockquote><pre>mysql&gt; call eval("SELECT sql_add_next_partition FROM sql_range_partitions WHERE table_name='quarterly_report_status'");
+
+mysql&gt; SHOW CREATE TABLE test.quarterly_report_status \G
+
+Create Table: CREATE TABLE `quarterly_report_status` (
+  `report_id` int(11) NOT NULL,
+  `report_status` varchar(20) NOT NULL,
+  `report_updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=MyISAM DEFAULT CHARSET=utf8
+/*!50100 PARTITION BY RANGE (UNIX_TIMESTAMP(report_updated))
+(PARTITION p0 VALUES LESS THAN (1199138400) ENGINE = MyISAM,
+ PARTITION p1 VALUES LESS THAN (1206997200) ENGINE = MyISAM,
+ PARTITION p2 VALUES LESS THAN (1214859600) ENGINE = MyISAM,
+ PARTITION p3 VALUES LESS THAN (1222808400) ENGINE = MyISAM,
+ PARTITION p4 VALUES LESS THAN (1230760800) ENGINE = MyISAM,
+ PARTITION p5 VALUES LESS THAN (1238533200) ENGINE = MyISAM,
+ PARTITION p_20090701000000 VALUES LESS THAN (1246395600) ENGINE = MyISAM,
+ PARTITION p_maxvalue VALUES LESS THAN MAXVALUE ENGINE = MyISAM) */
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="eval.html">eval()</a>,
+<a href="sql_foreign_keys.html">sql_foreign_keys</a>
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

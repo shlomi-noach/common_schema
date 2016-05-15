@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>processlist_grantees: common_schema documentation</title>
+	<meta name="description" content="processlist_grantees: common_schema" />
+	<meta name="keywords" content="processlist_grantees: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="processlist_grantees.html">processlist_grantees</a></h2>	
+<h3>NAME</h3>
+processlist_grantees: Assigning of GRANTEEs for connected processes
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+<p></p>
+
+<p><i>processlist_grantees</i> Lists connected processes, as with <strong>PROCESSLIST</strong>.
+For each process, it analyzes the connected GRANTEE. It does so by inspecting the user+host
+presented by <strong>PROCESSLIST</strong>, and matches those values, in a similar algorithm to that 
+of the MySQL server, to the list of known accounts.
+</p>
+
+<p>
+MySQL's <strong>PROCESSLIST</strong> fails to make the connection between a process ID and the account
+for which this process is assigned. It only tells us the connection's <strong>HOST</strong> and the
+specified <strong>USER</strong>. But these do not necessarily map directly to the known grantees:
+MySQL accounts can specify wildcards for both <strong>user</strong> and <strong>host</strong>.
+</p>
+<p>
+MySQL offers the <strong>USER()</strong> and <strong>CURRENT_USER()</strong> functions, which provide
+desired data, but only for current connection.
+</p>
+<p>
+<i>processlist_grantees</i> bridges the two by utilizing 
+<a href="match_grantee.html">match_grantee()</a> for each process in the PROCESSLIST.
+It also provides with additional useful information about the matched account.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.processlist_grantees;
++---------------------+---------------+------+-----+---------+-------+
+| Field               | Type          | Null | Key | Default | Extra |
++---------------------+---------------+------+-----+---------+-------+
+| ID                  | bigint(4)     | NO   |     | 0       |       |
+| USER                | varchar(16)   | NO   |     |         |       |
+| HOST                | varchar(64)   | NO   |     |         |       |
+| DB                  | varchar(64)   | YES  |     | NULL    |       |
+| COMMAND             | varchar(16)   | NO   |     |         |       |
+| TIME                | int(7)        | NO   |     | 0       |       |
+| STATE               | varchar(64)   | YES  |     | NULL    |       |
+| INFO                | longtext      | YES  |     | NULL    |       |
+| GRANTEE             | varchar(81)   | YES  |     |         |       |
+| grantee_user        | char(16)      | YES  |     |         |       |
+| grantee_host        | char(60)      | YES  |     |         |       |
+| is_super            | decimal(23,0) | YES  |     | NULL    |       |
+| is_repl             | int(1)        | NO   |     | 0       |       |
+| is_current          | int(1)        | NO   |     | 0       |       |
+| sql_kill_query      | varbinary(31) | NO   |     |         |       |
+| sql_kill_connection | varbinary(25) | NO   |     |         |       |
++---------------------+---------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>
+Rows of this view map directly to rows in <a href="http://dev.mysql.com/doc/refman/5.1/en/processlist-table.html">INFORMATION_SCHEMA.PROCESSLIST</a>.
+This view extends <strong>PROCESSLIST</strong> by including all existing columns, and adding some of its own. 
+</p>
+
+<p>Columns of this view:
+	<ul>
+		<li><strong>ID</strong>: process ID, as in PROCESSLIST</li>
+		<li><strong>USER</strong>: name of connected user, as in PROCESSLIST</li>
+		<li><strong>HOST</strong>: connection's host + port, as in PROCESSLIST</li>
+		<li><strong>DB</strong>: connection's current schema, as in PROCESSLIST</li>
+		<li><strong>COMMAND</strong>: connection's command, as in PROCESSLIST</li>
+		<li><strong>TIME</strong>: current command runtime in seconds, as in PROCESSLIST</li>
+		<li><strong>STATE</strong>: connection's state, as in PROCESSLIST</li>
+		<li><strong>INFO</strong>: command info, as in PROCESSLIST</li>
+		<li><strong>GRANTEE</strong>: account which is calculated by <a href="privileges_functions.html#match_grantee">match_grantee()</a> to match this process.</li>
+		<li><strong>grantee_user</strong>: <i>user</i> part of the <strong>GRANTEE</strong>.</li>
+		<li><strong>grantee_host</strong>: <i>host</i> part of the <strong>GRANTEE</strong>. This does not include port specification.</li>
+		<li><strong>is_super</strong>: <strong>1</strong> if the grantee has the <strong>SUPER</strong> privilege; <strong>0</strong> if not.</li>
+		<li><strong>is_repl</strong>: <strong>1</strong> if the connection appears to be a replication thread; <strong>0</strong> if not.</li>
+		<li><strong>is_current</strong>: <strong>1</strong> if the process is the current connection; <strong>0</strong> if not.</li>
+		<li><strong>sql_kill_query</strong>: 
+			generated statement to kill current query.
+			<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+		</li>
+		<li><strong>sql_kill_connection</strong>: 
+			generated statement to kill current connection.
+			<br/>Use with <a href="eval.html">eval()</a> to apply query.	
+		</li>
+	</ul>
+</p>
+<h3>EXAMPLES</h3>
+<p>Show grantees for all processes:</p>
+<blockquote><pre>mysql&gt; SELECT ID, USER, HOST, GRANTEE, grantee_user, grantee_host, 
+    is_super, is_repl, sql_kill_query, sql_kill_connection 
+  FROM 
+    common_schema.processlist_grantees;
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| ID     | USER       | HOST                | GRANTEE                | grantee_user | grantee_host | is_super | is_repl | sql_kill_query    | sql_kill_connection |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| 650472 | replica    | jboss00.myweb:34266 | 'replica'@'%.myweb'    | replica      | %.myweb      |        0 |       1 | KILL QUERY 650472 | KILL 650472         |
+| 692346 | openarkkit | jboss02.myweb:43740 | 'openarkkit'@'%.myweb' | openarkkit   | %.myweb      |        0 |       0 | KILL QUERY 692346 | KILL 692346         |
+| 842853 | root       | localhost           | 'root'@'localhost'     | root         | localhost    |        1 |       0 | KILL QUERY 842853 | KILL 842853         |
+| 843443 | jboss      | jboss03.myweb:40007 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843443 | KILL 843443         |
+| 843444 | jboss      | jboss03.myweb:40012 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843444 | KILL 843444         |
+| 843510 | jboss      | jboss00.myweb:49850 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843510 | KILL 843510         |
+| 844559 | jboss      | jboss01.myweb:37031 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844559 | KILL 844559         |
+| 844577 | jboss      | jboss03.myweb:38238 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844577 | KILL 844577         |
+| 844592 | jboss      | jboss02.myweb:34405 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844592 | KILL 844592         |
+| 844593 | jboss      | jboss01.myweb:37089 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844593 | KILL 844593         |
+| 844595 | jboss      | jboss04.myweb:46488 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844595 | KILL 844595         |
+| 844596 | jboss      | jboss00.myweb:41046 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844596 | KILL 844596         |
+| 844600 | jboss      | jboss01.myweb:37108 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844600 | KILL 844600         |
+| 844614 | jboss      | jboss04.myweb:46500 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844614 | KILL 844614         |
+| 844618 | jboss      | jboss02.myweb:44449 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844618 | KILL 844618         |
+| 844620 | jboss      | jboss02.myweb:44456 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844620 | KILL 844620         |
+| 844626 | jboss      | jboss04.myweb:46526 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844626 | KILL 844626         |
+| 844628 | jboss      | jboss02.myweb:44466 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844628 | KILL 844628         |
+| 844631 | jboss      | jboss03.myweb:38291 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 844631 | KILL 844631         |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+</pre></blockquote>
+<p>In the above, <strong>'root'@'localhost'</strong> is a trivial match, but other connections are mapped to accounts based on wildcards.
+All <strong>jboss</strong> users are connected from <i>jboss??.myweb</i> servers, and are matched to the <strong>'jboss'@'%.myweb'</strong> account.</p>
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="match_grantee.html">match_grantee()</a>,
+<a href="processlist_per_userhost.html">processlist_per_userhost</a>,
+<a href="processlist_repl.html">processlist_repl</a>,
+<a href="processlist_summary.html">processlist_summary</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

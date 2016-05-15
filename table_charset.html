@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>table_charset: common_schema documentation</title>
+	<meta name="description" content="table_charset: common_schema" />
+	<meta name="keywords" content="table_charset: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="table_charset.html">table_charset</a></h2>	
+<h3>NAME</h3>
+table_charset: list tables, their character sets and collations
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p>A table is associated with a character set and a collation. 
+Surprisingly, INFORMATION_SCHEMA's TABLES table only lists a table's collation, and neglects to provide with the character set.</p>
+
+<p>A character set is easily deduced by given collation, since a collation relates to a single character set.</p>
+
+<p><i>table_charset</i> provides this convenient connection.</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.table_charset;
++--------------------+-------------+------+-----+---------+-------+
+| Field              | Type        | Null | Key | Default | Extra |
++--------------------+-------------+------+-----+---------+-------+
+| TABLE_SCHEMA       | varchar(64) | NO   |     |         |       |
+| TABLE_NAME         | varchar(64) | NO   |     |         |       |
+| CHARACTER_SET_NAME | varchar(32) | NO   |     |         |       |
+| TABLE_COLLATION    | varchar(32) | YES  |     | NULL    |       |
++--------------------+-------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>TABLE_SCHEMA</strong>: name of schema (database)</li>
+	<li><strong>TABLE_NAME</strong>: name of table</li>
+	<li><strong>CHARACTER_SET_NAME</strong>: table's defined character set</li>
+	<li><strong>TABLE_COLLATION</strong>: table's collation</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.table_charset WHERE TABLE_SCHEMA IN ('sakila', 'world');
++--------------+-----------------+--------------------+-------------------+
+| TABLE_SCHEMA | TABLE_NAME      | CHARACTER_SET_NAME | TABLE_COLLATION   |
++--------------+-----------------+--------------------+-------------------+
+| world        | City            | latin1             | latin1_swedish_ci |
+| world        | Country         | latin1             | latin1_swedish_ci |
+| world        | CountryLanguage | latin1             | latin1_swedish_ci |
+| sakila       | actor           | utf8               | utf8_general_ci   |
+| sakila       | address         | utf8               | utf8_general_ci   |
+| sakila       | category        | utf8               | utf8_general_ci   |
+| sakila       | city            | utf8               | utf8_general_ci   |
+| sakila       | country         | utf8               | utf8_general_ci   |
+| sakila       | customer        | utf8               | utf8_general_ci   |
+| sakila       | film            | utf8               | utf8_general_ci   |
+| sakila       | film_actor      | utf8               | utf8_general_ci   |
+| sakila       | film_category   | utf8               | utf8_general_ci   |
+| sakila       | film_text       | utf8               | utf8_general_ci   |
+| sakila       | inventory       | utf8               | utf8_general_ci   |
+| sakila       | language        | utf8               | utf8_general_ci   |
+| sakila       | payment         | utf8               | utf8_general_ci   |
+| sakila       | rental          | utf8               | utf8_general_ci   |
+| sakila       | staff           | utf8               | utf8_general_ci   |
+| sakila       | store           | utf8               | utf8_general_ci   |
++--------------+-----------------+--------------------+-------------------+
+</pre></blockquote>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer.
+
+<h3>SEE ALSO</h3>
+<a href="text_columns.html">text_columns</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

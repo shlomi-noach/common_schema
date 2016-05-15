@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>innodb_index_stats: common_schema documentation</title>
+	<meta name="description" content="innodb_index_stats: common_schema" />
+	<meta name="keywords" content="innodb_index_stats: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="innodb_index_stats.html">innodb_index_stats</a></h2>	
+<h3>NAME</h3>
+innodb_index_stats: Estimated InnoDB depth & split factor of key's B+ Tree  
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p><i>innodb_index_stats</i> extends the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server, and presents with estimated depth & split factor of InnoDB keys.
+</p>
+
+<p>
+Estimations are optimistic, in that they assume condensed trees. 
+It is possible that the depth is larger than estimated, and that split factor is lower than estimated.
+</p>
+
+<p>Estimated values are presented as floating point values, although in reality these are
+integer types. 
+</p>
+
+<p>This view is experimental and in BETA stage. 
+</p>
+
+<p>This view depends upon the <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a> patch
+in Percona Server.  
+</p>
+
+<p>
+Note that Percona Server 5.5.8-20.0 version introduced changes to the INNODB_INDEX_STATS schema.
+This view is compatible with the new schema, and is incompatible with older releases.
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_index_stats;
++--------------+---------------------+------+-----+---------+-------+
+| Field        | Type                | Null | Key | Default | Extra |
++--------------+---------------------+------+-----+---------+-------+
+| table_schema | varchar(192)        | NO   |     |         |       |
+| table_name   | varchar(192)        | NO   |     |         |       |
+| index_name   | varchar(192)        | NO   |     |         |       |
+| fields       | bigint(21) unsigned | NO   |     | 0       |       |
+| row_per_keys | varchar(256)        | NO   |     |         |       |
+| index_size   | bigint(21) unsigned | NO   |     | 0       |       |
+| leaf_pages   | bigint(21) unsigned | NO   |     | 0       |       |
+| split_factor | decimal(23,1)       | NO   |     | 0.0     |       |
+| index_depth  | double(18,1)        | NO   |     | 0.0     |       |
++--------------+---------------------+------+-----+---------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view map directly to those of 
+<a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS</a>, 
+with the addition of:</p>
+<ul>
+	<li><strong>split_factor</strong>: Estimated split factor of the index tree</li>
+	<li><strong>index_depth</strong>: Estimated depth of the index tree. Value is a floating point, though the depth of an index is an integer.</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+<p>Examine index attributes on a specific table:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_index_stats WHERE TABLE_NAME='docs_template';
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+| table_schema | table_name    | index_name      | fields | row_per_keys             | index_size | leaf_pages | split_factor | index_depth |
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+| databus      | docs_template | unique_docs_idx |      4 | 28697340, 28697340, 1, 1 |     834310 |     725102 |          7.6 |         7.6 |
+| databus      | docs_template | PRIMARY         |      1 | 1                        |   18851201 |   16485198 |          8.0 |         9.0 |
+| databus      | docs_template | doc_timestamp   |      2 | 12, 1                    |     127577 |     126428 |        111.0 |         3.5 |
++--------------+---------------+-----------------+--------+--------------------------+------------+------------+--------------+-------------+
+</pre></blockquote>
+
+<h3>ENVIRONMENT</h3>
+Percona Server &gt;= 5.5.8-20.0 with <a href="http://www.percona.com/docs/wiki/percona-server:features:innodb_stats#innodb_index_stats">INNODB_INDEX_STATS patch</a>
+
+<h3>SEE ALSO</h3>
+<a href="innodb_index_rows.html">innodb_index_rows</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

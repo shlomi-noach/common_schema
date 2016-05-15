@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>introduction: common_schema documentation</title>
+	<meta name="description" content="introduction: common_schema" />
+	<meta name="keywords" content="introduction: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="introduction.html">introduction</a></h2>	
+
+<p><i>common_schema</i> is a framework for MySQL server administration.
+</p>
+<p>
+	<i>common_schema</i> provides with query scripting, analysis & informational views, and a function library, allowing for 
+	easier administration and diagnostics for MySQL. It introduces SQL based tools which simplify otherwise complex shell 
+	and client scripts, allowing the DBA to be independent of operating system, installed packages and dependencies.
+</p>
+<p>
+	<i>common_schema</i>'s components are:
+	<ul>
+		<li><strong>Views library</strong>: set of powerful views, typically operating and presenting server metadata</li>
+		<li><strong>Routines library</strong>: set of complementary routines to MySQL, including metadata handling</li>	
+		<li><strong><a href="query_script.html">QueryScript</a></strong>: programming language aimed for SQL scripting, seamlessly combining scripting power such as flow control & variables with standard SQL statements or RDBMS-specific commands. </li>
+		<li><strong><a href="rdebug.html">rdebug</a></strong>: debugger and debugging API for MySQL stored routines</li>
+	</ul>	
+</p>
+<p>
+	It is a self contained <i>schema</i>, compatible with all MySQL >= 5.1 servers. Installed by importing the schema
+	into the server, there is no need to configure nor compile. No special plugins are required, and no changes to your configuration.
+</p>
+
+<p>
+<i>common_schema</i> has a small footprint (well under 1MB).
+</p>
+
+<h3>What can common_schema do?</h3>
+
+<p>Here's a quick peek at some of <i>common_schema</i>'s capabilities:</p>
+
+<h4>Query scripting & execution</h4>
+
+		<p>
+		Run <a href="query_script.html">QueryScript</a> code:
+		</p>
+		<blockquote><pre>
+foreach($table, $schema, $engine: table in sakila)
+  if ($engine = 'InnoDB')
+    ALTER TABLE :$schema.:$table ENGINE=InnoDB ROW_FORMAT=Compressed KEY_BLOCK_SIZE=8;
+</pre></blockquote>
+
+<p>Throttle queries:</p>
+<blockquote><pre>
+SELECT Id, Name, throttle(1) 
+  FROM world.City 
+  ORDER BY Population DESC;
+...</pre></blockquote>
+
+
+<h4>Schema analysis</h4>
+
+<p>Detect duplicate keys:</p>
+<blockquote><pre>
+SELECT redundant_index_name, sql_drop_index FROM redundant_keys;
++----------------------+----------------------------------------------------------+
+| redundant_index_name | sql_drop_index                                           |
++----------------------+----------------------------------------------------------+
+| rental_date_2        | ALTER TABLE `sakila`.`rental` DROP INDEX `rental_date_2` |
++----------------------+----------------------------------------------------------+
+</pre></blockquote>
+
+
+<h4>Monitoring</h4>
+
+<p>Show status change on your server over time:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.global_status_diff_nonzero;
++-----------------------+------------------+------------------+---------------------+---------------------+------------------------+
+| variable_name         | variable_value_0 | variable_value_1 | variable_value_diff | variable_value_psec | variable_value_pminute |
++-----------------------+------------------+------------------+---------------------+---------------------+------------------------+
+| handler_read_rnd_next | 3871             | 4458             |                 587 |                58.7 |                   3522 |
+| handler_write         | 10868            | 11746            |                 878 |                87.8 |                   5268 |
+| open_files            | 39               | 37               |                  -2 |                -0.2 |                    -12 |
+| select_full_join      | 3                | 4                |                   1 |                 0.1 |                      6 |
+| select_scan           | 30               | 32               |                   2 |                 0.2 |                     12 |
++-----------------------+------------------+------------------+---------------------+---------------------+------------------------+
+</pre></blockquote>
+
+<h4>Process watch</h4>
+<p>Find the GRANTEE for active processes:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_grantees;
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| ID     | USER       | HOST                | GRANTEE                | grantee_user | grantee_host | is_super | is_repl | sql_kill_query    | sql_kill_connection |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+| 650472 | replica    | jboss00.myweb:34266 | 'replica'@'%.myweb'    | replica      | %.myweb      |        0 |       1 | KILL QUERY 650472 | KILL 650472         |
+| 692346 | openarkkit | jboss02.myweb:43740 | 'openarkkit'@'%.myweb' | openarkkit   | %.myweb      |        0 |       0 | KILL QUERY 692346 | KILL 692346         |
+| 842853 | root       | localhost           | 'root'@'localhost'     | root         | localhost    |        1 |       0 | KILL QUERY 842853 | KILL 842853         |
+| 843443 | jboss      | jboss03.myweb:40007 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843443 | KILL 843443         |
+| 843444 | jboss      | jboss03.myweb:40012 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843444 | KILL 843444         |
+| 843510 | jboss      | jboss00.myweb:49850 | 'jboss'@'%.myweb'      | jboss        | %.myweb      |        0 |       0 | KILL QUERY 843510 | KILL 843510         |
++--------+------------+---------------------+------------------------+--------------+--------------+----------+---------+-------------------+---------------------+
+</pre></blockquote>
+
+<p>See top running processes:</p>
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.processlist_top;
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+| ID       | USER        | HOST         | DB        | COMMAND     | TIME    | STATE                                                            | INFO                                                                                                                  | TIME_MS    |
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+|  3598334 | system user |              | NULL      | Connect     | 4281883 | Waiting for master to send event                                 | NULL                                                                                                                  | 4281883102 |
+|  3598469 | replica     | sql01:51157  | NULL      | Binlog Dump | 4281878 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 4281877707 |
+| 31066726 | replica     | sql02:48924  | NULL      | Binlog Dump | 1041758 | Has sent all binlog to slave; waiting for binlog to be updated   | NULL                                                                                                                  | 1041758134 |
+|  3598335 | system user |              | NULL      | Connect     |  195747 | Has read all relay log; waiting for the slave I/O thread to upda | NULL                                                                                                                  |          0 |
+| 39946702 | store       | app03:46795  | datastore | Query       |       0 | Writing to net                                                   | SELECT * FROM store_location                                                                                          |         27 |
+| 39946693 | store       | app05:51090  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 5  |         54 |
+| 39946692 | store       | sql01:47849  | datastore | Query       |       0 | Writing to net                                                   | SELECT store.store_id, store_location.zip_code FROM store JOIN store_location USING (store_id) WHERE store_class = 34 |        350 |
++----------+-------------+--------------+-----------+-------------+---------+------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+------------+
+</pre></blockquote>
+
+<p><i>common_schema</i> provides plenty of more functionality. The documentation is extensive!</p>
+
+<h3>RISKS</h3>
+Please refer to the <a href="risks.html">risks</a> page.
+
+<h3>LICENSE</h3>
+	common_schema is released under the GPL license.
+<blockquote><pre>
+common_schema - DBA's Framework for MySQL
+Copyright (C) 2011-2013, Shlomi Noach
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+A copy of the GNU General Public License is available at
+<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>
+</pre></blockquote>
+
+<h3>AUTHOR</h3>
+<p>Shlomi Noach</p>
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

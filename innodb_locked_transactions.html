@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>innodb_locked_transactions: common_schema documentation</title>
+	<meta name="description" content="innodb_locked_transactions: common_schema" />
+	<meta name="keywords" content="innodb_locked_transactions: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="innodb_locked_transactions.html">innodb_locked_transactions</a></h2>	
+<h3>NAME</h3>
+innodb_locked_transactions: List locked transactions, the locks they are waiting on and the transactions holding those locks.
+<h3>TYPE</h3>
+View
+
+<h3>DESCRIPTION</h3>
+
+<p>InnoDB Plugin provides with easy to query INFORMATION_SCHEMA tables. In particular, it offers information on running transactions,
+locked transactions and locks.</p>
+
+<p><i>innodb_locked_transactions</i> makes the obvious connection for blocked transactions: it lists blocked transactions, what they
+attempt to do, the locks on which they block, the transactions holding those locks and the queries they are executing.
+</p>
+
+<p>
+The view makes for a simple analysis of <i>"Why do I seem to have so many locks? What's locking what?"</i>
+</p>
+
+<h3>STRUCTURE</h3>
+
+<blockquote><pre>
+mysql&gt; DESC common_schema.innodb_locked_transactions;
++------------------------------+---------------------+------+-----+---------------------+-------+
+| Field                        | Type                | Null | Key | Default             | Extra |
++------------------------------+---------------------+------+-----+---------------------+-------+
+| locked_trx_id                | varchar(18)         | NO   |     |                     |       |
+| locked_trx_started           | datetime            | NO   |     | 0000-00-00 00:00:00 |       |
+| locked_trx_wait_started      | datetime            | YES  |     | NULL                |       |
+| locked_trx_mysql_thread_id   | bigint(21) unsigned | NO   |     | 0                   |       |
+| locked_trx_query             | varchar(1024)       | YES  |     | NULL                |       |
+| requested_lock_id            | varchar(81)         | NO   |     |                     |       |
+| blocking_lock_id             | varchar(81)         | NO   |     |                     |       |
+| locking_trx_id               | varchar(18)         | NO   |     |                     |       |
+| locking_trx_started          | datetime            | NO   |     | 0000-00-00 00:00:00 |       |
+| locking_trx_wait_started     | datetime            | YES  |     | NULL                |       |
+| locking_trx_mysql_thread_id  | bigint(21) unsigned | NO   |     | 0                   |       |
+| locking_trx_query            | varchar(1024)       | YES  |     | NULL                |       |
+| trx_wait_seconds             | bigint(21)          | YES  |     | NULL                |       |
+| sql_kill_blocking_query      | varbinary(31)       | NO   |     |                     |       |
+| sql_kill_blocking_connection | varbinary(25)       | NO   |     |                     |       |
++------------------------------+---------------------+------+-----+---------------------+-------+
+</pre></blockquote>
+
+<h3>SYNOPSIS</h3>
+
+<p>Columns of this view:</p>
+<ul>
+	<li><strong>locked_trx_id</strong>: InnoDB locked transaction ID</li>
+	<li><strong>locked_trx_started</strong>: time at which locked transaction started</li>
+	<li><strong>locked_trx_wait_started</strong>: time at which locked transaction got blocked on this lock</li>
+	<li><strong>locked_trx_mysql_thread_id</strong>: thread ID (mapped to PROCESSLIST)</li>
+	<li><strong>locked_trx_query</strong>: current blocked query</li>
+	<li><strong>requested_lock_id</strong>: ID of lock on which transaction is blocked</li>
+	<li><strong>blocking_lock_id</strong>: ID of lock preventing transaction from getting requested lock</li>
+	<li><strong>locking_trx_id</strong>: InnoDB blocking transaction ID</li>
+	<li><strong>locking_trx_started</strong>: time at which blocking transaction started</li>
+	<li><strong>locking_trx_wait_started</strong>: time at which blocking transaction got blocked (it, too, may be blocked)</li>
+	<li><strong>locking_trx_mysql_thread_id</strong>: blocking thread ID (mapped to PROCESSLIST)</li>
+	<li><strong>locking_trx_query</strong>: current blocking query</li>
+	<li><strong>trx_wait_seconds</strong>: number of seconds blocked transaction is waiting</li>
+	<li>
+		<strong>sql_kill_blocking_query</strong>: a <strong>KILL QUERY</strong> statement for the blocking transaction.
+		<br/>Use with <a href="eval.html">eval()</a> to apply statement.	
+	</li>
+	<li>
+		<strong>sql_kill_blocking_connection</strong>: a <strong>KILL</strong> statement for the blocking transaction.
+		<br/>Use with <a href="eval.html">eval()</a> to apply statement.	
+	</li>
+</ul>
+
+<h3>EXAMPLES</h3>
+
+<p>Show info on locked transactions:
+<blockquote><pre>mysql&gt; SELECT * FROM common_schema.innodb_locked_transactions;
++---------------+---------------------+-------------------------+----------------------------+--------------------------------------------------+-------------------------+-------------------------+----------------+---------------------+--------------------------+-----------------------------+-------------------+------------------+-------------------------+------------------------------+
+| locked_trx_id | locked_trx_started  | locked_trx_wait_started | locked_trx_mysql_thread_id | locked_trx_query                                 | requested_lock_id       | blocking_lock_id        | locking_trx_id | locking_trx_started | locking_trx_wait_started | locking_trx_mysql_thread_id | locking_trx_query | trx_wait_seconds | sql_kill_blocking_query | sql_kill_blocking_connection |
++---------------+---------------------+-------------------------+----------------------------+--------------------------------------------------+-------------------------+-------------------------+----------------+---------------------+--------------------------+-----------------------------+-------------------+------------------+-------------------------+------------------------------+
+| 9AD2D1811     | 2012-09-28 10:40:25 | 2012-09-28 10:40:25     |                     609205 | NULL                                             | 9AD2D1811:499850:82:113 | 9AD2D0E1A:499850:82:113 | 9AD2D0E1A      | 2012-09-28 10:40:01 | NULL                     |                      609159 | NULL              |                1 | KILL QUERY 609159       | KILL 609159                  |
+| 9AD2D0FBA     | 2012-09-28 10:40:03 | 2012-09-28 10:40:03     |                     609196 | UPDATE events SET ts = NOW() WHERE alias = 'all' | 9AD2D0FBA:499850:88:108 | 9AD2D0E1A:499850:88:108 | 9AD2D0E1A      | 2012-09-28 10:40:01 | NULL                     |                      609159 | NULL              |               23 | KILL QUERY 609159       | KILL 609159                  |
++---------------+---------------------+-------------------------+----------------------------+--------------------------------------------------+-------------------------+-------------------------+----------------+---------------------+--------------------------+-----------------------------+-------------------+------------------+-------------------------+------------------------------+
+</pre></blockquote>
+In the above example we are unable to catch the query blocking the 2rd transaction. In the first transaction we are also unable to realize the blocked query.
+We don't always get all we want...
+</p>
+
+
+<p>See which transactions are blocking, and how many are being blocked:
+<blockquote><pre>mysql&gt; SELECT locking_trx_id, COUNT(*) FROM innodb_locked_transactions GROUP BY locking_trx_id;
++----------------+----------+
+| locking_trx_id | COUNT(*) |
++----------------+----------+
+| 9AD30296C      |        2 |
+| 9AD30296E      |        1 |
++----------------+----------+
+</pre></blockquote>
+</p>
+
+
+<p>Kill transactions causing other transactions to block for <strong>30</strong> seconds or more:
+<blockquote><pre>mysql&gt; CALL eval('SELECT sql_kill_blocking_query FROM innodb_locked_transactions WHERE trx_wait_seconds >= 30 GROUP BY sql_kill_blocking_query');
+</pre></blockquote>
+</p>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 with InnoDB Plugin installed (with InnoDB INFORMATION_SCHEMA plugins enabled), or MySQL >= 5.5
+
+<h3>SEE ALSO</h3>
+<a href="innodb_simple_locks.html">innodb_simple_locks</a>,
+<a href="innodb_transactions.html">innodb_transactions</a>,
+<a href="innodb_transactions_summary.html">innodb_transactions_summary</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

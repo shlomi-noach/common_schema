@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>rdebug_workflow: common_schema documentation</title>
+	<meta name="description" content="rdebug_workflow: common_schema" />
+	<meta name="keywords" content="rdebug_workflow: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="rdebug_workflow.html">rdebug_workflow</a></h2>	
+
+<h3>Workflow of an rdebug debugging session</h3>
+
+<p>
+	<strong>rdebug</strong></a> requires two connections:
+	<ul>
+		<li>
+			The <strong>worker</strong> connection: this is where one's 
+			stored routine is executed.
+		</li>
+		<li>
+			The <strong>debugger</strong> session: this session controls the flow
+			of the <i>worker</i>; this is the session that "steps-into", "steps-over",
+			watches variables, modifies them; looks at metadata.
+		</li>
+	</ul>
+</p>
+<p>
+	The <i>debugger</i> needs to attach itself to the <i>worker</i>. This is done by
+	figuring out the <i>worker</i>'s session ID. The relevant routines must be 
+	<a href="rdebug_compile_routine.html">compiled with debug mode</a> beforehand.
+	Both sessions are then ready for the <i>debugging session</i>.
+</p>
+<p>
+	The following illustrates the general workflow of a debugging session, looking at 
+	both the <i>debugger</i> and the <i>worker</i>. For this illustration, we assume
+	debugging the routine <strong>test.take_action()</strong>.
+</p>
+<h4>General workflow</h4>
+
+<p>
+	<strong>worker session:</strong> get connection ID.
+	<blockquote><pre>mysql [worker]&gt; SELECT CONNECTION_ID();
++-----------------+
+| CONNECTION_ID() |
++-----------------+
+|            2819 |
++-----------------+
+</pre></blockquote>
+</p>
+
+<p>
+	<strong>debugger session:</strong> compile routine with debug info.
+	<blockquote><pre>mysql [debugger]&gt; use common_schema;
+mysql [debugger]&gt; call rdebug_compile_routine('test', 'take_action', true);
+</pre></blockquote>
+	Start a debug session, attach to <i>worker</i> session using its connection ID:
+	<blockquote><pre>mysql [debugger]&gt; call rdebug_start(2819);
+</pre></blockquote>
+	Optionally set verbose mode <strong>on</strong>:
+	<blockquote><pre>mysql [debugger]&gt; call rdebug_set_verbose(true);
+</pre></blockquote>
+	Begin controlling the <i>worker</i>. In this worker we work by <i>stepping</i>
+	through the routine:
+	<blockquote><pre>mysql [debugger]&gt; call rdebug_step_over();
+(hangs)
+</pre></blockquote>
+	The debugger is now awaiting action to be taken by the <i>worker</i>.
+</p>
+
+
+<p>
+	<strong>worker session:</strong> issue the routine.
+	<blockquote><pre>mysql [worker]&gt; call test.take_action();
+(hangs)
+</pre></blockquote>
+</p>
+
+<p>
+	<strong>debugger session:</strong> at this time the <i>debugger</i> has
+	control over the <i>worker</i>. Due to verbose mode, it dumps
+	thread stack status, watches local variables, shows next statement to execute.
+	The <i>debugger</i> may further control the flow of the <i>worker</i>:
+	<blockquote><pre>
+(status dump)
+mysql [debugger]&gt; call rdebug_step_over();
+(status dump)
+mysql [debugger]&gt; call rdebug_step_over();
+(status dump)
+mysql [debugger]&gt; call rdebug_watch_variables();
+(variables dump)
+mysql [debugger]&gt; call rdebug_set_variable('my_local_variable', 'my_new_value');
+(status dump)
+mysql [debugger]&gt; call rdebug_step_over();
+(status dump)
+mysql [debugger]&gt; call rdebug_step_out();
+mysql [debugger]&gt; 
+</pre></blockquote>
+	At this workflow we finally exit via <a href="rdebug_step_out.html">rdebug_step_out()</a>,
+	or we may choose to keep running <a href="rdebug_step_over.html">rdebug_step_over()</a>
+	until <strong>test.take_action()</strong> completes. Either way, both worker and
+	debugger complete the debugging session.
+</p>
+
+<p>
+	<strong>debugger session:</strong> do proper cleanup:
+	<blockquote><pre>
+mysql [debugger]&gt; call rdebug_stop();
+</pre></blockquote>
+	At this point all debug-session info is cleared. However, the 
+	<strong>test.take_action()</strong> routine is still compiled with debug mode; 
+	you may choose to keep them that way (it will act as normal
+	when not under a <i>debugger</i> control, but will have excessive code). At some point
+	you will want to remove debugging info from the routine:
+	<blockquote><pre>
+mysql [debugger]&gt; call rdebug_compile_routine('test', 'take_action', false);
+</pre></blockquote>
+</p>
+
+<h3>Workflow variations</h3>
+<p>
+	One may choose to set a breakpoint on <strong>test.take_action()</strong>.
+	For that, one needs to know what breakpoints are available.
+	<strong>debugger session:</strong> detect breakpoint info:
+	<blockquote><pre>
+mysql [debugger]&gt; call rdebug_show_routine('test', 'take_action');
+(dump of routine code with special numbers -- breakpoint IDs)
+</pre></blockquote>
+	See <a href="rdebug_show_routine.html">rdebug_show_routine()</a> for an output sample.
+	Breakpoints can be set via:
+	<blockquote><pre>
+mysql [debugger]&gt; call rdebug_set_breakpoint('test', 'take_action', 126, null);
+</pre></blockquote>
+	(assuming <strong>126</strong> is a relevant breakpoint ID).
+</p>
+<p>
+	The <strong>test.take_action()</strong> routine can be executed until it reaches
+	said breakpoint:
+	<blockquote><pre>mysql [debugger]&gt; call rdebug_run();
+</pre></blockquote>
+</p>
+
+
+
+
+
+<h3>SEE ALSO</h3>
+<a href="rdebug.html">rdebug</a>,
+<a href="rdebug_api.html">rdebug API</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

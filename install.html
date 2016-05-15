@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>install: common_schema documentation</title>
+	<meta name="description" content="install: common_schema" />
+	<meta name="keywords" content="install: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="install.html">install</a></h2>	
+<p><i>common_schema</i> distribution file is a SQL source file.  To install it, you should execute it on your MySQL server.</p>
+
+<p>There are many ways to import a SQL file into MySQL, listed below. 
+<strong>Make sure</strong> to execute them as a privileged user, e.g. <strong>'root'@'localhost'</strong>, as installation involves creation of schema, tables, views &amp; routines.</p>
+
+<p>Consult the <a href="download.html">download page</a> for obtaining the <i>common_schema</i> distribution file.</p>
+<ul>
+	<li>Within MySQL, issue (replace <i>"common_schema_distribution_file"</i> with actual file name):
+		<br/>
+		<blockquote><pre>mysql&gt; SOURCE '/path/to/common_schema_distribution_file.sql';</pre></blockquote>
+	</li>
+	<li>From shell, execute:
+		<br/>
+		<blockquote><pre>bash$ mysql < /path/to/common_schema_distribution_file.sql</pre></blockquote>
+	</li>
+	<li>Use your favorite MySQL GUI editor, copy+paste file content, execute.</li>
+</ul>
+
+<p>To verify installation, check that the <strong>common_schema</strong> database exists. e.g.:</p>
+<blockquote><pre>root@mysql&gt; SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| common_schema      |
+| mysql              |
+| sakila             |
+| world              |
++--------------------+
+</pre></blockquote>
+
+
+<h3>Requirements</h3>
+
+<p>The <i>common_schema</i> distribution file supports MySQL 
+	<strong>5.1</strong>, 
+	<strong>5.5</strong> and 
+	<strong>5.6</strong>, 
+	Oracle distribution, Percona Server and MariaDB.
+</p>
+
+
+<p>
+	Percona Server features are supported for versions >= <strong>5.5.8</strong>. 
+	TokuDB features are supported on TokuDB enabled servers.
+	Please note that <i>common_schema</i> will install regardless of the version. 
+	It will automatically recognize available feature set and install accordingly.
+	Likewise, it will install regardless of the availability of InnoDB Plugin and 
+	associated INFORMATION_SCHEMA tables.
+</p>
+
+<p>
+	If you should upgrade your MySQL server, or enable features which were turned off during install of <i>common_schema</i>,
+	the new feature set are not automatically available by <i>common_schema</i>, and a re-install of <i>common_schema</i> is required.
+</p>
+
+<h3>Installation notes</h3>
+
+<p>
+	The installation process drops and creates various tables and routines. In particular,
+	the installation process breaks any running <a href="query_script.html">QueryScript</a> code. 
+	Avoid installing <i>common_schema</i> during QueryScript executions.
+</p>
+
+<h3>Troubleshooting</h3>
+
+<p>Since installation is merely an import act, you should only expect trouble if
+schema generation is unable to execute on your server.
+</p>
+
+<ul>
+	<li>Are you executing on a <strong>5.0</strong> MySQL server? This version is not supported.</li>
+	<li>Were errors reported during installation process?</li>
+	<li>What was <i>common_schema</i>'s last message during install?</li>
+	<li>What is the output of <strong>SELECT * FROM common_schema.status</strong>?</li>
+</ul>				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>

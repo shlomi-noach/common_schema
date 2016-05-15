@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>google_line_chart: common_schema documentation</title>
+	<meta name="description" content="google_line_chart: common_schema" />
+	<meta name="keywords" content="google_line_chart: common_schema" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+</head>
+
+<body>
+	<div id="main">
+		<div id="header">
+			<h1>common_schema</h1> <strong>2.2</strong> documentation
+			<div class="subtitle">DBA's framework for MySQL</div>
+		</div>
+		<div id="contentwrapper">
+			<div id="content">
+				<h2><a href="google_line_chart.html">google_line_chart</a></h2>	
+<h3>NAME</h3>
+google_line_chart(): Generate a Google Image multi-line chart URL based on an arbitrary query.
+
+<h3>TYPE</h3>
+Procedure
+
+<h3>DESCRIPTION</h3>
+<p>
+	Given an arbitrary query, generate a Google Image Chart URL to visualize query's data.
+</p>
+<p>
+	To make for a compact URL (less than 2048 characters), data values are presented with
+	low resolution format, which allows at most <strong>63</strong> distinct values on the
+	vertical scale. This makes for non-smooth lines in some cases (See EXAMPLES below).
+</p>
+<p>
+	Even as this procedure was created (2013), Google Image Charts are deprecated, yet the
+	service is still running and functional. The service may go down at any stage.
+</p>
+
+
+<h3>SYNOPSIS</h3>
+<p>
+<blockquote><pre>google_line_chart(
+	IN values_query TEXT, 
+	IN chart_legend TEXT
+  )
+  READS SQL DATA</pre></blockquote>
+</p>
+<p>
+  Input:
+  <ul>
+    <li>
+    	<strong>values_query</strong>: a query producing data to be visualized. Query columns are
+    	assumed as follows:
+    	<ul>
+    		<li>First column makes for <i>"x"</i> values. <i>google_line_chart()</i> will sort the
+    		results by first column ascending. The type of this column is arbitrary; it could
+    		be numerical, temporal etc.</li>
+    		<li>2nd [, 3rd [...]] columns are <i>"y"</i> values. You may provide up to 
+    		<strong>8</strong> data columns, totaling <strong>9</strong> columns together with
+    		the first <i>"x"</i> values column.
+    		</li>
+    	</ul>
+	</li>
+    <li>
+    	<strong>chart_legend</strong>: comma delimited text, listing the desired
+    	legend items. There should be the same number of tokens in this parameter as there
+    	are data columns in the query. However, <i>google_line_chart()</i> will work with less that
+    	number or more; the result of a nonmatching number is a nonmatching legend.
+	</li>
+  </ul>
+</p>
+
+<h3>EXAMPLES</h3>
+	<p>
+		Show a simple sine & log computation:
+	<blockquote><pre>mysql&gt; call google_line_chart("select n, log(n), sin(n/5)+2 from numbers where n > 0 order by n limit 80", "log n, 2 + sin n/5") \G
+*************************** 1. row ***************************
+google_chart_url: <a href="http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,0.0,4.4&chd=s:AKPTWZbdfghjklmnnopqqrssttuuvvwwxxxyyzzz0001112222333444455555666677777888888999,fhkmopqqponljhebYWTRQPOOOQRTVYbdgjlnopqqpomkifcZXUSQPOOOPQSUXacfikmopqqponljgdbY&chxs=0,505050,10,0,lt&chxl=0:|1|||||||||||||||||||20||||||||||||||||||||40||||||||||||||||||||60||||||||||||||||||||80&chg=1.265822784,25,1,2,0,0&chco=ff8c00,4682b4&chdl=log n|2 + sin n/5&chdlp=b">http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,0.0,4.4&chd=s:AKPTWZbdfghjklmnnopqqrssttuuvvwwxxxyyzzz0001112222333444455555666677777888888999,fhkmopqqponljhebYWTRQPOOOQRTVYbdgjlnopqqpomkifcZXUSQPOOOPQSUXacfikmopqqponljgdbY&chxs=0,505050,10,0,lt&chxl=0:|1|||||||||||||||||||20||||||||||||||||||||40||||||||||||||||||||60||||||||||||||||||||80&chg=1.265822784,25,1,2,0,0&chco=ff8c00,4682b4&chdl=log n|2 + sin n/5&chdlp=b</a>
+</pre></blockquote>
+	The above leads to this image:
+	<img src="http://chart.apis.google.com/chart?cht=lc&chs=800x350&chtt=SQL+chart+by+common_schema&chxt=x,y&chxr=1,0.0,4.4&chd=s:AKPTWZbdfghjklmnnopqqrssttuuvvwwxxxyyzzz0001112222333444455555666677777888888999,fhkmopqqponljhebYWTRQPOOOQRTVYbdgjlnopqqpomkifcZXUSQPOOOPQSUXacfikmopqqponljgdbY&chxs=0,505050,10,0,lt&chxl=0:|1|||||||||||||||||||20||||||||||||||||||||40||||||||||||||||||||60||||||||||||||||||||80&chg=1.265822784,25,1,2,0,0&chco=ff8c00,4682b4&chdl=log n|2 + sin n/5&chdlp=b"" alt="SQL chart by common_schema"/>
+</p>
+
+
+<h3>ENVIRONMENT</h3>
+MySQL 5.1 or newer
+
+<h3>SEE ALSO</h3>
+<a href="line_chart.html">line_chart()</a>
+
+<h3>AUTHOR</h3>
+Shlomi Noach
+				<br/>
+			</div>
+			<div id="sidebarwrapper">
+				<div id="search">
+					Search online documentation
+					<form id="search_form" name="search_form" method="GET" 
+						action="http://www.google.com/search" 
+						onsubmit="document.forms['search_form']['q'].value = 'site:http://common-schema.googlecode.com/svn/trunk/common_schema/doc/html/ '+document.forms['search_form']['search_term'].value;">
+						<input type="text" name="search_term" value=""/>
+						<input type="hidden" name="q" value=""/>
+						<input type="submit" value="go"/>						
+					</form>
+				</div>
+				<div id="menu">
+					<ul>
+						<li><a title="Introduction" href="introduction.html">Introduction</a></li>
+						<li><a title="Documentation" href="documentation.html">Documentation</a></li>
+						<li><a title="Download" href="download.html">Download</a></li>
+						<li><a title="Install" href="install.html">Install</a></li>
+						<li><a title="Risks" href="risks.html">Risks</a></li>
+					</ul>						
+					<h3>QUERY SCRIPT</h3>
+					<ul>
+						<li><a title="QueryScript" href="query_script.html">QueryScript</a></li>
+						<li><a title="Execution" href="query_script_execution.html">Execution</a></li>
+						<li><a title="Flow control" href="query_script_flow_control.html">Flow control</a></li>
+						<li><a title="Statements" href="query_script_statements.html">Statements</a></li>
+						<li><a title="Expressions" href="query_script_expressions.html">Expressions</a></li>
+						<li><a title="Variables" href="query_script_variables.html">Variables</a></li>
+					</ul>						
+					<h3>DEBUG</h3>
+					<ul>
+						<li><a title="rdebug" href="rdebug.html">rdebug</a></li>
+						<li><a title="rdebug API" href="rdebug_api.html">rdebug API</a></li>
+						<li><a title="rdebug workflow" href="rdebug_workflow.html">Workflow</a></li>
+					</ul>						
+					<h3>ROUTINES</h3>
+					<ul>
+						<li><a title="Execution &amp; flow control" href="execution_routines.html">Execution & flow control</a></li>
+						<li><a title="General" href="general_routines.html">General</a></li>
+						<li><a title="Process" href="process_routines.html">Process</a></li>
+						<li><a title="Query analysis" href="query_analysis_routines.html">Query analysis</a></li>
+						<li><a title="Schema analysis" href="schema_analysis_routines.html">Schema analysis</a></li>
+						<li><a title="Security" href="security_routines.html">Security</a></li>
+						<li><a title="Text" href="text_routines.html">Text</a></li>
+						<li><a title="Time &amp; date" href="temporal_routines.html">Time & date</a></li>
+						<li><a title="Charting" href="charting_routines.html">Charting</a></li>
+					</ul>
+					<h3>VIEWS</h3>
+					<ul>
+						<li><a title="Schema analysis" href="schema_analysis_views.html">Schema analysis</a></li>
+						<li><a title="Data dimension" href="data_dimension_views.html">Data dimension</a></li>
+						<li><a title="Process" href="process_views.html">Process</a></li>
+						<li><a title="Security" href="security_views.html">Security</a></li>
+						<li><a title="Monitoring" href="monitoring_views.html">Monitoring</a></li>
+						<li><a title="InnoDB Plugin" href="innodb_plugin_views.html">InnoDB Plugin</a></li>
+						<li><a title="Percona server" href="percona_server_views.html">Percona Server</a></li>
+						<li><a title="TokuDB" href="tokudb_views.html">TokuDB</a></li>
+					</ul>						
+					<h3>DATA</h3>
+					<ul>
+						<li><a title="tables" href="tables.html">Tables</a></li>
+						<li><a title="variables" href="variables.html">Variables</a></li>
+					</ul>						
+					<h3>META</h3>
+					<ul>
+						<li><a title="Help" href="help.html">help</a></li>
+						<li><a title="Metadata" href="metadata.html">metadata</a></li>
+						<li><a title="status" href="status.html">status</a></li>
+					</ul>						
+				</div>
+			</div>	
+			<div class="clear">&nbsp;</div>
+			
+			<div id="footnote" align="center">
+				<a href="">common_schema</a> documentation
+			</div>
+		</div>
+	</div>
+</body>
+</html>
