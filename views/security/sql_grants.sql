@@ -147,6 +147,59 @@ VIEW _sql_grants_components AS
 -- 
 -- Current grantee privileges and additional info breakdown, generated GRANT and REVOKE sql statements  
 -- 
+call run("
+  if (
+  select count(*)=0 
+  from information_schema.columns 
+  where table_schema = 'mysql' 
+  and table_name = 'user' 
+  and column_name = 'password'
+  )
+  {
+CREATE OR REPLACE
+ALGORITHM = TEMPTABLE
+SQL SECURITY INVOKER
+VIEW sql_grants AS
+  SELECT 
+    GRANTEE, 
+    user.user,
+    user.host,
+    priv_level,
+    priv_level_name,
+    object_schema,
+    object_name,
+    current_privileges,
+    IS_GRANTABLE,
+    CONCAT(
+      'GRANT ', current_privileges, 
+      ' ON ', IF(priv_level_name = 'routine', CONCAT(object_type, ' '), ''), priv_level, 
+      ' TO ', GRANTEE,
+      IF(priv_level = '*.*' AND current_privileges = 'USAGE', 
+        CONCAT(' IDENTIFIED BY PASSWORD ''', user.authentication_string, ''''), ''),
+      IF(IS_GRANTABLE = 'YES', 
+        ' WITH GRANT OPTION', '')
+      ) AS sql_grant,
+    CASE
+      WHEN current_privileges = 'USAGE' AND priv_level = '*.*' THEN ''
+      ELSE
+        CONCAT(
+          'REVOKE ', current_privileges, 
+          IF(IS_GRANTABLE = 'YES', 
+            ', GRANT OPTION', ''),
+          ' ON ', priv_level, 
+          ' FROM ', GRANTEE
+          )      
+    END AS sql_revoke,
+    CONCAT(
+      'DROP USER ', GRANTEE
+      ) AS sql_drop_user
+  FROM 
+    _sql_grants_components
+    JOIN mysql.user ON (GRANTEE = CONCAT('''', user.user, '''@''', user.host, ''''))
+  ORDER BY 
+    GRANTEE, result_order
+;  
+  } else {
 CREATE OR REPLACE
 ALGORITHM = TEMPTABLE
 SQL SECURITY INVOKER
@@ -189,8 +242,9 @@ VIEW sql_grants AS
     JOIN mysql.user ON (GRANTEE = CONCAT('''', user.user, '''@''', user.host, ''''))
   ORDER BY 
     GRANTEE, result_order
-;
-
+;  
+  }
+");
 
 -- 
 -- SHOW GRANTS like output, for all accounts  

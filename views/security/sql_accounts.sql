@@ -2,11 +2,40 @@
 -- 
 -- 
 
-CREATE OR REPLACE
-ALGORITHM = MERGE
-SQL SECURITY INVOKER
-VIEW _sql_accounts_base AS
-  SELECT 
+call run("
+  if (
+  select count(*)=0 
+  from information_schema.columns 
+  where table_schema = 'mysql' 
+  and table_name = 'user' 
+  and column_name = 'password'
+  )
+  {
+    CREATE OR REPLACE
+    ALGORITHM = MERGE
+    SQL SECURITY INVOKER
+    VIEW _sql_accounts_base AS
+    SELECT 
+    user,
+    host,
+    mysql_grantee(user, host) AS grantee,
+    authentication_string as password,
+    authentication_string = '' or authentication_string rlike '^[?]{41}$' as is_empty_password,
+    authentication_string rlike '^[*][0-9a-fA-F]{40}$' or authentication_string rlike '^[0-9a-fA-F]{40}[*]$' as is_new_password,
+    authentication_string rlike '^[0-9a-fA-F]{16}$' or authentication_string rlike '^[~]{25}[0-9a-fA-F]{16}$' as is_old_password,
+    authentication_string rlike '^[0-9a-fA-F]{40}[*]$' or authentication_string rlike '^[~]{25}[0-9a-fA-F]{16}$' or authentication_string rlike '^[?]{41}$' as is_blocked,
+    REVERSE(authentication_string) AS reversed_password,
+    REPLACE(authentication_string, '~', '') AS untiled_password,
+    CONCAT(REPEAT('~', IF(CHAR_LENGTH(authentication_string) = 16, 25, 0)), authentication_string) AS tiled_password
+    FROM
+    mysql.user
+    ;
+  } else {
+    CREATE OR REPLACE
+    ALGORITHM = MERGE
+    SQL SECURITY INVOKER
+    VIEW _sql_accounts_base AS
+    SELECT 
     user,
     host,
     mysql_grantee(user, host) AS grantee,
@@ -18,10 +47,11 @@ VIEW _sql_accounts_base AS
     REVERSE(password) AS reversed_password,
     REPLACE(password, '~', '') AS untiled_password,
     CONCAT(REPEAT('~', IF(CHAR_LENGTH(password) = 16, 25, 0)), password) AS tiled_password
-  FROM
+    FROM
     mysql.user
-;
-
+    ;  
+  }
+");
 
 -- 
 -- 
