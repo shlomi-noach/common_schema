@@ -24,29 +24,23 @@ INSERT INTO metadata (attribute_name, attribute_value) VALUES
   ('innodb_plugin_components_installed', false),
   ('percona_server_components_installed', false),
   ('tokudb_components_installed', false),
-  ('license_type', 'GPL'),
+  ('license_type', 'MIT'),
   ('license', '
 
 common_schema - DBA''s Framework for MySQL
-Copyright (C) 2011-2013, Shlomi Noach
+Copyright (C) 2011-2019, Shlomi Noach
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-A copy of the GNU General Public License is available at
-<http://www.gnu.org/licenses/>; or type ''man gpl'' on a unix system.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 '),
   ('project_name', 'common_schema'),
-  ('project_home', 'http://code.google.com/p/common-schema/'),
-  ('project_repository', 'https://common-schema.googlecode.com/svn/trunk/'),
-  ('project_repository_type', 'svn'),
-  ('revision', 'revision.placeholder'),
-  ('version', '2.2')
+  ('project_home', 'https://github.com/shlomi-noach/common_schema'),
+  ('project_repository', 'https://github.com/shlomi-noach/common_schema.git'),
+  ('project_repository_type', 'git'),
+  ('revision', 'buildnumber.placeholder'),
+  ('version', '2.3-snapshot')
 ;  
