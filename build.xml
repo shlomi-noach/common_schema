@@ -11,14 +11,19 @@
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="" />
 	<property name="mysql.socket" value="/tmp/mysql.prime.sock" />
+	-->
 
--->
+	<property name="mysql.user" value="root" />
+	<property name="mysql.password" value="root" />
+	<property name="mysql.socket" value="/var/run/mysqld/mysqld.sock" />
+
+	<!--
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
 	<property name="mysql.socket" value="/var/folders/m2/jxhw5r550fbcj96cg_9j8xx40000gn/T//mysql_sandbox22293.sock" />
+	-->
 
 	<!--
-
 	<property name="mysql.user" value="root" />
 	<property name="mysql.password" value="msandbox" />
 	<property name="mysql.socket" value="/tmp/mysql_sandbox5524.sock" />
@@ -71,27 +76,15 @@
 	</target>
 
 
-	<target name="revnumber" description="Get the SVN greatest revision number">
-		<mkdir dir="${tmp.dir}" />
-		<exec dir="." executable="svn" output="ant-tmp/svn_output" failifexecutionfails="false" description="Get SVN info for all files recursively">
-			<arg value="info" />
-			<arg value="--recursive" />
-		</exec>
-		<exec dir="." executable="awk" input="ant-tmp/svn_output" outputproperty="svn.revision" failifexecutionfails="false" description="Extract highest revision number">
-			<arg value="BEGIN {max=0} /Revision:/ {if ($2 > max) max=$2} END {print max}" />
-		</exec>
-		<condition property="svn.revision" value="0">
-			<not>
-				<isset property="svn.revision" />
-			</not>
-		</condition>
-		<delete dir="${tmp.dir}" />
-		<tstamp description="To be used as build number" />
-		<echo>revision: ${svn.revision}</echo>
+	<target name="buildnumber" description="Get the current timestamp">
+		<tstamp description="To be used as build number">
+			<format property="build.number" pattern="yyyyMMddHHmmss" locale="en,GB"/>
+		</tstamp>
+		<echo>build number: ${build.number}</echo>
 	</target>
 
 
-	<target name="build_base_components" depends="revnumber">
+	<target name="build_base_components" depends="buildnumber">
 		<mkdir dir="${build.dir}" />
 		<concat destfile="${build.dir}/${sql.base_components.output.file}">
 			<fileset dir="tables/" includes="*.sql" />
@@ -137,7 +130,7 @@
 			<fileset dir="views/script/" includes="*.sql" />
 			<fileset dir="views/security/" includes="*.sql" />
 		</concat>
-		<replace file="${build.dir}/${sql.base_components.output.file}" token="revision.placeholder" value="${svn.revision}"/>
+		<replace file="${build.dir}/${sql.base_components.output.file}" token="buildnumber.placeholder" value="${build.number}"/>
 	</target>
 
 
@@ -213,7 +206,7 @@
 	</target>
 
 
-	<target name="build" depends="revnumber, build_base_components, build_additional_components, build_scripts">
+	<target name="build" depends="buildnumber, build_base_components, build_additional_components, build_scripts">
 		<concat destfile="${build.dir}/${sql.build.output.file}">
 			<fileset file="${build_data.dir}/main_head.sql" />
 			<fileset file="${build.dir}/${sql.base_components.output.file}" />
@@ -232,14 +225,14 @@
 	</target>
 
 
-	<target name="dist" depends="clean, build, doc_sql, revnumber, test">
+	<target name="dist" depends="clean, build, doc_sql, buildnumber, test">
 		<mkdir dir="${dist.dir}" />
-		<propertyregex property="release_filename" input="${sql.build.output.file}" regexp="(.*).sql" select="\1-r${svn.revision}.sql" />
+		<propertyregex property="release_filename" input="${sql.build.output.file}" regexp="(.*).sql" select="\1-r${build.number}.sql" />
 
 		<loadfile property="doc_sql" srcfile="${build.dir}/${sql.help.output.file}"></loadfile>
 		<copy file="${build.dir}/${sql.build.output.file}" tofile="${dist.dir}/${release_filename}" />
 		<replace file="${dist.dir}/${release_filename}" token="doc_sql.placeholder" value="${doc_sql}"/>
-		<tar destfile="${dist.dir}/common_schema_doc_r${svn.revision}.tar.gz" basedir="doc/html" compression="gzip" />
+		<tar destfile="${dist.dir}/common_schema_doc_r${build.number}.tar.gz" basedir="doc/html" compression="gzip" />
 	</target>
 
 	<target name="deploy_file">
@@ -280,7 +273,7 @@
 	</target>
 
 
-	<target name="doc" depends="revnumber">
+	<target name="doc" depends="buildnumber">
 		<copy file="${doc.templates.dir}/style.css" todir="${doc.html.dir}/css">
 		</copy>
 		<foreach param="component_doc_filename" target="component_doc" inheritall="true">
@@ -322,7 +315,7 @@
 		</concat>
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${component_name}" />
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${component_name}" />
-		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>
+		<replace file="${doc.html.dir}/${doc_basename}" token="buildnumber.placeholder" value="${build.number}"/>
 	</target>
 
 	<target name="generaldoc">
@@ -334,7 +327,7 @@
 		</concat>
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagetitle" value="${docname}" />
 		<replace file="${doc.html.dir}/${doc_basename}" token="pagename" value="${docname}" />
-		<replace file="${doc.html.dir}/${doc_basename}" token="revision.placeholder" value="${svn.revision}"/>
+		<replace file="${doc.html.dir}/${doc_basename}" token="buildnumber.placeholder" value="${build.number}"/>
 	</target>
 
 
