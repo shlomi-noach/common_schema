@@ -11,7 +11,7 @@
 DELIMITER $$
 
 DROP FUNCTION IF EXISTS mysql_grantee $$
-CREATE FUNCTION mysql_grantee(mysql_user char(16) CHARSET utf8, mysql_host char(60) CHARSET utf8) RETURNS VARCHAR(100) CHARSET utf8 
+CREATE FUNCTION mysql_grantee(mysql_user char(80) CHARSET utf8, mysql_host char(60) CHARSET utf8) RETURNS VARCHAR(100) CHARSET utf8 
 DETERMINISTIC
 NO SQL
 SQL SECURITY INVOKER
